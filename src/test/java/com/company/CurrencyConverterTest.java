@@ -8,7 +8,7 @@ import java.io.IOException;
 class CurrencyConverterTest {
 
     @Test
-    public void getUSDinEURtest() throws IOException {
+    public void getUSDinEURtest() throws Exception {
         Double usd = CurrencyConverter.getUSDinEURO(new Double (1));
         System.out.println(usd);
         assertTrue(null != usd);

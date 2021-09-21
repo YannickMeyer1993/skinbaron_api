@@ -20,7 +20,7 @@ public class CurrencyConverter {
      * @throws MalformedURLException
      * @return gives conversion rate from USD to EUR
      */
-    public static Double getUSDinEURO(Double value) throws IOException,FailingHttpStatusCodeException,MalformedURLException{
+    public static Double getUSDinEURO(Double value) throws Exception {
 
         java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(java.util.logging.Level.OFF); //ignore useless warnings
         String url_USBtoEUR = "https://www.finanzen.net/waehrungsrechner/euro_us-dollar";
@@ -39,7 +39,12 @@ public class CurrencyConverter {
             List<DomElement> Items_USBtoEUR = page_USDtoEUR.getByXPath("//*[contains(@id, 'currency-second-display')]");
             for (DomElement item_USBtoEUR: Items_USBtoEUR)
             {
-                line_USBtoEUR = item_USBtoEUR.getFirstChild().asNormalizedText();
+                try {
+                    line_USBtoEUR = item_USBtoEUR.getFirstChild().asNormalizedText();
+                }
+                catch (NullPointerException e){
+                    throw new Exception("Kein Wert für Währung gefunden!");
+                }
             }
             webClient_USDtoEUR.close();
 

@@ -7,13 +7,12 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.Properties;
 
-import static com.company.Main.readPasswordFromFile;
-import static com.company.Main.setIterationCounter;
+import static com.company.SteamCrawler.setIterationCounter;
+import static com.company.common.readPasswordFromFile;
 
-public class MainTest extends TestCase {
+public class SteamCrawlerTest extends TestCase {
 
     public void testSetIterationCounter() throws SQLException, FileNotFoundException {
         String url = "jdbc:postgresql://localhost/postgres";
@@ -31,4 +30,9 @@ public class MainTest extends TestCase {
         conn.close();
 
     }
+
+    public void testExtractValuesFromJSON() throws SQLException, FileNotFoundException {
+
+    }
+
 }

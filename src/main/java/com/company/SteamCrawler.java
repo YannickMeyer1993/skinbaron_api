@@ -5,29 +5,31 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.dom4j.Document;
-import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Properties;
-import java.util.Scanner;
 
-public class Main {
+import static com.company.common.readPasswordFromFile;
+
+
+public class SteamCrawler {
 
     private static int MAX_ITERATION = 400;
     private static int iteration;
     private static double conversionFromUSDtoEUR;
 
+
     static {
         try {
             conversionFromUSDtoEUR = CurrencyConverter.getUSDinEURO(new Double(1));
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -67,8 +69,10 @@ public class Main {
             }
 
         } //End Start of the Day
-
-        iteration = rs.getInt("iteration"); //rs.next() was called above
+        else
+        {
+            iteration = rs.getInt("iteration"); //rs.next() was called above
+        }
 
         System.out.println("Starte mit Iteration  "+ iteration);
 
@@ -109,10 +113,6 @@ public class Main {
 
     }
 
-    public static String readPasswordFromFile(String path) throws FileNotFoundException {
-        Scanner sc = new Scanner(new File(path));
-        return sc.nextLine();
-    }
 
     public static Boolean getItemsforSteamPageNumber(Connection conn, int pageNumber) throws Exception {
         System.out.println("Iteration: " + pageNumber);
