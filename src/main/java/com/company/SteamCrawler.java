@@ -7,7 +7,6 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.dom4j.Document;
 import org.dom4j.io.SAXReader;
 
-import java.io.IOException;
 import java.io.StringReader;
 import java.sql.*;
 import java.time.LocalDate;
@@ -19,16 +18,12 @@ import static com.company.common.readPasswordFromFile;
 
 public class SteamCrawler {
 
-    private static int MAX_ITERATION = 400;
-    private static int iteration;
     private static double conversionFromUSDtoEUR;
 
 
     static {
         try {
-            conversionFromUSDtoEUR = CurrencyConverter.getUSDinEURO(new Double(1));
-        } catch (IOException e) {
-            e.printStackTrace();
+            conversionFromUSDtoEUR = CurrencyConverter.getUSDinEURO();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -48,6 +43,7 @@ public class SteamCrawler {
         Statement stmt = conn.createStatement();
         ResultSet rs = stmt.executeQuery("select highest_iteration_steam+1 as iteration from steam_item_sale.overview where \"DATE\" = CURRENT_DATE;");
 
+        int iteration;
         if (!rs.next()) //Start of today
         {
             String SQLinsert = "INSERT INTO steam_item_sale.overview(\"DATE\",highest_iteration_steam,steam_balance,steam_open_sales,skinbaron_balance,smurf_inv_value,skinbaron_open_sales_wert,steam_inv_value,skinbaron_inv_value,kommentar) "
@@ -76,9 +72,10 @@ public class SteamCrawler {
 
         System.out.println("Starte mit Iteration  "+ iteration);
 
+        int MAX_ITERATION = 400;
         while (iteration < MAX_ITERATION) {
             Boolean works = getItemsforSteamPageNumber(conn, iteration);
-            setIterationCounter(conn,  iteration);
+            setIterationCounter(conn, iteration);
             conn.commit();
 
             if (works){
@@ -118,7 +115,7 @@ public class SteamCrawler {
         System.out.println("Iteration: " + pageNumber);
 
         if (pageNumber % 50 == 0) {
-            conversionFromUSDtoEUR = CurrencyConverter.getUSDinEURO(1.0);
+            conversionFromUSDtoEUR = CurrencyConverter.getUSDinEURO();
             System.out.println("Conversion Factor from USD to EUR: " + conversionFromUSDtoEUR);
         }
 
@@ -153,16 +150,16 @@ public class SteamCrawler {
             System.out.println("Item Name = " + name);
             System.out.println("Quantity = " + quantity);
             System.out.println("Preis in USD cents = " + price_source);
-            System.out.println("");
+            System.out.print("\n");
 
             if (name == null) {
-                throw new Exception("Fehlerhafte Ergebnisse für Iteration: " + pageNumber);
+                return false;
             }
 
             java.text.DecimalFormat df = new java.text.DecimalFormat("0.00");
             df.setRoundingMode(java.math.RoundingMode.HALF_UP);
 
-            Double price_eur = Double.valueOf(-1);
+            Double price_eur;
 
             if (1 == currencyId) {
 
@@ -170,7 +167,7 @@ public class SteamCrawler {
             } else if (3 == currencyId) {
                 price_eur = Double.parseDouble(df.format(price_source / 100).replace(",", "."));
             } else {
-                throw new Exception("CurrencyId nicht USD oder EUR");
+                return false;
             }
 
             String SQLinsert = "INSERT INTO steam_item_sale.steam_item_prices(name,quantity,price_euro) "
@@ -184,10 +181,12 @@ public class SteamCrawler {
                 //System.out.println(pstmt);
                 int rowsAffected = pstmt.executeUpdate();
             }
+            catch (Exception e){
+                return false;
+            }
             conn.commit();
 
         } //End of for each Item
-
 
         return true;
     }

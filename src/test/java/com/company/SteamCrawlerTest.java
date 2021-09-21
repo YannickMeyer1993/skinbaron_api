@@ -14,7 +14,7 @@ import static com.company.common.readPasswordFromFile;
 
 public class SteamCrawlerTest extends TestCase {
 
-    public void testSetIterationCounter() throws SQLException, FileNotFoundException {
+    public void testSetIterationCounter() throws FileNotFoundException, SQLException {
         String url = "jdbc:postgresql://localhost/postgres";
         Properties props = new Properties();
         props.setProperty("user", "postgres");
@@ -31,8 +31,9 @@ public class SteamCrawlerTest extends TestCase {
 
     }
 
-    public void testExtractValuesFromJSON() throws SQLException, FileNotFoundException {
-
+    @SuppressWarnings("EmptyMethod")
+    public void testExtractValuesFromJSON() {
+        //TODO
     }
 
 }

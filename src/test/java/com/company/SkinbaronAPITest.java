@@ -2,8 +2,6 @@ package com.company;
 
 import junit.framework.TestCase;
 
-import java.io.IOException;
-
 import static com.company.common.readPasswordFromFile;
 import static com.company.SkinbaronAPI.*;
 
@@ -14,7 +12,8 @@ public class SkinbaronAPITest extends TestCase {
         assertEquals(200,resendTradeOffers(secret));
     }
 
-    public void testResendTradeOffersNegative() throws Exception {
+    @SuppressWarnings("CatchMayIgnoreException")
+    public void testResendTradeOffersNegative() {
         try {
             resendTradeOffers("bad secret");
         }

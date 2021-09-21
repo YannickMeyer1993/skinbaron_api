@@ -20,7 +20,7 @@ public class CurrencyConverter {
      * @throws MalformedURLException
      * @return gives conversion rate from USD to EUR
      */
-    public static Double getUSDinEURO(Double value) throws Exception {
+    public static Double getUSDinEURO() throws Exception {
 
         java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(java.util.logging.Level.OFF); //ignore useless warnings
         String url_USBtoEUR = "https://www.finanzen.net/waehrungsrechner/euro_us-dollar";
@@ -71,7 +71,7 @@ public class CurrencyConverter {
      * @throws MalformedURLException
      * @return gives conversion rate from RMB to EUR
      */
-    public static Double getRMBinEURO(Double value) {
+    public static Double getRMBinEURO() {
 
             java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(java.util.logging.Level.OFF);
             String url_USBtoEUR = "https://www.finanzen.net/waehrungsrechner/euro_chinesicher-renminbi-yuan";
