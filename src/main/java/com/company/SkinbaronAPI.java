@@ -11,6 +11,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.xpath.operations.Bool;
 import org.json.*;
+import org.postgresql.util.PSQLException;
 
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
@@ -56,9 +57,6 @@ public class SkinbaronAPI {
     public static int writeSoldItems(String secret) throws Exception {
         String queryId = "";
 
-        //TODO
-        //Query id with highest load_counter
-
         String url = "jdbc:postgresql://localhost/postgres";
         Properties props = new Properties();
         props.setProperty("user", "postgres");
@@ -67,10 +65,6 @@ public class SkinbaronAPI {
         Connection conn = DriverManager.getConnection(url, props);
         conn.setAutoCommit(false);
         System.out.println("Successfully Connected.");
-
-        Statement st = conn.createStatement();
-        st.execute("TRUNCATE TABLE steam_item_sale.sold_items");
-        st.close();
 
         Boolean run = true;
 
@@ -112,6 +106,15 @@ public class SkinbaronAPI {
                 String txid = jObject.get("txid").toString();
                 String commission = jObject.get("commission").toString();
                 item_id = jObject.get("id").toString();
+
+                Statement stmt2 = conn.createStatement();
+                ResultSet rs2 = stmt2.executeQuery("select * from steam_item_sale.sold_items where sale_id='"+item_id+"'");
+
+                if (rs2.next()){
+                    conn.commit();
+                    conn.close();
+                    return 200;
+                }
 
                 String SQLinsert = "INSERT INTO steam_item_sale.sold_items\n" +
                         "(sale_id, name, price,load_counter)\n" +
