@@ -13,6 +13,12 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
+import java.util.Properties;
+
+import static com.company.common.readPasswordFromFile;
 
 public class SkinbaronAPI {
 
@@ -49,5 +55,28 @@ public class SkinbaronAPI {
         return response.getStatusLine().getStatusCode();
     }
 
+    public static int writeSoldItems(String secret) throws Exception {
+        String url = "jdbc:postgresql://localhost/postgres";
+        Properties props = new Properties();
+        props.setProperty("user", "postgres");
+        String password = readPasswordFromFile("C:/passwords/postgres.txt");
+        props.setProperty("password", password);
+        Connection conn = DriverManager.getConnection(url, props);
+        conn.setAutoCommit(false);
+        System.out.println("Successfully Connected.");
+
+        Statement st = conn.createStatement();
+        st.execute("TRUNCATE TABLE steam_item_sale.sold_items");
+        conn.commit();
+        st.close();
+
+        //TODO
+     return 200;
+    }
+
+    public static int buyItemById(String secret,String itemId) throws Exception {
+        //TODO
+        return 200;
+    }
 }
 
