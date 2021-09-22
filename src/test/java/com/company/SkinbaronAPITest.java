@@ -2,6 +2,8 @@ package com.company;
 
 import junit.framework.TestCase;
 
+import java.io.FileNotFoundException;
+
 import static com.company.common.readPasswordFromFile;
 import static com.company.SkinbaronAPI.*;
 
@@ -21,5 +23,10 @@ public class SkinbaronAPITest extends TestCase {
         {
             assertEquals(e.getMessage(),"wrong or unauthenticated request");
         }
+    }
+
+    public void testwriteSoldItems() throws Exception {
+        String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
+        assertEquals(200,writeSoldItems(secret));
     }
 }
