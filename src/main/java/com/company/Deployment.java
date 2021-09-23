@@ -8,6 +8,7 @@ import com.sun.applet2.AppletParameters;
 import org.dom4j.Document;
 import org.dom4j.io.SAXReader;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.sql.*;
@@ -172,4 +173,44 @@ public class Deployment {
 
     }
 
+    public static void crawWearValues() throws IOException, SQLException, InterruptedException {
+        String connstring = "jdbc:postgresql://localhost/postgres";
+        Properties props = new Properties();
+        props.setProperty("user", "postgres");
+        String password = readPasswordFromFile("C:/passwords/postgres.txt");
+        props.setProperty("password", password);
+        Connection conn = DriverManager.getConnection(connstring, props);
+        conn.setAutoCommit(false);
+        System.out.println("Successfully Connected.");
+
+        for (int i=250;i<=20000;i++){
+
+            String url = "https://csgostash.com/skin/"+i;
+            System.out.println(i);
+            com.gargoylesoftware.htmlunit.WebClient webClient = new com.gargoylesoftware.htmlunit.WebClient(com.gargoylesoftware.htmlunit.BrowserVersion.FIREFOX);
+            webClient.getOptions().setJavaScriptEnabled(true); // enable javascript
+            webClient.getOptions().setCssEnabled(true);
+            webClient.getOptions().setThrowExceptionOnScriptError(false); //even if there is error in js continue
+            webClient.waitForBackgroundJavaScriptStartingBefore (1000000);
+            webClient.waitForBackgroundJavaScript(10000000); // important! wait when javascript finishes rendering
+            com.gargoylesoftware.htmlunit.html.HtmlPage page = webClient.getPage(url);
+            Thread.sleep(1000);
+            String name = page.getTitleText().replace(" - CS:GO Stash", "");
+            List<com.gargoylesoftware.htmlunit.html.DomElement> Items_min = page.getByXPath("//*[contains(@class, 'marker-wrapper wear-min-value')]");
+            List<com.gargoylesoftware.htmlunit.html.DomElement> Items_max = page.getByXPath("//*[contains(@class, 'marker-wrapper wear-max-value')]");
+            List<com.gargoylesoftware.htmlunit.html.DomElement> Items_name = page.getByXPath("//*[contains(@class, 'img-responsive center-block main-skin-img margin-top-sm margin-bot-sm')]");
+
+            //globalMap.put("list_min", Items_min);
+            //globalMap.put("list_max", Items_max);
+            //globalMap.put("list_name", Items_name);
+
+            //xml /div@data-wearmin
+            //xml /div@data-wearmax
+            //output_row.item_xml =  ((List<com.gargoylesoftware.htmlunit.html.DomElement>) globalMap.get("list_min")).get(input_row.index).asXml();
+            //output_row.item_xml =  ((List<com.gargoylesoftware.htmlunit.html.DomElement>) globalMap.get("list_max")).get(input_row.index).asXml();
+
+            //join it to item_informations
+        }
+
+    }
 }
