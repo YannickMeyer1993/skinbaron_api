@@ -30,22 +30,13 @@ public class SteamItemPriceChecker {
         }
     }
 
-    public static Double getSteamPriceForGivenName(String hash_name) throws Exception {
+    public static Double getSteamPriceForGivenName(String hash_name, Connection conn) throws Exception {
 
         Double return_price = 0.0;
         Boolean item_found = false;
 
         String SQLinsert = "INSERT INTO steam_item_sale.steam_item_prices(name,quantity,price_euro) "
                 + "VALUES(?,?,?)";
-
-        String connurl = "jdbc:postgresql://localhost/postgres";
-        Properties props = new Properties();
-        props.setProperty("user", "postgres");
-        String password = readPasswordFromFile("C:/passwords/postgres.txt");
-        props.setProperty("password", password);
-        Connection conn = DriverManager.getConnection(connurl, props);
-        conn.setAutoCommit(false);
-        System.out.println("Successfully Connected.");
 
         String url = "https://steamcommunity.com/market/search?q="+java.net.URLDecoder.decode(hash_name, "UTF-8")+"#p1_default_desc";
 
@@ -113,7 +104,6 @@ public class SteamItemPriceChecker {
             }
         }
 
-        conn.close();
         System.out.println("Item \""+hash_name+"\" costs "+return_price+" Euro.");
         Thread.sleep(10*1000);
         return return_price;
