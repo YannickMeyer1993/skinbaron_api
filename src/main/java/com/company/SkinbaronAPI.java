@@ -18,6 +18,7 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.util.Properties;
 
+import static com.company.SteamCrawler.setRowInOverviewTable;
 import static com.company.common.readPasswordFromFile;
 
 public class SkinbaronAPI {
@@ -145,6 +146,64 @@ public class SkinbaronAPI {
     public static int buyItemById(String secret,String itemId) throws Exception {
         //TODO
         return 200;
+    }
+
+    public static Double getBalance(String secret, Boolean overwriteDB) throws Exception {
+
+        String url = "jdbc:postgresql://localhost/postgres";
+        Properties props = new Properties();
+        props.setProperty("user", "postgres");
+        String password = readPasswordFromFile("C:/passwords/postgres.txt");
+        props.setProperty("password", password);
+        Connection conn = DriverManager.getConnection(url, props);
+        conn.setAutoCommit(false);
+        System.out.println("Successfully Connected.");
+
+        System.out.println("Skinbaron API GetBalance has been called.");
+        String jsonInputString = "{\"apikey\": \"" + secret + "\"}";
+
+        HttpPost httpPost = new HttpPost("https://api.skinbaron.de/GetBalance");
+        httpPost.setHeader("Content.Type", "application/json");
+        httpPost.setHeader("x-requested-with", "XMLHttpRequest");
+        httpPost.setHeader("Accept", "application/json");
+
+        HttpClient client = HttpClients.custom()
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setCookieSpec(CookieSpecs.STANDARD).build())
+                .build();
+
+        HttpEntity entity = new ByteArrayEntity(jsonInputString.getBytes(StandardCharsets.UTF_8));
+        httpPost.setEntity(entity);
+        HttpResponse response = client.execute(httpPost);
+        String result = EntityUtils.toString(response.getEntity());
+
+        JSONObject result_json= (JSONObject) new JSONTokener(result).nextValue();
+
+        if (result_json.has("message"))
+        {
+            System.out.println("Result: "+result_json.get("message"));
+            throw new Exception((String) result_json.get("message"));
+        }
+
+        Double skinbaronBalance = result_json.getDouble("balance");
+
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery("select count(*) from steam_item_sale.overview where \"DATE\" = CURRENT_DATE;");
+
+        if (!rs.next()) //Start of today
+        {
+            setRowInOverviewTable(conn);
+        } //End Start of the Day
+
+        String SQLUpdate = "Update steam_item_sale.overview set steam_balance =  ? where \"DATE\" = CURRENT_DATE;";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(SQLUpdate, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setDouble(1, skinbaronBalance);
+            int rowsAffected = pstmt.executeUpdate();
+        }
+
+        System.out.println("Skinbaron Balance ist zur Zeit bei: "+skinbaronBalance+" Euro.");
+        return skinbaronBalance;
     }
 }
 

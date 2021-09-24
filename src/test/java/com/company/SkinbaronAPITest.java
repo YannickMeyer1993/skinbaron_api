@@ -29,4 +29,9 @@ public class SkinbaronAPITest extends TestCase {
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
         assertEquals(200,writeSoldItems(secret));
     }
+
+    public void testgetBalance() throws Exception {
+        String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
+        assertTrue(getBalance(secret,true)>0);
+    }
 }

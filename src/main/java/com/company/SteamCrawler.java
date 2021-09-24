@@ -52,24 +52,8 @@ public class SteamCrawler {
         int iteration;
         if (!rs.next()) //Start of today
         {
-            String SQLinsert = "INSERT INTO steam_item_sale.overview(\"DATE\",highest_iteration_steam,steam_balance,steam_open_sales,skinbaron_balance,smurf_inv_value,skinbaron_open_sales_wert,steam_inv_value,skinbaron_inv_value,kommentar) "
-                    + "VALUES(?,?,?,?,?,?,?,?,?,?)";
-            try (PreparedStatement pstmt = conn.prepareStatement(SQLinsert, Statement.RETURN_GENERATED_KEYS)) {
-                pstmt.setDate(1, Date.valueOf(LocalDate.now()));
-                pstmt.setInt(2, 0);
-                pstmt.setInt(3, 0);
-                pstmt.setInt(4, 0);
-                pstmt.setInt(5, 0);
-                pstmt.setInt(6, 0);
-                pstmt.setInt(7, 0);
-                pstmt.setInt(8, 0);
-                pstmt.setInt(9, 0);
-                pstmt.setString(10, "");
-                System.out.println("Steam Scrawling will be started at Iteration 1.");
-                int rowsAffected = pstmt.executeUpdate();
-                iteration = 1;
-            }
-
+            setRowInOverviewTable(conn);
+            iteration = 1;
         } //End Start of the Day
         else
         {
@@ -100,6 +84,24 @@ public class SteamCrawler {
         conn.close();
     }
 
+    public static void setRowInOverviewTable(Connection conn) throws SQLException {
+        String SQLinsert = "INSERT INTO steam_item_sale.overview(\"DATE\",highest_iteration_steam,steam_balance,steam_open_sales,skinbaron_balance,smurf_inv_value,skinbaron_open_sales_wert,steam_inv_value,skinbaron_inv_value,kommentar) "
+                + "VALUES(?,?,?,?,?,?,?,?,?,?)";
+        try (PreparedStatement pstmt = conn.prepareStatement(SQLinsert, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setDate(1, Date.valueOf(LocalDate.now()));
+            pstmt.setInt(2, 0);
+            pstmt.setInt(3, 0);
+            pstmt.setInt(4, 0);
+            pstmt.setInt(5, 0);
+            pstmt.setInt(6, 0);
+            pstmt.setInt(7, 0);
+            pstmt.setInt(8, 0);
+            pstmt.setInt(9, 0);
+            pstmt.setString(10, "");
+            System.out.println("Steam Scrawling will be started at Iteration 1.");
+            int rowsAffected = pstmt.executeUpdate();
+        }
+    }
 
     public static void setIterationCounter(@NotNull Connection conn, int i) {
         String SQLinsert = "UPDATE steam_item_sale.overview set highest_iteration_steam=? where \"DATE\"=current_date";
