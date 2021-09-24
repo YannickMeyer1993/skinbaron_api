@@ -1,6 +1,7 @@
 package com.company;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -8,6 +9,7 @@ import com.sun.applet2.AppletParameters;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -24,7 +26,7 @@ public class Deployment {
 
     private static Map<String,  String[]> map = new HashMap<String, String[]>();
     private static Map<String,  String[]> mapWears = new HashMap<String, String[]>();
-    private static int max_iteration = 280;
+    private static int max_iteration = 20000;
 
     public static void crawItemInformations() throws IOException, InterruptedException, SQLException {
 
@@ -199,15 +201,22 @@ public class Deployment {
         conn.setAutoCommit(false);
         System.out.println("Successfully Connected.");
 
-        //get highest id
-        Statement stmt = conn.createStatement();
-        ResultSet rs = stmt.executeQuery("select max(id) as iteration from steam_item_sale.item_wears");
-        rs.next();
-
         //TODO
-        //select all ids and excute the complement
+        Collection<Integer> iterators = new HashSet<>();
 
-        int max_iteration_current = (rs.getInt("iteration")>=250?rs.getInt("iteration")+1:250);
+        for (int i=250;i<=max_iteration;i++){
+            iterators.add(i);
+        }
+        iterators.add(Integer.MAX_VALUE);
+
+        //select all ids and excute the complement
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery("select id from steam_item_sale.item_wears");
+
+        while(rs.next()){
+            iterators.remove(rs.getInt("id"));
+            System.out.println(rs.getInt("id"));
+        };
 
         java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF);
 
@@ -218,48 +227,59 @@ public class Deployment {
         webClient.waitForBackgroundJavaScriptStartingBefore (1000000);
         webClient.waitForBackgroundJavaScript(10000000); // important! wait when javascript finishes rendering
 
-        for (int i = max_iteration_current;i<=max_iteration;i++){
+        int count = 0;
+        for (Object i:iterators){
 
-            String url = "https://csgostash.com/skin/"+i;
-            com.gargoylesoftware.htmlunit.html.HtmlPage page = webClient.getPage(url);
-            Thread.sleep(1000);
+            count++;
+            try{
+                String url = "https://csgostash.com/skin/"+((Integer) i);
+                com.gargoylesoftware.htmlunit.html.HtmlPage page = webClient.getPage(url);
 
-            String name = page.getTitleText().replace(" - CS:GO Stash", "");
-            List<com.gargoylesoftware.htmlunit.html.DomElement> Items_min = page.getByXPath("//*[contains(@class, 'marker-wrapper wear-min-value')]");
-            List<com.gargoylesoftware.htmlunit.html.DomElement> Items_max = page.getByXPath("//*[contains(@class, 'marker-wrapper wear-max-value')]");
-            List<com.gargoylesoftware.htmlunit.html.DomElement> Items_name = page.getByXPath("//*[contains(@class, 'img-responsive center-block main-skin-img margin-top-sm margin-bot-sm')]");
+                Thread.sleep(1000);
 
-            try {
-                String xml_min = ((List<DomElement>) Items_min).get(0).asXml();
-                String xml_max = ((List<DomElement>) Items_max).get(0).asXml();
+                String name = page.getTitleText().replace(" - CS:GO Stash", "");
+                List<com.gargoylesoftware.htmlunit.html.DomElement> Items_min = page.getByXPath("//*[contains(@class, 'marker-wrapper wear-min-value')]");
+                List<com.gargoylesoftware.htmlunit.html.DomElement> Items_max = page.getByXPath("//*[contains(@class, 'marker-wrapper wear-max-value')]");
+                List<com.gargoylesoftware.htmlunit.html.DomElement> Items_name = page.getByXPath("//*[contains(@class, 'img-responsive center-block main-skin-img margin-top-sm margin-bot-sm')]");
 
-                Document document_min = new SAXReader().read(new StringReader(xml_min));
-                String min = document_min.valueOf("/div/@data-wearmin");
+                try {
+                    String xml_min = ((List<DomElement>) Items_min).get(0).asXml();
+                    String xml_max = ((List<DomElement>) Items_max).get(0).asXml();
 
-                Document document_max = new SAXReader().read(new StringReader(xml_max));
-                String max = document_max.valueOf("/div/@data-wearmax");
+                    Document document_min = new SAXReader().read(new StringReader(xml_min));
+                    String min = document_min.valueOf("/div/@data-wearmin");
 
-                //System.out.println(name + " " + min + " " + max);
+                    Document document_max = new SAXReader().read(new StringReader(xml_max));
+                    String max = document_max.valueOf("/div/@data-wearmax");
 
-                String[] infos = new String[3];
-                //put in map
-                infos[0] = ""+i;
-                infos[1] = min;
-                infos[2] = max;
-                mapWears.put(name,infos);
+                    //System.out.println(name + " " + min + " " + max);
+
+                    String[] infos = new String[3];
+                    //put in map
+                    infos[0] = ""+((Integer) i);
+                    infos[1] = min;
+                    infos[2] = max;
+                    mapWears.put(name,infos);
+                }
+                catch (IndexOutOfBoundsException e){
+                    String[] infos = new String[3];
+                    //put in map
+                    infos[0] = ""+((Integer) i);
+                    infos[1] = "0";
+                    infos[2] = "1";
+                    mapWears.put(name,infos);
+                }
             }
-            catch (IndexOutOfBoundsException e){
-                String[] infos = new String[3];
-                //put in map
-                infos[0] = ""+i;
-                infos[1] = "0";
-                infos[2] = "1";
-                mapWears.put(name,infos);
+            catch (FailingHttpStatusCodeException e){
+                if ("404".equals(e.getStatusCode())){
+                    continue;
+                }
             }
 
             try (PreparedStatement pstmt = conn.prepareStatement(SQLinsert, Statement.RETURN_GENERATED_KEYS)) {
                 System.out.println(i);
-                if (i % 100 == 0 || ((Integer)i).equals(max_iteration)) {
+                if (count % 100 == 0 || ((Integer)i).equals(Integer.MAX_VALUE)) {
+                    count = 0;
                     for (String key : mapWears.keySet()) {
                         pstmt.setString(1, key); //name
                         pstmt.setInt(2, Integer.parseInt(mapWears.get(key)[0])); //i

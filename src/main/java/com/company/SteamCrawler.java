@@ -5,9 +5,15 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.dom4j.Document;
+import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
+import org.jetbrains.annotations.NotNull;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.List;
@@ -95,7 +101,7 @@ public class SteamCrawler {
     }
 
 
-    public static void setIterationCounter(Connection conn,  int i) {
+    public static void setIterationCounter(@NotNull Connection conn, int i) {
         String SQLinsert = "UPDATE steam_item_sale.overview set highest_iteration_steam=? where \"DATE\"=current_date";
 
         try (PreparedStatement pstmt = conn.prepareStatement(SQLinsert, Statement.RETURN_GENERATED_KEYS)) {
@@ -111,7 +117,7 @@ public class SteamCrawler {
     }
 
 
-    public static Boolean getItemsforSteamPageNumber(Connection conn, int pageNumber) throws Exception {
+    public static @NotNull Boolean getItemsforSteamPageNumber(Connection conn, int pageNumber) throws Exception {
         System.out.println("Iteration: " + pageNumber);
 
         if (pageNumber % 50 == 0) {
