@@ -37,7 +37,7 @@ public class SteamCrawler {
     }
 
     public static void main(String[] args) throws Exception {
-        // write your code here
+
         String url = "jdbc:postgresql://localhost/postgres";
         Properties props = new Properties();
         props.setProperty("user", "postgres");

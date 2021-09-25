@@ -23,6 +23,13 @@ import static com.company.common.readPasswordFromFile;
 
 public class SkinbaronAPI {
 
+    public static class SkinBaronException extends Exception{
+
+        public SkinBaronException(String message) {
+            super(message);
+        }
+    }
+
     public static int resendTradeOffers(String secret) throws Exception {
 
         System.out.println("Skinbaron API resendTradeOffers has been called.");
@@ -48,7 +55,7 @@ public class SkinbaronAPI {
         if (result_json.has("message"))
         {
             System.out.println("Result: "+result_json.get("message"));
-            throw new Exception((String) result_json.get("message"));
+            throw new SkinBaronException((String) result_json.get("message"));
         }
 
         System.out.println("Result: "+response.getStatusLine().getStatusCode());
@@ -143,20 +150,10 @@ public class SkinbaronAPI {
     return 200;
     }
 
-    public static void buyItem(String secret,String itemId, Double price) throws Exception {
+    public static void buyItem(Connection conn,String secret,String itemId, Double price) throws Exception {
 
         String SQLInsert = "Insert into steam_item_sale.skinbaron_transactions (steam_price,success,name,saleid,price) VALUES (?,?,?,?,?)";
 
-        String url = "jdbc:postgresql://localhost/postgres";
-        Properties props = new Properties();
-        props.setProperty("user", "postgres");
-        String password = readPasswordFromFile("C:/passwords/postgres.txt");
-        props.setProperty("password", password);
-        Connection conn = DriverManager.getConnection(url, props);
-        conn.setAutoCommit(false);
-        System.out.println("Successfully Connected.");
-
-        System.out.println("Skinbaron API BuyItems has been called.");
         String jsonInputString = "{\"apikey\": \""+secret+"\",\"total\":"+price+",\"saleids\":[\""+itemId+"\"]}";
 
         HttpPost httpPost = new HttpPost("https://api.skinbaron.de/BuyItems");
@@ -178,18 +175,21 @@ public class SkinbaronAPI {
 
         if (result_json.has("generalErrors")) {
             System.out.println(result_json.get("generalErrors").toString());
-            if ("{[\"some offer(s) already in another shopping cart and/or sold\"]".equals(result_json.get("generalErrors").toString()) || "[\"some offer(s) are already sold\"]".equals(result_json.get("generalErrors").toString())){
+            if ( "[\"some offer(s) are already sold\"]".equals(result_json.get("generalErrors").toString())
+                 || "[\"count mismatch - maybe some offers have been sold or canceled or you provided wrong saleids\"]".equals(result_json.get("generalErrors").toString())
+            ){
                 Statement st = conn.createStatement();
                 st.execute("DELETE FROM steam_item_sale.skinbaron_market_search_results where id='"+itemId+"'");
                 System.out.println("Deleted one Id from Skinbaron table.");
                 st.close();
                 conn.commit();
             }
-            throw new JSONException((String) result_json.get("generalErrors").toString());
+            return;
         }
 
         if (!result_json.has("items")) {
-            throw new JSONException( result);
+            System.out.println("There was no json query 'result' found.");
+            return;
         }
 
         System.out.println(result_json);
@@ -231,7 +231,7 @@ public class SkinbaronAPI {
             st.execute("DELETE FROM steam_item_sale.skinbaron_market_search_results where id='"+itemId+"'");
             st.close();
 
-            System.out.println("Deleted one Id from Skinbaron table.");
+            System.out.println("Item \""+name+"\" was bought for "+price+". Steam: "+steam_price);
 
             conn.commit();
             System.out.println("");
@@ -272,7 +272,7 @@ public class SkinbaronAPI {
         if (result_json.has("message"))
         {
             System.out.println("Result: "+result_json.get("message"));
-            throw new Exception((String) result_json.get("message"));
+            throw new  SkinBaronException((String) result_json.get("message"));
         }
 
         Double skinbaronBalance = result_json.getDouble("balance");

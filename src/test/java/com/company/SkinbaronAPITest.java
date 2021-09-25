@@ -69,8 +69,17 @@ public class SkinbaronAPITest extends TestCase {
     }
 
     public void testBuyItemNegative() throws Exception {
+        String url = "jdbc:postgresql://localhost/postgres";
+        Properties props = new Properties();
+        props.setProperty("user", "postgres");
+        String password = readPasswordFromFile("C:/passwords/postgres.txt");
+        props.setProperty("password", password);
+        Connection conn = DriverManager.getConnection(url, props);
+        conn.setAutoCommit(false);
+        System.out.println("Successfully Connected.");
+
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
-        try{buyItem(secret,"6944b89b-dd36-49f5-b9ae-7dea17f5b0a4",0.02);}
+        try{buyItem(conn,secret,"6944b89b-dd36-49f5-b9ae-7dea17f5b0a4",0.02);}
         catch (JSONException e){
             assertTrue("[\"some offer(s) are already sold\"]".equals(e.getMessage()));
         }
