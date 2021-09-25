@@ -255,34 +255,36 @@ public class SkinbaronAPI {
         JSONArray result_array = ((JSONArray) result_json.get("sales"));
 
         String id = null;
-        String wear;
+        Double wear;
 
         try (PreparedStatement pstmt = conn.prepareStatement(SQLUpsert, Statement.RETURN_GENERATED_KEYS)) {
             for (Object o : result_array) {
                 if (o instanceof JSONObject) {
-                    System.out.println(o.toString());
                     id = ((JSONObject) o).getString("id");
                     Double price_euro = ((JSONObject) o).getDouble("price");
                     String name = ((JSONObject) o).getString("market_name");
                     String stickers = ((JSONObject) o).getString("stickers");
                     try {
-                        wear = ((JSONObject) o).get("wear").toString();
+                        wear = ((JSONObject) o).getDouble("wear");
+                        pstmt.setDouble(5, wear);
                     }
                     catch (JSONException je) {
                         wear = null;
+                        pstmt.setNull(5,Types.DOUBLE);
                     }
 
                     pstmt.setString(1, id);
                     pstmt.setString(2, name);
                     pstmt.setDouble(3, price_euro);
                     pstmt.setString(4, stickers);
-                    pstmt.setString(5, ""+wear);
                     pstmt.addBatch();
                 }
             }
             int[] updateCounts = pstmt.executeBatch();
             amount_inserts = IntStream.of(updateCounts).sum();
-            System.out.println(amount_inserts + " items were inserted!");
+            if (amount_inserts!=0){
+                System.out.println(amount_inserts + " items were inserted!");
+            }
 
             conn.commit();
 
@@ -294,6 +296,24 @@ public class SkinbaronAPI {
         return_object[0] = ""+amount_inserts;
         return_object[1] = id;
         return return_object;
+    }
+
+    public static void MainSearch(String secret, Connection conn) throws SQLException, IOException, InterruptedException {
+        String id = "";
+        while (true){ //infinite times
+            while (true){ //as long as there are inserts
+                String[] output = Search(secret,conn,id);
+                if (Integer.parseInt(output[0])==0){
+                    break;
+                }
+                id = output[1];
+                System.out.println("Not finished yet. Last id="+id+" ("+(new Timestamp(System.currentTimeMillis()))+")");
+            }
+        Thread.sleep(5*1000);
+        System.out.println("------------------------------------------------------------------");
+        System.out.println("New Search started.");
+        System.out.println("------------------------------------------------------------------");
+        }
     }
 }
 

@@ -53,4 +53,18 @@ public class SkinbaronAPITest extends TestCase {
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
         Search(secret,conn,"5f1eb3cb-a81d-4746-a528-211e5c424207");
     }
+
+    public void testMainSearch() throws SQLException, IOException, InterruptedException {
+        String url = "jdbc:postgresql://localhost/postgres";
+        Properties props = new Properties();
+        props.setProperty("user", "postgres");
+        String password = readPasswordFromFile("C:/passwords/postgres.txt");
+        props.setProperty("password", password);
+        Connection conn = DriverManager.getConnection(url, props);
+        conn.setAutoCommit(false);
+        System.out.println("Successfully Connected.");
+
+        String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
+        MainSearch(secret,conn);
+    }
 }
