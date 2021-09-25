@@ -1,6 +1,7 @@
 package com.company;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -63,17 +64,24 @@ public class SteamCrawler {
 
         System.out.println("Starte mit Iteration  "+ iteration);
 
-        int MAX_ITERATION = 400;
+        int MAX_ITERATION = 1600;
+        int wait_counter = 0;
         while (iteration < MAX_ITERATION) {
-            Boolean works = getItemsforSteamPageNumber(conn, iteration);
-            setIterationCounter(conn, iteration);
-            conn.commit();
+            try {
+                System.out.println("Waiting for "+Math.pow(2,wait_counter)+" seconds");
+                Thread.sleep((long) (Math.pow(2,wait_counter)*1000));
+                Boolean works = getItemsforSteamPageNumber(conn, iteration);
+                setIterationCounter(conn, iteration);
+                conn.commit();
+                wait_counter=0;
 
-            if (works){
-                iteration++;
+                if (works){
+                    iteration++;
 
+                }
+            } catch (FailingHttpStatusCodeException e){
+                wait_counter++;
             }
-            Thread.sleep(30 * 1000);
 
         }
 
