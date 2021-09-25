@@ -13,10 +13,13 @@ import org.apache.xpath.operations.Bool;
 import org.json.*;
 import org.postgresql.util.PSQLException;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.Iterator;
 import java.util.Properties;
+import java.util.stream.IntStream;
 
 import static com.company.SteamCrawler.setRowInOverviewTable;
 import static com.company.common.readPasswordFromFile;
@@ -204,6 +207,93 @@ public class SkinbaronAPI {
 
         System.out.println("Skinbaron Balance ist zur Zeit bei: "+skinbaronBalance+" Euro.");
         return skinbaronBalance;
+    }
+
+    public static String[] Search(String secret, Connection conn, String after_saleid) throws IOException, SQLException {
+
+        int amount_inserts = 0;
+        String SQLUpsert = "WITH\n" +
+                "    to_be_upserted (id,name,price,stickers,wear) AS (\n" +
+                "        VALUES\n" +
+                "            (?,?,?,?,?)\n" +
+                "    ),\n" +
+                "    updated AS (\n" +
+                "        UPDATE\n" +
+                "            steam_item_sale.skinbaron_market_search_results s\n" +
+                "        SET\n" +
+                "            price = to_be_upserted.price::numeric\n" +
+                "        FROM\n" +
+                "            to_be_upserted\n" +
+                "        WHERE\n" +
+                "            s.id = to_be_upserted.id\n" +
+                "        RETURNING s.id\n" +
+                "    )\n" +
+                "INSERT INTO steam_item_sale.skinbaron_market_search_results\n" +
+                "    SELECT * FROM to_be_upserted\n" +
+                "    WHERE id NOT IN (SELECT id FROM updated);";
+
+        System.out.println("Skinbaron API Search has been called.");
+        String jsonInputString = "{\"apikey\": \"" + secret + "\",\"appid\": 730,\"items_per_page\": 50" + (!"".equals(after_saleid) ? ",\"after_saleid\":\"" + after_saleid + "\"" : "") + "}";
+
+        HttpPost httpPost = new HttpPost("https://api.skinbaron.de/Search");
+        httpPost.setHeader("Content.Type", "application/json");
+        httpPost.setHeader("x-requested-with", "XMLHttpRequest");
+        httpPost.setHeader("Accept", "application/json");
+
+        HttpClient client = HttpClients.custom()
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setCookieSpec(CookieSpecs.STANDARD).build())
+                .build();
+
+        HttpEntity entity = new ByteArrayEntity(jsonInputString.getBytes(StandardCharsets.UTF_8));
+        httpPost.setEntity(entity);
+        HttpResponse response = client.execute(httpPost);
+        String result = EntityUtils.toString(response.getEntity());
+
+        JSONObject result_json = (JSONObject) new JSONTokener(result).nextValue();
+
+        JSONArray result_array = ((JSONArray) result_json.get("sales"));
+
+        String id = null;
+        String wear;
+
+        try (PreparedStatement pstmt = conn.prepareStatement(SQLUpsert, Statement.RETURN_GENERATED_KEYS)) {
+            for (Object o : result_array) {
+                if (o instanceof JSONObject) {
+                    System.out.println(o.toString());
+                    id = ((JSONObject) o).getString("id");
+                    Double price_euro = ((JSONObject) o).getDouble("price");
+                    String name = ((JSONObject) o).getString("market_name");
+                    String stickers = ((JSONObject) o).getString("stickers");
+                    try {
+                        wear = ((JSONObject) o).get("wear").toString();
+                    }
+                    catch (JSONException je) {
+                        wear = null;
+                    }
+
+                    pstmt.setString(1, id);
+                    pstmt.setString(2, name);
+                    pstmt.setDouble(3, price_euro);
+                    pstmt.setString(4, stickers);
+                    pstmt.setString(5, ""+wear);
+                    pstmt.addBatch();
+                }
+            }
+            int[] updateCounts = pstmt.executeBatch();
+            amount_inserts = IntStream.of(updateCounts).sum();
+            System.out.println(amount_inserts + " items were inserted!");
+
+            conn.commit();
+
+        } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+        }
+
+        String[] return_object = new String[2];
+        return_object[0] = ""+amount_inserts;
+        return_object[1] = id;
+        return return_object;
     }
 }
 
