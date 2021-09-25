@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Properties;
 
+import static com.company.SteamItemPriceChecker.getSteamPriceForGivenName;
 import static com.company.common.readPasswordFromFile;
 
 
@@ -199,6 +200,33 @@ public class SteamCrawler {
         return true;
     }
 
+    public static void updateItemPricesLongNotSeen(Connection conn) throws Exception {
+
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery("select * from steam_item_sale.steam_most_recent_prices order by \"timestamp\" asc");
+
+        String name;
+        while (rs.next()){
+            name = rs.getString("name");
+            getSteamPriceForGivenName(name,conn);
+        }
+
+        rs.close();
+    }
+
+    public static void updateItemPrices0Euro(Connection conn) throws Exception {
+
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery("select * from steam_item_sale.steam_most_recent_prices where price_euro = 0");
+
+        String name;
+        while (rs.next()){
+            name = rs.getString("name");
+            getSteamPriceForGivenName(name,conn);
+        }
+
+        rs.close();
+    }
 
 }
 

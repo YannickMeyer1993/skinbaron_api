@@ -9,7 +9,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import static com.company.SteamCrawler.setIterationCounter;
+import static com.company.SteamCrawler.*;
 import static com.company.common.readPasswordFromFile;
 
 public class SteamCrawlerTest extends TestCase {
@@ -36,4 +36,29 @@ public class SteamCrawlerTest extends TestCase {
         //TODO
     }
 
+    public void testUpdateItemPricesLongNotSeen() throws Exception {
+        String url = "jdbc:postgresql://localhost/postgres";
+        Properties props = new Properties();
+        props.setProperty("user", "postgres");
+        String password = readPasswordFromFile("C:/passwords/postgres.txt");
+        props.setProperty("password", password);
+        Connection conn = DriverManager.getConnection(url, props);
+        conn.setAutoCommit(false);
+        System.out.println("Successfully Connected.");
+
+        updateItemPricesLongNotSeen(conn);
+    }
+
+    public void testUpdateItemPrices0Euro() throws Exception {
+        String url = "jdbc:postgresql://localhost/postgres";
+        Properties props = new Properties();
+        props.setProperty("user", "postgres");
+        String password = readPasswordFromFile("C:/passwords/postgres.txt");
+        props.setProperty("password", password);
+        Connection conn = DriverManager.getConnection(url, props);
+        conn.setAutoCommit(false);
+        System.out.println("Successfully Connected.");
+
+        updateItemPrices0Euro(conn);
+    }
 }
