@@ -65,7 +65,7 @@ public class SteamCrawler {
         System.out.println("Starte mit Iteration  "+ iteration);
 
         int MAX_ITERATION = 1600;
-        int wait_counter = 0;
+        int wait_counter = 2;
         while (iteration < MAX_ITERATION) {
             try {
                 System.out.println("Waiting for "+Math.pow(2,wait_counter)+" seconds");
@@ -73,13 +73,13 @@ public class SteamCrawler {
                 Boolean works = getItemsforSteamPageNumber(conn, iteration);
                 setIterationCounter(conn, iteration);
                 conn.commit();
-                wait_counter=0;
+                wait_counter=2;
 
                 if (works){
                     iteration++;
 
                 }
-            } catch (FailingHttpStatusCodeException e){
+            } catch (Exception e){
                 wait_counter++;
             }
 
@@ -152,6 +152,10 @@ public class SteamCrawler {
 
         System.out.println("There are " + Items.size() + " Items on the Steam Page no. " + pageNumber + "\n");
 
+        if (Items.size()==0){
+            throw new Exception("No Items found.");
+        }
+
         for (DomElement item : Items) {
             String item_xml = item.asXml();
 
@@ -163,11 +167,6 @@ public class SteamCrawler {
             int quantity = Integer.parseInt(document.valueOf("/div/div/div/span/span/@data-qty"));
             int price_source = Integer.parseInt(document.valueOf("/div/div/div/span/span/@data-price"));
             int currencyId = Integer.parseInt(document.valueOf("/div/div/div/span/span/@data-currency"));
-
-            System.out.println("Item Name = " + name);
-            System.out.println("Quantity = " + quantity);
-            System.out.println("Preis in USD cents = " + price_source);
-            System.out.print("\n");
 
             if (name == null) {
                 return false;
