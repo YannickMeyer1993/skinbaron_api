@@ -67,4 +67,9 @@ public class SkinbaronAPITest extends TestCase {
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
         MainSearch(secret,conn);
     }
+
+    public void testBuyItem() throws Exception {
+        String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
+        buyItem(secret,"6944b89b-dd36-49f5-b9ae-7dea17f5b0a4",0.02);
+    }
 }

@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.stream.IntStream;
 
@@ -146,9 +147,85 @@ public class SkinbaronAPI {
     return 200;
     }
 
-    public static int buyItemById(String secret,String itemId) throws Exception {
-        //TODO
-        return 200;
+    public static void buyItem(String secret,String itemId, Double price) throws Exception {
+
+        String SQLInsert = "Insert into steam_item_sale.skinbaron_transactions (steam_price,success,name,saleid,price) VALUES (?,?,?,?,?)";
+
+        String url = "jdbc:postgresql://localhost/postgres";
+        Properties props = new Properties();
+        props.setProperty("user", "postgres");
+        String password = readPasswordFromFile("C:/passwords/postgres.txt");
+        props.setProperty("password", password);
+        Connection conn = DriverManager.getConnection(url, props);
+        conn.setAutoCommit(false);
+        System.out.println("Successfully Connected.");
+
+        System.out.println("Skinbaron API BuyItems has been called.");
+        String jsonInputString = "{\"apikey\": \""+secret+"\",\"total\":"+price+",\"saleids\":[\""+itemId+"\"]}";
+
+        HttpPost httpPost = new HttpPost("https://api.skinbaron.de/BuyItems");
+        httpPost.setHeader("Content.Type", "application/json");
+        httpPost.setHeader("x-requested-with", "XMLHttpRequest");
+        httpPost.setHeader("Accept", "application/json");
+
+        HttpClient client = HttpClients.custom()
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setCookieSpec(CookieSpecs.STANDARD).build())
+                .build();
+
+        HttpEntity entity = new ByteArrayEntity(jsonInputString.getBytes(StandardCharsets.UTF_8));
+        httpPost.setEntity(entity);
+        HttpResponse response = client.execute(httpPost);
+        String result = EntityUtils.toString(response.getEntity());
+
+        JSONObject result_json = (JSONObject) new JSONTokener(result).nextValue();
+
+        if (result_json.has("generalErrors")) {
+            throw new JSONException((String) result_json.get("generalErrors").toString());
+        }
+
+        if (!result_json.has("items")) {
+            throw new JSONException( result);
+        }
+
+        System.out.println(result_json);
+
+        JSONArray result_array = result_json.getJSONArray("items");
+
+        String name = "";
+        String saleId = "";
+        Double steam_price = 0.0;
+
+        for (Object o : result_array) {
+            if (o instanceof JSONObject) {
+                name = ((JSONObject) o).getString("name");
+                saleId = ((JSONObject) o).getString("saleid");
+                price = ((JSONObject) o).getDouble("price");
+            }
+
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("select price_euro from steam_item_sale.steam_most_recent_prices smrp where name =\'" + name+"'");
+
+            if (!rs.next()) {
+                throw new NoSuchElementException(name + " has no Steam price.");
+            }
+
+            steam_price = rs.getDouble("price_euro");
+
+
+            try (PreparedStatement pstmt = conn.prepareStatement(SQLInsert, Statement.RETURN_GENERATED_KEYS)) {
+                //steam_price,success,name,saleid,price
+                pstmt.setDouble(1, steam_price);
+                pstmt.setBoolean(2, true);
+                pstmt.setString(3, name);
+                pstmt.setString(4, saleId);
+                pstmt.setDouble(5, price);
+                int rowsAffected = pstmt.executeUpdate();
+            }
+
+            conn.commit();
+            System.out.println("");
+        }
     }
 
     public static Double getBalance(String secret, Boolean overwriteDB) throws Exception {
