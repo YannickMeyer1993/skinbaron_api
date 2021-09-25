@@ -65,7 +65,7 @@ public class SteamCrawler {
         System.out.println("Starte mit Iteration  "+ iteration);
 
         int MAX_ITERATION = 1600;
-        int wait_counter = 2;
+        int wait_counter = 3;
         while (iteration < MAX_ITERATION) {
             try {
                 System.out.println("Waiting for "+Math.pow(2,wait_counter)+" seconds");
@@ -73,7 +73,7 @@ public class SteamCrawler {
                 Boolean works = getItemsforSteamPageNumber(conn, iteration);
                 setIterationCounter(conn, iteration);
                 conn.commit();
-                wait_counter=2;
+                wait_counter=3;
 
                 if (works){
                     iteration++;
