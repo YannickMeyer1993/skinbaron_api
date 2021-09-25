@@ -1,8 +1,8 @@
 package com.company;
 
 import junit.framework.TestCase;
+import org.json.JSONException;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -68,8 +68,11 @@ public class SkinbaronAPITest extends TestCase {
         MainSearch(secret,conn);
     }
 
-    public void testBuyItem() throws Exception {
+    public void testBuyItemNegative() throws Exception {
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
-        buyItem(secret,"6944b89b-dd36-49f5-b9ae-7dea17f5b0a4",0.02);
+        try{buyItem(secret,"6944b89b-dd36-49f5-b9ae-7dea17f5b0a4",0.02);}
+        catch (JSONException e){
+            assertTrue("[\"some offer(s) are already sold\"]".equals(e.getMessage()));
+        }
     }
 }

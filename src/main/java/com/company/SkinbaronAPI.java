@@ -9,15 +9,11 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.apache.xpath.operations.Bool;
 import org.json.*;
-import org.postgresql.util.PSQLException;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
-import java.time.LocalDate;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.stream.IntStream;
@@ -181,6 +177,14 @@ public class SkinbaronAPI {
         JSONObject result_json = (JSONObject) new JSONTokener(result).nextValue();
 
         if (result_json.has("generalErrors")) {
+            System.out.println(result_json.get("generalErrors").toString());
+            if ("{[\"some offer(s) already in another shopping cart and/or sold\"]".equals(result_json.get("generalErrors").toString()) || "[\"some offer(s) are already sold\"]".equals(result_json.get("generalErrors").toString())){
+                Statement st = conn.createStatement();
+                st.execute("DELETE FROM steam_item_sale.skinbaron_market_search_results where id='"+itemId+"'");
+                System.out.println("Deleted one Id from Skinbaron table.");
+                st.close();
+                conn.commit();
+            }
             throw new JSONException((String) result_json.get("generalErrors").toString());
         }
 
@@ -222,6 +226,12 @@ public class SkinbaronAPI {
                 pstmt.setDouble(5, price);
                 int rowsAffected = pstmt.executeUpdate();
             }
+
+            Statement st = conn.createStatement();
+            st.execute("DELETE FROM steam_item_sale.skinbaron_market_search_results where id='"+itemId+"'");
+            st.close();
+
+            System.out.println("Deleted one Id from Skinbaron table.");
 
             conn.commit();
             System.out.println("");
