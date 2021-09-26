@@ -5,10 +5,23 @@ import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -17,8 +30,11 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.IntStream;
 
 import static com.company.SteamItemPriceChecker.getSteamPriceForGivenName;
 import static com.company.common.readPasswordFromFile;
@@ -57,29 +73,28 @@ public class SteamCrawler {
             setRowInOverviewTable(conn);
             iteration = 1;
         } //End Start of the Day
-        else
-        {
+        else {
             iteration = rs.getInt("iteration"); //rs.next() was called above
         }
 
-        System.out.println("Starte mit Iteration  "+ iteration);
+        System.out.println("Starte mit Iteration  " + iteration);
 
         int MAX_ITERATION = 1600;
         int wait_counter = 3;
         while (iteration < MAX_ITERATION) {
             try {
-                System.out.println("Waiting for "+Math.pow(2,wait_counter)+" seconds");
-                Thread.sleep((long) (Math.pow(2,wait_counter)*1000));
+                System.out.println("Waiting for " + Math.pow(2, wait_counter) + " seconds");
+                Thread.sleep((long) (Math.pow(2, wait_counter) * 1000));
                 Boolean works = getItemsforSteamPageNumber(conn, iteration);
                 setIterationCounter(conn, iteration);
                 conn.commit();
-                wait_counter=4;
+                wait_counter = 4;
 
-                if (works){
+                if (works) {
                     iteration++;
 
                 }
-            } catch (Exception e){
+            } catch (Exception e) {
                 wait_counter++;
             }
 
@@ -152,7 +167,7 @@ public class SteamCrawler {
 
         System.out.println("There are " + Items.size() + " Items on the Steam Page no. " + pageNumber + "\n");
 
-        if (Items.size()==0){
+        if (Items.size() == 0) {
             throw new Exception("No Items found.");
         }
 
@@ -196,8 +211,7 @@ public class SteamCrawler {
 
                 //System.out.println(pstmt);
                 int rowsAffected = pstmt.executeUpdate();
-            }
-            catch (Exception e){
+            } catch (Exception e) {
                 return false;
             }
             conn.commit();
@@ -213,9 +227,9 @@ public class SteamCrawler {
         ResultSet rs = stmt.executeQuery("select * from steam_item_sale.steam_most_recent_prices order by \"timestamp\" asc");
 
         String name;
-        while (rs.next()){
+        while (rs.next()) {
             name = rs.getString("name");
-            getSteamPriceForGivenName(name,conn);
+            getSteamPriceForGivenName(name, conn);
         }
 
         rs.close();
@@ -227,13 +241,178 @@ public class SteamCrawler {
         ResultSet rs = stmt.executeQuery("select * from steam_item_sale.steam_most_recent_prices where price_euro = 0");
 
         String name;
-        while (rs.next()){
+        while (rs.next()) {
             name = rs.getString("name");
-            getSteamPriceForGivenName(name,conn);
+            getSteamPriceForGivenName(name, conn);
         }
 
         rs.close();
     }
 
+    public static void getItemsfromInventory(Connection conn, String inventoryurl) throws Exception {
+
+        HttpGet httpGet = new HttpGet(inventoryurl);
+
+        HttpClient client = HttpClients.custom()
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setCookieSpec(CookieSpecs.STANDARD).build())
+                .build();
+
+        HttpResponse response = client.execute(httpGet);
+        String result = EntityUtils.toString(response.getEntity());
+
+        JSONObject result_json = (JSONObject) new JSONTokener(result).nextValue();
+
+        HashMap<String, Integer> assets_map = new HashMap();
+        HashMap<String, String> descriptions_map = new HashMap();
+
+        JSONArray assets_array = result_json.getJSONArray("assets");
+        JSONArray descriptions_array = result_json.getJSONArray("descriptions");
+
+
+        for (Object jo : assets_array) {
+            if (jo instanceof JSONObject) {
+                assets_map.put(((JSONObject) jo).getString("classid"), ((JSONObject) jo).getInt("amount"));
+            }
+        }
+
+        for (Object jo : descriptions_array) {
+            if (jo instanceof JSONObject) {
+                if (((JSONObject) jo).getInt("marketable") == 1) {
+                    descriptions_map.put(((JSONObject) jo).getString("classid"), ((JSONObject) jo).getString("market_hash_name"));
+                }
+            }
+        }
+
+        String SQLInsert = "INSERT INTO steam_item_sale.inventory(inv_type,name,still_there,amount) "
+                + "VALUES('steam',?,true,?)";
+
+        HashMap<String, Integer> map = new HashMap();
+
+        for (String classid : descriptions_map.keySet()) {
+            String name = descriptions_map.get(classid);
+            if (!assets_map.containsKey(classid)) {
+                continue;
+            }
+            int amount = assets_map.get(classid);
+            if (!map.containsKey(name)) {
+                map.put(name, 1);
+            } else {
+                map.put(name, map.get(name) + 1);
+            }
+        }
+
+        try (PreparedStatement pstmt = conn.prepareStatement(SQLInsert, Statement.RETURN_GENERATED_KEYS)) {
+
+            for (String key : map.keySet()) {
+                pstmt.setString(1, key);
+                pstmt.setInt(2, map.get(key));
+                pstmt.addBatch();
+            }
+
+            int[] updateCounts = pstmt.executeBatch();
+            int amount_inserts = IntStream.of(updateCounts).sum();
+            if (amount_inserts != 0) {
+                System.out.println(amount_inserts + " items were inserted!");
+            }
+        }
+        conn.commit();
+
+
+    }
+
+    public static void getStorageItems(Connection conn) throws IOException {
+
+        HttpGet httpGet = new HttpGet("https://steamcommunity.com/inventory/76561198286004569/730/2?count=2000");
+
+        HttpClient client = HttpClients.custom()
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setCookieSpec(CookieSpecs.STANDARD).build())
+                .build();
+
+        HttpResponse response = client.execute(httpGet);
+        String result = EntityUtils.toString(response.getEntity());
+
+        JSONObject result_json = (JSONObject) new JSONTokener(result).nextValue();
+
+        JSONArray assets_array = result_json.getJSONArray("descriptions");
+
+        String SQLInsert = "INSERT INTO steam_item_sale.inventory(inv_type,name,still_there,amount) "
+                + "VALUES('storage',?,true,?)";
+        try (PreparedStatement pstmt = conn.prepareStatement(SQLInsert, Statement.RETURN_GENERATED_KEYS)) {
+
+            for (Object jo : assets_array) {
+                if (jo instanceof JSONObject) {
+
+                    //if (!((JSONObject) jo).keySet().contains("fraudwarnings")){
+                    //    continue;
+                    //}
+                    if (!"Storage Unit".equals(((JSONObject) jo).getString("market_hash_name"))) {
+                        continue;
+                    }
+                    String amount_string = ((JSONObject) jo).getJSONArray("descriptions").getJSONObject(2).getString("value");
+                    int amount = Integer.parseInt(amount_string.split(" ")[3]);
+
+                    if (amount==0){
+                        continue;
+                    }
+
+                    String item_name = ((String)(((JSONObject) jo).getJSONArray("fraudwarnings").get(0))).split("''")[1];
+
+                    if ("Broken Fang Case".equals(item_name)) {
+                        item_name = "Operation Broken Fang Case";
+                    }
+
+                    if ("Sticker | Tyloo 2020".equals(item_name)) {
+                        item_name = "Sticker | TYLOO | 2020 RMR";
+                    }
+
+                    if ("Wildfire Case".equals(item_name)) {
+                        item_name = "Operation Wildfire Case";
+                    }
+
+                    if ("Sticker | Navi 2020".equals(item_name)) {
+                        item_name = "Sticker | Natus Vincere | 2020 RMR";
+                    }
+
+
+                    //TODO Filter out Trash
+
+                    Statement stmt = conn.createStatement();
+                    ResultSet rs = stmt.executeQuery("select name from steam_item_sale.item_informations");
+
+                    List<String> name_list = new ArrayList<>();
+
+                    while (rs.next()){
+                        name_list.add(rs.getString("name"));
+                    }
+
+                    rs.close();
+                    stmt.close();
+
+                    if (!name_list.contains(item_name)){
+                        continue;
+                    }
+
+
+                    pstmt.setString(1, item_name);
+                    pstmt.setInt(2, amount);
+                    pstmt.addBatch();
+                }
+            }
+
+            int[] updateCounts = pstmt.executeBatch();
+            int amount_inserts = IntStream.of(updateCounts).sum();
+            if (amount_inserts != 0) {
+                System.out.println(amount_inserts + " items were inserted!");
+            }
+
+            conn.commit();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
 }
+
 
