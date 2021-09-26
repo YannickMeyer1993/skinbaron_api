@@ -3,6 +3,7 @@ package com.company;
 import junit.framework.TestCase;
 import org.json.JSONException;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -75,7 +76,22 @@ public class SkinbaronAPITest extends TestCase {
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
         try{buyItem(conn,secret,"6944b89b-dd36-49f5-b9ae-7dea17f5b0a4",0.02);}
         catch (JSONException e){
-            assertTrue("[\"some offer(s) are already sold\"]".equals(e.getMessage()));
+            assertEquals("[\"some offer(s) are already sold\"]",e.getMessage());
         }
+    }
+
+    public void testBuyFromSelect() throws Exception {
+        String url = "jdbc:postgresql://localhost/postgres";
+        Properties props = new Properties();
+        props.setProperty("user", "postgres");
+        String password = readPasswordFromFile("C:/passwords/postgres.txt");
+        props.setProperty("password", password);
+        Connection conn = DriverManager.getConnection(url, props);
+        conn.setAutoCommit(false);
+        System.out.println("Successfully Connected.");
+
+        String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
+
+        buyFromSelect(secret, conn);
     }
 }
