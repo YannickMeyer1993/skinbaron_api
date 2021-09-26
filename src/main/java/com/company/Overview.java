@@ -3,11 +3,13 @@ package com.company;
 import java.io.FileNotFoundException;
 import java.sql.*;
 import java.util.Properties;
+import java.util.Scanner;
 
 import static com.company.SkinbaronAPI.getBalance;
 import static com.company.SteamCrawler.setRowInOverviewTable;
 import static com.company.SteamItemPriceChecker.getSteamPriceForGivenName;
 import static com.company.common.readPasswordFromFile;
+import static java.lang.Math.min;
 
 public class Overview {
 
@@ -16,10 +18,18 @@ public class Overview {
     private static double steam_inv_value   ;
     private static double skinbaron_inv_value ;
     private static double sum_rare_items ;
+    private static double steam_balance;
+    private static double steam_sales_value;
 
     public static void main(String[] args) throws Exception {
 
         //TODO Hardcoded steam_balance + steam_open_sales
+        Scanner sc= new Scanner(System.in);    //System.in is a standard input stream
+        System.out.println("Enter Steam Balance: ");
+        steam_balance = sc.nextDouble();
+        System.out.println("Enter Steam Sales Value: ");
+        steam_balance = sc.nextDouble();
+
 
 
         String url = "jdbc:postgresql://localhost/postgres";
@@ -91,6 +101,8 @@ public class Overview {
                 "                ,steam_inv_value = ?::numeric\n" +
                 "                ,skinbaron_inv_value = ?::numeric\n" +
                 "                ,summe_rare_items = ?::numeric\n" +
+                "                ,steam_balance = ?::numeric\n" +
+                "                ,steam_open_sales = ?::numeric\n" +
                 "        WHERE\n" +
                 "            s.\"DATE\" = '2021-09-26'";
 
@@ -108,8 +120,9 @@ public class Overview {
             pstmt.setDouble(3, steam_inv_value);
             pstmt.setDouble(4, skinbaron_inv_value);
             pstmt.setDouble(5, sum_rare_items);
+            pstmt.setDouble(5, steam_balance);
+            pstmt.setDouble(5, steam_sales_value);
 
-            System.out.println(pstmt.toString());
             int[] updateCounts = pstmt.executeBatch();
             System.out.println(updateCounts.length + " were inserted!");
 
