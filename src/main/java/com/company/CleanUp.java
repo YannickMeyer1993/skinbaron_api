@@ -57,6 +57,7 @@ public class CleanUp {
                 "delete from steam_item_sale.skinbaron_market_search_results where id in (select id from deletable_ids);");
         st3.close();
 
+        conn.close();
     }
 
 }
