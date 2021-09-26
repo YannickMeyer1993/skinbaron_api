@@ -14,6 +14,8 @@ import org.json.*;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.stream.IntStream;
@@ -412,6 +414,62 @@ public class SkinbaronAPI {
         System.out.println("New Search started.");
         System.out.println("------------------------------------------------------------------");
         }
+    }
+
+    public static void getSkinbaronInventory(String secret, Connection conn) throws Exception {
+
+        System.out.println("Skinbaron API GetInventory has been called.");
+        String jsonInputString = "{\"apikey\": \"" + secret + "\",\"type\": 2,\"appid\": 730,\"items_per_page\": 50}"; //items_er_page?
+
+        HttpPost httpPost = new HttpPost("https://api.skinbaron.de/GetInventory");
+        httpPost.setHeader("Content.Type", "application/json");
+        httpPost.setHeader("x-requested-with", "XMLHttpRequest");
+        httpPost.setHeader("Accept", "application/json");
+
+        HttpClient client = HttpClients.custom()
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setCookieSpec(CookieSpecs.STANDARD).build())
+                .build();
+
+        HttpEntity entity = new ByteArrayEntity(jsonInputString.getBytes(StandardCharsets.UTF_8));
+        httpPost.setEntity(entity);
+        HttpResponse response = client.execute(httpPost);
+        String result = EntityUtils.toString(response.getEntity());
+
+        JSONObject result_json = (JSONObject) new JSONTokener(result).nextValue();
+        JSONArray result_array = ((JSONArray) result_json.get("items"));
+
+        String SQLInsert = "INSERT INTO steam_item_sale.inventory(inv_type,name,still_there,amount) "
+                + "VALUES('skinbaron',?,true,?)";
+
+        HashMap<String, Integer> map = new HashMap();
+
+        for (Object o : result_array) {
+            if (o instanceof JSONObject) {
+                String name = ((JSONObject) o).getString("marketHashName");
+                if (!map.containsKey(name)) {
+                    map.put(name, 1);
+                } else {
+                    map.put(name, map.get(name) + 1);
+                }
+            }
+        }
+
+        try (PreparedStatement pstmt = conn.prepareStatement(SQLInsert, Statement.RETURN_GENERATED_KEYS)) {
+
+            for (String key: map.keySet()){
+                pstmt.setString(1, key);
+                pstmt.setInt(2, map.get(key));
+                pstmt.addBatch();
+            }
+
+            int[] updateCounts = pstmt.executeBatch();
+            int amount_inserts = IntStream.of(updateCounts).sum();
+            if (amount_inserts!=0){
+                System.out.println(amount_inserts + " items were inserted!");
+            }
+        }
+        conn.commit();
     }
 }
 
