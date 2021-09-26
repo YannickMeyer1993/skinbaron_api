@@ -375,9 +375,6 @@ public class SteamCrawler {
                         item_name = "Sticker | Natus Vincere | 2020 RMR";
                     }
 
-
-                    //TODO Filter out Trash
-
                     Statement stmt = conn.createStatement();
                     ResultSet rs = stmt.executeQuery("select name from steam_item_sale.item_informations");
 
