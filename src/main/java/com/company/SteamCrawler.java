@@ -73,7 +73,7 @@ public class SteamCrawler {
                 Boolean works = getItemsforSteamPageNumber(conn, iteration);
                 setIterationCounter(conn, iteration);
                 conn.commit();
-                wait_counter=3;
+                wait_counter=4;
 
                 if (works){
                     iteration++;

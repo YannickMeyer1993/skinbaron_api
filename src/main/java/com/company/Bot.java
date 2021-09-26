@@ -73,7 +73,6 @@ public class Bot {
             System.out.println("No Items found!.");
 
             rs.close();
-            break;
         }
 
 
