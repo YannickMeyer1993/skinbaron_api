@@ -23,14 +23,11 @@ public class Overview {
 
     public static void main(String[] args) throws Exception {
 
-        //TODO Hardcoded steam_balance + steam_open_sales
         Scanner sc= new Scanner(System.in);    //System.in is a standard input stream
         System.out.println("Enter Steam Balance: ");
         steam_balance = sc.nextDouble();
         System.out.println("Enter Steam Sales Value: ");
         steam_balance = sc.nextDouble();
-
-
 
         String url = "jdbc:postgresql://localhost/postgres";
         Properties props = new Properties();
