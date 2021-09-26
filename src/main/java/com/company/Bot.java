@@ -16,14 +16,6 @@ public class Bot {
 
     public static void main(String[] args) throws Exception {
 
-
-        String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
-        Double balance = getBalance(secret,false);
-
-        Scanner sc= new Scanner(System.in);    //System.in is a standard input stream
-        System.out.println("Enter max price: ");
-        max_price = min(sc.nextDouble(),balance);
-
         String url = "jdbc:postgresql://localhost/postgres";
         Properties props = new Properties();
         props.setProperty("user", "postgres");
@@ -32,6 +24,15 @@ public class Bot {
         Connection conn = DriverManager.getConnection(url, props);
         conn.setAutoCommit(false);
         System.out.println("Successfully Connected.");
+
+        String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
+        Double balance = getBalance(secret,false,conn);
+
+        Scanner sc= new Scanner(System.in);    //System.in is a standard input stream
+        System.out.println("Enter max price: ");
+        max_price = min(sc.nextDouble(),balance);
+
+
 
         while(true){
             System.out.println("Bot is started...");

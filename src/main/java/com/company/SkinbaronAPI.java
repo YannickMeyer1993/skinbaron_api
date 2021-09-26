@@ -240,16 +240,8 @@ public class SkinbaronAPI {
         }
     }
 
-    public static Double getBalance(String secret, Boolean overwriteDB) throws Exception {
+    public static Double getBalance(String secret, Boolean overwriteDB, Connection conn) throws Exception {
 
-        String url = "jdbc:postgresql://localhost/postgres";
-        Properties props = new Properties();
-        props.setProperty("user", "postgres");
-        String password = readPasswordFromFile("C:/passwords/postgres.txt");
-        props.setProperty("password", password);
-        Connection conn = DriverManager.getConnection(url, props);
-        conn.setAutoCommit(false);
-        System.out.println("Successfully Connected.");
 
         System.out.println("Skinbaron API GetBalance has been called.");
         String jsonInputString = "{\"apikey\": \"" + secret + "\"}";
@@ -286,7 +278,7 @@ public class SkinbaronAPI {
             setRowInOverviewTable(conn);
         } //End Start of the Day
 
-        String SQLUpdate = "Update steam_item_sale.overview set steam_balance =  ? where \"DATE\" = CURRENT_DATE;";
+        String SQLUpdate = "Update steam_item_sale.overview set skinbaron_balance =  ? where \"DATE\" = CURRENT_DATE;";
 
         try (PreparedStatement pstmt = conn.prepareStatement(SQLUpdate, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setDouble(1, skinbaronBalance);

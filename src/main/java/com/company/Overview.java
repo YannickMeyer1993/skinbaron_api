@@ -4,10 +4,120 @@ import java.io.FileNotFoundException;
 import java.sql.*;
 import java.util.Properties;
 
+import static com.company.SkinbaronAPI.getBalance;
+import static com.company.SteamCrawler.setRowInOverviewTable;
 import static com.company.SteamItemPriceChecker.getSteamPriceForGivenName;
 import static com.company.common.readPasswordFromFile;
 
 public class Overview {
+
+    private static double smurf_inv_value;
+    private static double skinbaron_open_sale_wert;
+    private static double steam_inv_value   ;
+    private static double skinbaron_inv_value ;
+    private static double sum_rare_items ;
+
+    public static void main(String[] args) throws Exception {
+
+        //TODO Hardcoded steam_balance + steam_open_sales
+
+
+        String url = "jdbc:postgresql://localhost/postgres";
+        Properties props = new Properties();
+        props.setProperty("user", "postgres");
+        String password = readPasswordFromFile("C:/passwords/postgres.txt");
+        props.setProperty("password", password);
+        Connection conn = DriverManager.getConnection(url, props);
+        conn.setAutoCommit(false);
+        System.out.println("Successfully Connected.");
+
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery("select highest_iteration_steam+1 as iteration from steam_item_sale.overview where \"DATE\" = CURRENT_DATE;");
+
+        if (!rs.next()) //Start of today
+        {
+            setRowInOverviewTable(conn);
+        }
+        rs.close();
+        stmt.close();
+
+        Statement st = conn.createStatement();
+        st.execute("UPDATE steam_item_sale.inventory set still_there = false;");
+        st.close();
+
+        Inventory.main(null);
+        getItemPricesInventory(conn);
+        String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
+        getBalance(secret,true,conn);
+
+        Statement stmt2 = conn.createStatement();
+        ResultSet rs2 = stmt2.executeQuery("with smurf as \n" +
+                "(select round(cast(x.smurf_inv_wert as numeric),2) as smurf_inv_value from (select t.smurf_inv_wert \n" +
+                "\tfrom ( select sum(si.amount*si.price_per_unit) as smurf_inv_wert\n" +
+                "\tfrom steam_item_sale.inventory_with_prices si where inv_type = 'smurf' ) t) x),\n" +
+                "skinbaron_inv as \n" +
+                "(select ROUND(cast(w.skinbaron_wert as numeric),2) as skinbaron_inv_value from ( select t.skinbaron_wert \n" +
+                "\tfrom ( select sum(si.amount*si.price_per_unit) as skinbaron_wert\n" +
+                "\tfrom steam_item_sale.inventory_with_prices si where inv_type = 'skinbaron' ) t) w),\n" +
+                "steam_inv as \n" +
+                "(select ROUND(cast(w.skinbaron_wert as numeric),2) as steam_inv_value from ( select t.skinbaron_wert \n" +
+                "\tfrom ( select sum(si.amount*si.price_per_unit) as skinbaron_wert\n" +
+                "\tfrom steam_item_sale.inventory_with_prices si where inv_type = 'steam' or inv_type like 'storage%' ) t) w),\n" +
+                "skinbaron_open_sales as \n" +
+                "(select ROUND(cast(w.skinbaron_wert as numeric),2) as skinbaron_open_sales_value from ( select t.skinbaron_wert \n" +
+                "\tfrom ( select sum(si.amount*si.price_per_unit) as skinbaron_wert\n" +
+                "\tfrom steam_item_sale.inventory_with_prices si where inv_type = 'skinbaron_sales' ) t) w)\n" +
+                "select smurf.*,skinbaron_open_sales.*,steam_inv.*,skinbaron_inv.* from smurf\n" +
+                "inner join skinbaron_inv on 1=1\n" +
+                "inner join steam_inv on 1=1\n" +
+                "inner join skinbaron_open_sales on 1=1");
+
+        rs2.next();
+
+        smurf_inv_value =            rs2.getDouble("smurf_inv_value");
+        skinbaron_open_sale_wert =   rs2.getDouble("skinbaron_open_sales_value");
+        steam_inv_value =            rs2.getDouble("steam_inv_value");
+        skinbaron_inv_value =        rs2.getDouble("skinbaron_inv_value");
+
+
+        rs2.close();
+        stmt2.close();
+
+        String SQLUpdate = "UPDATE\n" +
+                "            steam_item_sale.overview s\n" +
+                "        SET\n" +
+                "                smurf_inv_value = ?::numeric\n" +
+                "                ,skinbaron_open_sales_wert = ?::numeric\n" +
+                "                ,steam_inv_value = ?::numeric\n" +
+                "                ,skinbaron_inv_value = ?::numeric\n" +
+                "                ,summe_rare_items = ?::numeric\n" +
+                "        WHERE\n" +
+                "            s.\"DATE\" = '2021-09-26'";
+
+
+        Statement stmt3 = conn.createStatement();
+        ResultSet rs3 = stmt3.executeQuery("select sum(zusatz_wert) as sum_rare_items from steam_item_sale.rare_skins;");
+
+        rs3.next();
+        sum_rare_items = rs3.getDouble("sum_rare_items");
+
+        try (PreparedStatement pstmt = conn.prepareStatement(SQLUpdate, Statement.RETURN_GENERATED_KEYS)) {
+
+            pstmt.setDouble(1, smurf_inv_value);
+            pstmt.setDouble(2, skinbaron_open_sale_wert);
+            pstmt.setDouble(3, steam_inv_value);
+            pstmt.setDouble(4, skinbaron_inv_value);
+            pstmt.setDouble(5, sum_rare_items);
+
+            System.out.println(pstmt.toString());
+            int[] updateCounts = pstmt.executeBatch();
+            System.out.println(updateCounts.length + " were inserted!");
+
+            conn.commit();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
 
     public static void getItemPricesInventory(Connection conn) throws Exception {
 

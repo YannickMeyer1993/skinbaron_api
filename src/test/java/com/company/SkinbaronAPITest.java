@@ -36,8 +36,16 @@ public class SkinbaronAPITest extends TestCase {
     }
 
     public void testgetBalance() throws Exception {
+        String url = "jdbc:postgresql://localhost/postgres";
+        Properties props = new Properties();
+        props.setProperty("user", "postgres");
+        String password = readPasswordFromFile("C:/passwords/postgres.txt");
+        props.setProperty("password", password);
+        Connection conn = DriverManager.getConnection(url, props);
+        conn.setAutoCommit(false);
+        System.out.println("Successfully Connected.");
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
-        assertTrue(getBalance(secret,true)>0);
+        assertTrue(getBalance(secret,true,conn)>0);
     }
 
     public void testSearch1() throws SQLException, IOException {
