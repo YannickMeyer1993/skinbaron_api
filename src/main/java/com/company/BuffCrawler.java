@@ -2,16 +2,19 @@ package com.company;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.DomAttr;
 import com.gargoylesoftware.htmlunit.html.DomElement;
+import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
+import java.math.RoundingMode;
 import java.sql.*;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Properties;
 
@@ -55,8 +58,8 @@ public class BuffCrawler {
                 "where sub.ranking =1\n" +
                 "order by id");
 
-        while (rs.next()){
-            getBuffItem(conn,38586);//rs.getInt("id"));
+        while (rs.next()) {
+            getBuffItem(conn, 38586);//rs.getInt("id"));
             break;
         }
 
@@ -66,10 +69,10 @@ public class BuffCrawler {
 
     }
 
-    private static void getBuffItem(Connection conn,int id) throws IOException, InterruptedException, DocumentException {
+    private static void getBuffItem(Connection conn, int id) throws IOException, InterruptedException, DocumentException {
 
-        java.text.DecimalFormat df = new java.text.DecimalFormat("0.00");
-        df.setRoundingMode(java.math.RoundingMode.HALF_UP);
+        DecimalFormat df = new DecimalFormat("0.00");
+        df.setRoundingMode(RoundingMode.HALF_UP);
 
         String SQLUpsert = "WITH\n" +
                 "    to_be_upserted (id,price_euro,timestamp,success,name) AS (\n" +
@@ -107,37 +110,44 @@ public class BuffCrawler {
 
         String hash_name = null;
         List<DomElement> names = page.getByXPath("//*[contains(@class, 'cru-goods')]");
-        for (DomElement name: names){
+        for (DomElement name : names) {
             Document name_xml = new SAXReader().read(new StringReader(name.asXml()));
-            if (name_xml.valueOf("span")==null){
+            if (name_xml.valueOf("span") == null) {
                 continue;
             }
             hash_name = name_xml.valueOf("span").trim();
         }
 
-        List<DomElement> Items = page.getByXPath("//*[contains(@class, 'relative-goods')]");
 
-        for (DomElement element : Items) {
-            String item_xml = element.asXml();
-            Document document = new SAXReader().read(new StringReader(item_xml));
+        //System.out.println(((DomNode) o).asXml().toString());
+        List<DomAttr> ItemsIds = ((DomElement) page.getByXPath("//*[contains(@class, 'relative-goods')]").get(0)).getByXPath("//a//@data-goodsid");
+        List<HtmlAnchor> ItemsPrices = ((DomElement) page.getByXPath("//*[contains(@class, 'relative-goods')]").get(0)).getByXPath("//a//.");
 
-            id = (document.valueOf("/div/a/@data-goodsid")!=null? Integer.parseInt(document.valueOf("/div/a/@data-goodsid")) :id);
-            String Column01 = document.valueOf("/div/a/.");
 
-            try {
-                Column01 = Column01.replaceAll("\n","").replaceAll("\t","").replaceAll(" ","").split("¥")[1];
-            } catch (java.lang.ArrayIndexOutOfBoundsException e)
-            {
-                System.out.println("Kein Preis für ID: "+id);
-                continue;
-            }
-
-            Double price_rmb = Double.parseDouble(Column01);
-            Double price_euro = Double.parseDouble(df.format(conversionFromRMBtoEUR*price_rmb).replace(",","."));
-
-            //TODO I got the fn price and not the bs price
-            System.out.println(hash_name + " "+ price_rmb+ " "+ price_euro+" "+conversionFromRMBtoEUR);
-
+        for (int i = 0; i < ItemsIds.size(); i++) {
+            System.out.println(ItemsIds.get(i).getValue());
+            System.out.println(ItemsPrices.get(i).toString());
         }
+
+
+                    /*
+                    id = (subdocument.valueOf("/div/a/@data-goodsid") != null ? Integer.parseInt(subdocument.valueOf("/div/a/@data-goodsid")) : id);
+                    String Column01 = document.valueOf("/div/a/.");
+
+                    try {
+                        Column01 = Column01.replaceAll("\n", "").replaceAll("\t", "").replaceAll(" ", "").split("¥")[1];
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        System.out.println("Kein Preis für ID: " + id);
+                        continue;
+                    }
+
+                    Double price_rmb = Double.parseDouble(Column01);
+                    Double price_euro = Double.parseDouble(df.format(conversionFromRMBtoEUR * price_rmb).replace(",", "."));
+
+                    //TODO I got the fn price and not the bs price
+                    System.out.println(id + " " + price_rmb + " " + price_euro + " " + conversionFromRMBtoEUR);
+                */
+
     }
 }
+
