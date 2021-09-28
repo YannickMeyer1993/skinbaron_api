@@ -9,13 +9,15 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.json.*;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.stream.IntStream;
@@ -198,7 +200,7 @@ public class SkinbaronAPI {
 
         String name = "";
         String saleId = "";
-        double steam_price ;
+        double steam_price;
 
         for (Object o : result_array) {
             if (o instanceof JSONObject) {
@@ -286,7 +288,7 @@ public class SkinbaronAPI {
         return skinbaronBalance;
     }
 
-    public static String[] Search(String secret, Connection conn, String after_saleid) throws IOException {
+    public static String[] Search(String secret, Connection conn, String after_saleid) throws IOException, InterruptedException {
 
         int amount_inserts = 0;
         String SQLUpsert = "WITH\n" +
@@ -310,6 +312,7 @@ public class SkinbaronAPI {
                 "    WHERE id NOT IN (SELECT id FROM updated);";
 
         System.out.println("Skinbaron API Search has been called.");
+        Thread.sleep(1000);
         String jsonInputString = "{\"apikey\": \"" + secret + "\",\"appid\": 730,\"items_per_page\": 50" + (!"".equals(after_saleid) ? ",\"after_saleid\":\"" + after_saleid + "\"" : "") + "}";
 
         HttpPost httpPost = new HttpPost("https://api.skinbaron.de/Search");
@@ -327,49 +330,59 @@ public class SkinbaronAPI {
         HttpResponse response = client.execute(httpPost);
         String result = EntityUtils.toString(response.getEntity());
 
-        JSONObject result_json = (JSONObject) new JSONTokener(result).nextValue();
+        try {
+            JSONObject result_json = (JSONObject) new JSONTokener(result).nextValue();
 
-        JSONArray result_array = ((JSONArray) result_json.get("sales"));
+            JSONArray result_array = ((JSONArray) result_json.get("sales"));
 
-        String id = null;
-        Double wear;
 
-        try (PreparedStatement pstmt = conn.prepareStatement(SQLUpsert, Statement.RETURN_GENERATED_KEYS)) {
-            for (Object o : result_array) {
-                if (o instanceof JSONObject) {
-                    id = ((JSONObject) o).getString("id");
-                    double price_euro = ((JSONObject) o).getDouble("price");
-                    String name = ((JSONObject) o).getString("market_name");
-                    String stickers = ((JSONObject) o).getString("stickers");
-                    try {
-                        pstmt.setDouble(5, ((JSONObject) o).getDouble("wear"));
-                    } catch (JSONException je) {
-                        pstmt.setNull(5, Types.DOUBLE);
+            String id = null;
+            Double wear;
+
+            try (PreparedStatement pstmt = conn.prepareStatement(SQLUpsert, Statement.RETURN_GENERATED_KEYS)) {
+                for (Object o : result_array) {
+                    if (o instanceof JSONObject) {
+                        id = ((JSONObject) o).getString("id");
+                        double price_euro = ((JSONObject) o).getDouble("price");
+                        String name = ((JSONObject) o).getString("market_name");
+                        String stickers = ((JSONObject) o).getString("stickers");
+                        try {
+                            pstmt.setDouble(5, ((JSONObject) o).getDouble("wear"));
+                        } catch (JSONException je) {
+                            pstmt.setNull(5, Types.DOUBLE);
+                        }
+
+                        pstmt.setString(1, id);
+                        pstmt.setString(2, name);
+                        pstmt.setDouble(3, price_euro);
+                        pstmt.setString(4, stickers);
+                        pstmt.addBatch();
                     }
-
-                    pstmt.setString(1, id);
-                    pstmt.setString(2, name);
-                    pstmt.setDouble(3, price_euro);
-                    pstmt.setString(4, stickers);
-                    pstmt.addBatch();
                 }
-            }
-            int[] updateCounts = pstmt.executeBatch();
-            amount_inserts = IntStream.of(updateCounts).sum();
-            if (amount_inserts != 0) {
-                System.out.println(amount_inserts + " items were inserted!");
+                int[] updateCounts = pstmt.executeBatch();
+                amount_inserts = IntStream.of(updateCounts).sum();
+                if (amount_inserts != 0) {
+                    System.out.println(amount_inserts + " items were inserted!");
+                }
+
+                conn.commit();
+
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
             }
 
-            conn.commit();
 
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            String[] return_object = new String[2];
+            return_object[0] = "" + amount_inserts;
+            return_object[1] = id;
+            return return_object;
+        } catch (ClassCastException e) {
+            System.out.println(result);
+            String[] return_object = new String[2];
+            return_object[0] = "" + 50;
+            return_object[1] = after_saleid;
+            return return_object;
         }
-
-        String[] return_object = new String[2];
-        return_object[0] = "" + amount_inserts;
-        return_object[1] = id;
-        return return_object;
     }
 
     public static void main(String[] args) throws Exception {
@@ -445,7 +458,7 @@ public class SkinbaronAPI {
 
         try (PreparedStatement pstmt = conn.prepareStatement(SQLInsert, Statement.RETURN_GENERATED_KEYS)) {
 
-            for (String key: map.keySet()){
+            for (String key : map.keySet()) {
                 pstmt.setString(1, key);
                 pstmt.setInt(2, map.get(key));
                 pstmt.addBatch();
@@ -488,18 +501,18 @@ public class SkinbaronAPI {
             JSONObject result_json = (JSONObject) new JSONTokener(result).nextValue();
             JSONArray result_array = ((JSONArray) result_json.get("response"));
 
-            if (result_array.length()==0){
+            if (result_array.length() == 0) {
                 break;
             }
-            for (Object o: result_array){
-                if (o instanceof JSONObject){
+            for (Object o : result_array) {
+                if (o instanceof JSONObject) {
                     String name = ((JSONObject) o).getString("name");
                     id = ((JSONObject) o).getString("id");
 
-                    if (!map.containsKey(name)){
-                        map.put(name,1);
+                    if (!map.containsKey(name)) {
+                        map.put(name, 1);
                     } else {
-                        map.put(name,map.get(name)+1);
+                        map.put(name, map.get(name) + 1);
                     }
                 }
             }
@@ -510,7 +523,7 @@ public class SkinbaronAPI {
 
         try (PreparedStatement pstmt = conn.prepareStatement(SQLInsert, Statement.RETURN_GENERATED_KEYS)) {
 
-            for (String key: map.keySet()){
+            for (String key : map.keySet()) {
                 pstmt.setString(1, key);
                 pstmt.setInt(2, map.get(key));
                 pstmt.addBatch();
@@ -518,7 +531,7 @@ public class SkinbaronAPI {
 
             int[] updateCounts = pstmt.executeBatch();
             int amount_inserts = IntStream.of(updateCounts).sum();
-            if (amount_inserts!=0){
+            if (amount_inserts != 0) {
                 System.out.println(amount_inserts + " items were inserted!");
             }
         }
@@ -532,7 +545,7 @@ public class SkinbaronAPI {
 
         while (rs.next()) //Start of today
         {
-            buyItem(conn,secret,rs.getString("id"),rs.getDouble("price"));
+            buyItem(conn, secret, rs.getString("id"), rs.getDouble("price"));
         }
 
         rs.close();

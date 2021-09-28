@@ -49,7 +49,7 @@ public class SkinbaronAPITest extends TestCase {
         assertTrue(getBalance(secret,true,conn)>0);
     }
 
-    public void testSearch1() throws SQLException, IOException {
+    public void testSearch1() throws SQLException, IOException, InterruptedException {
         String url = "jdbc:postgresql://localhost/postgres";
         Properties props = new Properties();
         props.setProperty("user", "postgres");
