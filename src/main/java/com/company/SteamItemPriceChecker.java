@@ -105,7 +105,7 @@ public class SteamItemPriceChecker {
         }
 
         System.out.println("Item \""+hash_name+"\" costs "+return_price+" Euro.");
-        Thread.sleep(10*1000);
+        Thread.sleep(20*1000);
         return return_price;
     }
 }

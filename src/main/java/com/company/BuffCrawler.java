@@ -8,7 +8,9 @@ import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
+import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
+import org.dom4j.tree.AbstractNode;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -97,6 +99,8 @@ public class BuffCrawler {
 
         String url = "https://buff.163.com/market/goods?goods_id=" + id;
 
+        System.out.println(url);
+
         WebClient webClient = new WebClient(BrowserVersion.FIREFOX);
         webClient.getOptions().setJavaScriptEnabled(true); // enable javascript
         webClient.getOptions().setCssEnabled(true);
@@ -119,19 +123,51 @@ public class BuffCrawler {
         }
 
 
+        /*
+        Document document = DocumentHelper.parseText(xmlFileAsString);
+
+        List<Element> elements = document.getRootElement().selectNodes("//machine[@name='"+machineName+"']//cred-pair");
+
+        for (Element element : elements) {
+            String login = element.attributeValue("login");
+            String pwd = element.attributeValue("password");
+            ...
+            }
+}
+         */
         //System.out.println(((DomNode) o).asXml().toString());
-        List<DomAttr> ItemsIds = ((DomElement) page.getByXPath("//*[contains(@class, 'relative-goods')]").get(0)).getByXPath("//a//@data-goodsid");
-        List<HtmlAnchor> ItemsPrices = ((DomElement) page.getByXPath("//*[contains(@class, 'relative-goods')]").get(0)).getByXPath("//a//.");
+        //List<DomAttr> ItemsIds = ((DomElement) page.getByXPath("//*[contains(@class, 'relative-goods')]").get(0)).getByXPath("//a//@data-goodsid");
+        //List<HtmlAnchor> ItemsPrices = ((DomElement) page.getByXPath("//*[contains(@class, 'relative-goods')]").get(0)).getByXPath("//a//.");
 
+        List<DomElement> Items = page.getByXPath("//*[contains(@class, 'relative-goods')]");
+        //System.out.println(Items.size()); = 1
 
-        for (int i = 0; i < ItemsIds.size(); i++) {
-            System.out.println(ItemsIds.get(i).getValue());
-            System.out.println(ItemsPrices.get(i).toString());
+        //for (int i = 0; i < Items.size(); i++) {
+        //    System.out.println(Items.get(i).getByXPath("//a"));
+        //}
+
+        String item_xml =  ((DomElement)((List<DomElement>) Items).get(0)).asXml();
+
+        //System.out.println(item_xml);
+        Document item_document = new SAXReader().read(new StringReader(item_xml));
+
+        String loopQuery = "/div/a";
+
+        List<Node> list = item_document.selectNodes("/div/a/@data-goodsid");
+        System.out.println(list.size());
+        for (Node n: list){
+            //System.out.println(n.asXML());
+
+            System.out.println(((Node)n.selectSingleNode("/div/a/@data-goodsid")).asXML());
+            //System.out.println(" "+n.selectSingleNode("/.").asXML());
         }
 
+        int goodsId = (item_document.valueOf("/div/a/@data-goodsid") != null ? Integer.parseInt(item_document.valueOf("/div/a/@data-goodsid")) : id);
+        // There is no goodsid for the main items
 
-                    /*
-                    id = (subdocument.valueOf("/div/a/@data-goodsid") != null ? Integer.parseInt(subdocument.valueOf("/div/a/@data-goodsid")) : id);
+        System.out.println(goodsId);
+
+        /*
                     String Column01 = document.valueOf("/div/a/.");
 
                     try {
@@ -140,7 +176,7 @@ public class BuffCrawler {
                         System.out.println("Kein Preis für ID: " + id);
                         continue;
                     }
-
+/*
                     Double price_rmb = Double.parseDouble(Column01);
                     Double price_euro = Double.parseDouble(df.format(conversionFromRMBtoEUR * price_rmb).replace(",", "."));
 
