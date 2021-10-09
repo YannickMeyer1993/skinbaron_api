@@ -2,13 +2,8 @@ package com.company;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.DomAttr;
-import com.gargoylesoftware.htmlunit.html.DomElement;
-import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Node;
+import com.gargoylesoftware.htmlunit.html.*;
+import org.dom4j.*;
 import org.dom4j.io.SAXReader;
 import org.dom4j.tree.AbstractNode;
 
@@ -17,6 +12,7 @@ import java.io.StringReader;
 import java.math.RoundingMode;
 import java.sql.*;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -43,6 +39,27 @@ public class BuffCrawler {
         Connection conn = DriverManager.getConnection(url, props);
         conn.setAutoCommit(false);
         System.out.println("Successfully Connected.");
+
+        String SQLUpsert = "WITH\n" +
+                "    to_be_upserted (id,price_euro,timestamp,success,name) AS (\n" +
+                "        VALUES\n" +
+                "            (?,?,?,?,?,?)\n" +
+                "    ),\n" +
+                "    updated AS (\n" +
+                "        UPDATE\n" +
+                "            steam_item_sale.buff_item_prices s\n" +
+                "        SET\n" +
+                "            price = to_be_upserted.price::numeric\n" +
+                "            ,timestamp = to_be_upserted.price::numeric\n" +
+                "        FROM\n" +
+                "            to_be_upserted\n" +
+                "        WHERE\n" +
+                "            s.id = to_be_upserted.id\n" +
+                "        RETURNING s.id\n" +
+                "    )\n" +
+                "INSERT INTO steam_item_sale.buff_item_prices\n" +
+                "    SELECT * FROM to_be_upserted\n" +
+                "    WHERE id NOT IN (SELECT id FROM updated);";
 
         Statement stmt = conn.createStatement();
         ResultSet rs = stmt.executeQuery("select id from (select\n" +
@@ -76,26 +93,7 @@ public class BuffCrawler {
         DecimalFormat df = new DecimalFormat("0.00");
         df.setRoundingMode(RoundingMode.HALF_UP);
 
-        String SQLUpsert = "WITH\n" +
-                "    to_be_upserted (id,price_euro,timestamp,success,name) AS (\n" +
-                "        VALUES\n" +
-                "            (?,?,?,?,?,?)\n" +
-                "    ),\n" +
-                "    updated AS (\n" +
-                "        UPDATE\n" +
-                "            steam_item_sale.buff_item_prices s\n" +
-                "        SET\n" +
-                "            price = to_be_upserted.price::numeric\n" +
-                "            ,timestamp = to_be_upserted.price::numeric\n" +
-                "        FROM\n" +
-                "            to_be_upserted\n" +
-                "        WHERE\n" +
-                "            s.id = to_be_upserted.id\n" +
-                "        RETURNING s.id\n" +
-                "    )\n" +
-                "INSERT INTO steam_item_sale.buff_item_prices\n" +
-                "    SELECT * FROM to_be_upserted\n" +
-                "    WHERE id NOT IN (SELECT id FROM updated);";
+        List<String[]> result = new ArrayList<String[]>();
 
         String url = "https://buff.163.com/market/goods?goods_id=" + id;
 
@@ -110,80 +108,28 @@ public class BuffCrawler {
         HtmlPage page = webClient.getPage(url);
         Thread.sleep(1000);
 
-        //System.out.println(page.getPage().asXml());
+        List<com.gargoylesoftware.htmlunit.html.DomElement> Items = page.getByXPath("//*[contains(@class, 'relative-goods')]");
 
-        String hash_name = null;
-        List<DomElement> names = page.getByXPath("//*[contains(@class, 'cru-goods')]");
-        for (DomElement name : names) {
-            Document name_xml = new SAXReader().read(new StringReader(name.asXml()));
-            if (name_xml.valueOf("span") == null) {
-                continue;
+        for (DomNode element : Items.get(0).getChildNodes()){
+            //System.out.println(element.asXml().trim());
+            String goodsId = null;
+
+            String item_xml =  element.asXml().trim();
+
+            Document document = null;
+            try {
+                document = new SAXReader().read(new StringReader(item_xml));
+                goodsId = document.valueOf("a/data-goods-id");
+                String price_rmb = document.valueOf("/a/.").replaceAll("\n", "").replaceAll("\t", "").replaceAll(" ", "").split("¥")[1];
+
+                //goodsId = goodsId!=null&&!"".equals(goodsId)?goodsId:""+id;
+
+                System.out.println(goodsId);
+                System.out.println(price_rmb);
+            } catch (DocumentException e){
+                //Do nothing
             }
-            hash_name = name_xml.valueOf("span").trim();
         }
-
-
-        /*
-        Document document = DocumentHelper.parseText(xmlFileAsString);
-
-        List<Element> elements = document.getRootElement().selectNodes("//machine[@name='"+machineName+"']//cred-pair");
-
-        for (Element element : elements) {
-            String login = element.attributeValue("login");
-            String pwd = element.attributeValue("password");
-            ...
-            }
-}
-         */
-        //System.out.println(((DomNode) o).asXml().toString());
-        //List<DomAttr> ItemsIds = ((DomElement) page.getByXPath("//*[contains(@class, 'relative-goods')]").get(0)).getByXPath("//a//@data-goodsid");
-        //List<HtmlAnchor> ItemsPrices = ((DomElement) page.getByXPath("//*[contains(@class, 'relative-goods')]").get(0)).getByXPath("//a//.");
-
-        List<DomElement> Items = page.getByXPath("//*[contains(@class, 'relative-goods')]");
-        //System.out.println(Items.size()); = 1
-
-        //for (int i = 0; i < Items.size(); i++) {
-        //    System.out.println(Items.get(i).getByXPath("//a"));
-        //}
-
-        String item_xml =  ((DomElement)((List<DomElement>) Items).get(0)).asXml();
-
-        //System.out.println(item_xml);
-        Document item_document = new SAXReader().read(new StringReader(item_xml));
-
-        String loopQuery = "/div/a";
-
-        List<Node> list = item_document.selectNodes("/div/a/@data-goodsid");
-        System.out.println(list.size());
-        for (Node n: list){
-            //System.out.println(n.asXML());
-
-            System.out.println(((Node)n.selectSingleNode("/div/a/@data-goodsid")).asXML());
-            //System.out.println(" "+n.selectSingleNode("/.").asXML());
-        }
-
-        int goodsId = (item_document.valueOf("/div/a/@data-goodsid") != null ? Integer.parseInt(item_document.valueOf("/div/a/@data-goodsid")) : id);
-        // There is no goodsid for the main items
-
-        System.out.println(goodsId);
-
-        /*
-                    String Column01 = document.valueOf("/div/a/.");
-
-                    try {
-                        Column01 = Column01.replaceAll("\n", "").replaceAll("\t", "").replaceAll(" ", "").split("¥")[1];
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                        System.out.println("Kein Preis für ID: " + id);
-                        continue;
-                    }
-/*
-                    Double price_rmb = Double.parseDouble(Column01);
-                    Double price_euro = Double.parseDouble(df.format(conversionFromRMBtoEUR * price_rmb).replace(",", "."));
-
-                    //TODO I got the fn price and not the bs price
-                    System.out.println(id + " " + price_rmb + " " + price_euro + " " + conversionFromRMBtoEUR);
-                */
-
     }
 }
 
