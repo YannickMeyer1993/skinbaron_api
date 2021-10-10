@@ -7,10 +7,10 @@ select
 	mg2.grade as outcome_grade,
 	wpg.count::decimal as amount_outcomes,
 	case
-		when replace(ii2.name, 'StatTrak� ', '') != ii2.name then 'StatTrak'
+		when replace(ii2.name, 'StatTrak™ ', '') != ii2.name then 'StatTrak'
 		else 'Normal'
 	end as type,
-	REGEXP_REPLACE(replace(ii2.name, 'StatTrak� ', ''), ' [(].*[)]', '') as outcome_name,
+	REGEXP_REPLACE(replace(ii2.name, 'StatTrak™ ', ''), ' [(].*[)]', '') as outcome_name,
 	iw2.max_wear -iw2.min_wear as outcome_range,
 	iw2.min_wear as outcome_min
 from
