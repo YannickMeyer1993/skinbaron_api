@@ -29,5 +29,5 @@ inner join steam_item_sale.item_informations ii2 on
 	and ii2.collection = wpg.collection
 	and ii2."name" not like 'Souvenir%'
 inner join steam_item_sale.item_wears iw2 on
-	iw2."name" = REGEXP_REPLACE(replace(ii.name, 'StatTrak� ', ''), ' [(].*[)]', '');
+	iw2."name" = REGEXP_REPLACE(replace(ii.name, 'StatTrak™ ', ''), ' [(].*[)]', '');
 
