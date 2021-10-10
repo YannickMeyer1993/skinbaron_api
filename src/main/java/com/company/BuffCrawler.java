@@ -74,7 +74,7 @@ public class BuffCrawler {
 
     }
 
-    private static void getBuffItemNoExterior(Connection conn, int id) throws SQLException, InterruptedException, IOException, DocumentException {
+    static void getBuffItemNoExterior(Connection conn, int id) throws SQLException, InterruptedException, IOException, DocumentException {
 
         String SQLUpsert = "WITH\n" +
                 "    to_be_upserted (id,price_euro,timestamp,has_enterior,name) AS (\n" +
@@ -161,7 +161,7 @@ public class BuffCrawler {
         conn.commit();
     }
 
-    private static void getBuffItem(Connection conn, int id) throws IOException, InterruptedException, DocumentException, SQLException, IndexOutOfBoundsException {
+    static void getBuffItem(Connection conn, int id) throws IOException, InterruptedException, DocumentException, SQLException, IndexOutOfBoundsException {
 
         String SQLUpsert = "WITH\n" +
                 "    to_be_upserted (id,price_euro,timestamp,has_enterior,name) AS (\n" +
