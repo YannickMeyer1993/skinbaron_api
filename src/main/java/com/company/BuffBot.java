@@ -27,10 +27,7 @@ public class BuffBot {
         conn.setAutoCommit(false);
         System.out.println("Successfully Connected.");
 
-        String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
-        Double balance = getBalance(secret, false, conn);
-
-        System.out.println("Bot is started...");
+        System.out.println("BuffBot is started...");
         Statement stmt = conn.createStatement();
         ResultSet rs = stmt.executeQuery("select  buff_preis_ok,steam_preis_ok,buff_preis,steam_preis, name,id from steam_item_sale.auf_buff_kaufbare_skins order by rati desc");
 
