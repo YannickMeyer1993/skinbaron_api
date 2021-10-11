@@ -1,9 +1,0 @@
-y=range * x + min=(max-min)*x+min
-
-x=average float value of the 10 skins used
-
-y=float value of the skins received
-
-min= minimum of the FV range of the skin received
-
-range=max-min
