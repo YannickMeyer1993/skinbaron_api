@@ -8,20 +8,14 @@ import static com.company.SkinbaronAPI.getSales;
 import static com.company.SkinbaronAPI.getSkinbaronInventory;
 import static com.company.SteamCrawler.getItemsfromInventory;
 import static com.company.SteamCrawler.getStorageItems;
+import static com.company.common.getConnection;
 import static com.company.common.readPasswordFromFile;
 
 public class Inventory {
 
     public static void main(String[] args) throws Exception {
 
-        String url = "jdbc:postgresql://localhost/postgres";
-        Properties props = new Properties();
-        props.setProperty("user", "postgres");
-        String password = readPasswordFromFile("C:/passwords/postgres.txt");
-        props.setProperty("password", password);
-        Connection conn = DriverManager.getConnection(url, props);
-        conn.setAutoCommit(false);
-        System.out.println("Successfully Connected.");
+        Connection conn = getConnection();
 
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 

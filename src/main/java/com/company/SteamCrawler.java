@@ -28,6 +28,7 @@ import java.util.Properties;
 import java.util.stream.IntStream;
 
 import static com.company.SteamItemPriceChecker.getSteamPriceForGivenName;
+import static com.company.common.getConnection;
 import static com.company.common.readPasswordFromFile;
 
 
@@ -46,14 +47,7 @@ public class SteamCrawler {
 
     public static void main(String[] args) throws Exception {
 
-        String url = "jdbc:postgresql://localhost/postgres";
-        Properties props = new Properties();
-        props.setProperty("user", "postgres");
-        String password = readPasswordFromFile("C:/passwords/postgres.txt");
-        props.setProperty("password", password);
-        Connection conn = DriverManager.getConnection(url, props);
-        conn.setAutoCommit(false);
-        System.out.println("Successfully Connected.");
+        Connection conn = getConnection();
 
         Statement stmt = conn.createStatement();
         ResultSet rs = stmt.executeQuery("select highest_iteration_steam+1 as iteration from steam_item_sale.overview where \"DATE\" = CURRENT_DATE;");
@@ -181,7 +175,7 @@ public class SteamCrawler {
             java.text.DecimalFormat df = new java.text.DecimalFormat("0.00");
             df.setRoundingMode(java.math.RoundingMode.HALF_UP);
 
-            Double price_eur;
+            double price_eur;
 
             if (1 == currencyId) {
 
@@ -254,8 +248,8 @@ public class SteamCrawler {
 
         JSONObject result_json = (JSONObject) new JSONTokener(result).nextValue();
 
-        HashMap<String, Integer> assets_map = new HashMap();
-        HashMap<String, String> descriptions_map = new HashMap();
+        HashMap<String, Integer> assets_map = new HashMap<>();
+        HashMap<String, String> descriptions_map = new HashMap<>();
 
         JSONArray assets_array = result_json.getJSONArray("assets");
         JSONArray descriptions_array = result_json.getJSONArray("descriptions");
@@ -278,7 +272,7 @@ public class SteamCrawler {
         String SQLInsert = "INSERT INTO steam_item_sale.inventory(inv_type,name,still_there,amount) "
                 + "VALUES('steam',?,true,?)";
 
-        HashMap<String, Integer> map = new HashMap();
+        HashMap<String, Integer> map = new HashMap<>();
 
         for (String classid : descriptions_map.keySet()) {
             String name = descriptions_map.get(classid);

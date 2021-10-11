@@ -6,16 +6,16 @@ import org.dom4j.DocumentException;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import static com.company.Deployment.crawItemInformations;
-import static com.company.Deployment.crawWearValues;
+import static com.company.Deployment.crawlItemInformations;
+import static com.company.Deployment.crawlWearValues;
 
 public class DeploymentTest extends TestCase {
 
     public void testDeployment() throws IOException, InterruptedException, SQLException {
-        crawItemInformations();
+        crawlItemInformations();
     }
 
-    public void testCrawWearValues() throws SQLException, DocumentException, IOException, InterruptedException {
-        crawWearValues();
+    public void testCrawlWearValues() throws SQLException, DocumentException, IOException, InterruptedException {
+        crawlWearValues();
     }
 }

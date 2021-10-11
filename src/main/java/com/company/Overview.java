@@ -8,6 +8,7 @@ import java.util.Scanner;
 import static com.company.SkinbaronAPI.getBalance;
 import static com.company.SteamCrawler.setRowInOverviewTable;
 import static com.company.SteamItemPriceChecker.getSteamPriceForGivenName;
+import static com.company.common.getConnection;
 import static com.company.common.readPasswordFromFile;
 import static java.lang.Math.min;
 
@@ -29,14 +30,7 @@ public class Overview {
         System.out.println("Enter Steam Sales Value: ");
         steam_balance = sc.nextDouble();
 
-        String url = "jdbc:postgresql://localhost/postgres";
-        Properties props = new Properties();
-        props.setProperty("user", "postgres");
-        String password = readPasswordFromFile("C:/passwords/postgres.txt");
-        props.setProperty("password", password);
-        Connection conn = DriverManager.getConnection(url, props);
-        conn.setAutoCommit(false);
-        System.out.println("Successfully Connected.");
+        Connection conn = getConnection();
 
         Statement stmt = conn.createStatement();
         ResultSet rs = stmt.executeQuery("select highest_iteration_steam+1 as iteration from steam_item_sale.overview where \"DATE\" = CURRENT_DATE;");

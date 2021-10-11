@@ -7,8 +7,10 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 import static com.company.SkinbaronAPI.getBalance;
+import static com.company.common.getConnection;
 import static com.company.common.readPasswordFromFile;
 
+@SuppressWarnings("BusyWait")
 public class SkinbaronLiveCheck {
     private static Connection conn;
 
@@ -20,14 +22,8 @@ public class SkinbaronLiveCheck {
 
         while (true) {
             try {
-                String url = "jdbc:postgresql://localhost/postgres";
-                Properties props = new Properties();
-                props.setProperty("user", "postgres");
-                String password = readPasswordFromFile("C:/passwords/postgres.txt");
-                props.setProperty("password", password);
-                conn = DriverManager.getConnection(url, props);
-                conn.setAutoCommit(false);
-                System.out.println("Successfully Connected.");
+                Connection conn = getConnection();
+
                 System.out.println("Waiting for " + Math.pow(2, wait_counter) + " seconds");
                 Thread.sleep((long) (Math.pow(2, wait_counter) * 1000));
                 getBalance(secret,false,conn);

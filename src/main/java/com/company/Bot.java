@@ -7,6 +7,7 @@ import java.util.Scanner;
 import static com.company.SkinbaronAPI.buyItem;
 import static com.company.SkinbaronAPI.getBalance;
 import static com.company.SteamItemPriceChecker.getSteamPriceForGivenName;
+import static com.company.common.getConnection;
 import static com.company.common.readPasswordFromFile;
 import static java.lang.Math.min;
 
@@ -16,14 +17,7 @@ public class Bot {
 
     public static void main(String[] args) throws Exception {
 
-        String url = "jdbc:postgresql://localhost/postgres";
-        Properties props = new Properties();
-        props.setProperty("user", "postgres");
-        String password = readPasswordFromFile("C:/passwords/postgres.txt");
-        props.setProperty("password", password);
-        Connection conn = DriverManager.getConnection(url, props);
-        conn.setAutoCommit(false);
-        System.out.println("Successfully Connected.");
+        Connection conn = getConnection();
 
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
         Double balance = getBalance(secret,false,conn);
@@ -39,8 +33,7 @@ public class Bot {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery("select steam_preis_aktuell,skinbaron_preis,steam_preis, name from steam_item_sale.auf_skinbaron_kaufbare_skins where skinbaron_preis<="+max_price+" order by rati desc");
 
-            while (rs.next())
-            {
+            while (rs.next()) {
                 if (!rs.getBoolean("steam_preis_aktuell")){
                     Double recent_price = getSteamPriceForGivenName(rs.getString("name"),conn);
                     if (recent_price < rs.getDouble("steam_preis")){

@@ -3,13 +3,28 @@ package com.company;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.sql.BatchUpdateException;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 import java.util.Scanner;
 
 public class common {
     public static String readPasswordFromFile(String path) throws FileNotFoundException {
         Scanner sc = new Scanner(new File(path));
         return sc.nextLine();
+    }
+
+    public static Connection getConnection() throws SQLException, FileNotFoundException {
+        String url = "jdbc:postgresql://localhost/postgres";
+        Properties props = new Properties();
+        props.setProperty("user", "postgres");
+        String password = readPasswordFromFile("C:/passwords/postgres.txt");
+        props.setProperty("password", password);
+        Connection conn = DriverManager.getConnection(url, props);
+        conn.setAutoCommit(false);
+        System.out.println("Successfully Connected.");
+        return conn;
     }
 
     public static void printSQLException(SQLException ex) {
@@ -37,8 +52,8 @@ public class common {
         System.err.print("Update counts:  ");
         int[] updateCounts = b.getUpdateCounts();
 
-        for (int i = 0; i < updateCounts.length; i++) {
-            System.err.print(updateCounts[i] + "   ");
+        for (int updateCount : updateCounts) {
+            System.err.print(updateCount + "   ");
         }
     }
 }

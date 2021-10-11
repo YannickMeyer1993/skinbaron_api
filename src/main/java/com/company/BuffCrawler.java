@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import static com.company.common.getConnection;
 import static com.company.common.readPasswordFromFile;
 
 public class BuffCrawler {
@@ -34,14 +35,8 @@ public class BuffCrawler {
     }
 
     public static void main(String[] args) throws IOException, SQLException, DocumentException, InterruptedException {
-        String url = "jdbc:postgresql://localhost/postgres";
-        Properties props = new Properties();
-        props.setProperty("user", "postgres");
-        String password = readPasswordFromFile("C:/passwords/postgres.txt");
-        props.setProperty("password", password);
-        Connection conn = DriverManager.getConnection(url, props);
-        conn.setAutoCommit(false);
-        System.out.println("Successfully Connected.");
+
+        Connection conn = getConnection();
 
         Statement stmt = conn.createStatement();
         ResultSet rs = stmt.executeQuery("select id from (select\n" +

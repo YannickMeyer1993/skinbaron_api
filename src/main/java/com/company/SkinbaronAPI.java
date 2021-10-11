@@ -23,6 +23,7 @@ import java.util.Properties;
 import java.util.stream.IntStream;
 
 import static com.company.SteamCrawler.setRowInOverviewTable;
+import static com.company.common.getConnection;
 import static com.company.common.readPasswordFromFile;
 
 public class SkinbaronAPI {
@@ -68,14 +69,7 @@ public class SkinbaronAPI {
     public static int writeSoldItems(String secret) throws Exception {
         String queryId = "";
 
-        String url = "jdbc:postgresql://localhost/postgres";
-        Properties props = new Properties();
-        props.setProperty("user", "postgres");
-        String password = readPasswordFromFile("C:/passwords/postgres.txt");
-        props.setProperty("password", password);
-        Connection conn = DriverManager.getConnection(url, props);
-        conn.setAutoCommit(false);
-        System.out.println("Successfully Connected.");
+        Connection conn = getConnection();
 
         int counter = 0;
         while (true) {
@@ -386,14 +380,7 @@ public class SkinbaronAPI {
     }
 
     public static void main(String[] args) throws Exception {
-        String url = "jdbc:postgresql://localhost/postgres";
-        Properties props = new Properties();
-        props.setProperty("user", "postgres");
-        String password = readPasswordFromFile("C:/passwords/postgres.txt");
-        props.setProperty("password", password);
-        Connection conn = DriverManager.getConnection(url, props);
-        conn.setAutoCommit(false);
-        System.out.println("Successfully Connected.");
+        Connection conn = getConnection();
 
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 
@@ -443,7 +430,7 @@ public class SkinbaronAPI {
         String SQLInsert = "INSERT INTO steam_item_sale.inventory(inv_type,name,still_there,amount) "
                 + "VALUES('skinbaron',?,true,?)";
 
-        HashMap<String, Integer> map = new HashMap();
+        HashMap<String, Integer> map = new HashMap<>();
 
         for (Object o : result_array) {
             if (o instanceof JSONObject) {
@@ -488,7 +475,7 @@ public class SkinbaronAPI {
                         .setCookieSpec(CookieSpecs.STANDARD).build())
                 .build();
 
-        HashMap<String, Integer> map = new HashMap();
+        HashMap<String, Integer> map = new HashMap<>();
 
         while (true) {
             String jsonInputString = "{\"apikey\": \"" + secret + "\",\"type\":2,\"appid\": 730,\"items_per_page\": 50" + (id == null ? "" : ",\"after_saleid\":\"" + id + "\"") + "}";

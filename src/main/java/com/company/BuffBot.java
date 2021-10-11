@@ -10,6 +10,7 @@ import static com.company.BuffCrawler.getBuffItem;
 import static com.company.BuffCrawler.getBuffItemNoExterior;
 import static com.company.SkinbaronAPI.getBalance;
 import static com.company.SteamItemPriceChecker.getSteamPriceForGivenName;
+import static com.company.common.getConnection;
 import static com.company.common.readPasswordFromFile;
 
 public class BuffBot {
@@ -18,14 +19,7 @@ public class BuffBot {
 
     public static void main(String[] args) throws Exception {
 
-        String url = "jdbc:postgresql://localhost/postgres";
-        Properties props = new Properties();
-        props.setProperty("user", "postgres");
-        String password = readPasswordFromFile("C:/passwords/postgres.txt");
-        props.setProperty("password", password);
-        Connection conn = DriverManager.getConnection(url, props);
-        conn.setAutoCommit(false);
-        System.out.println("Successfully Connected.");
+        Connection conn = getConnection();
 
         System.out.println("BuffBot is started...");
         Statement stmt = conn.createStatement();

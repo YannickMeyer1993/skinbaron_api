@@ -5,39 +5,26 @@ import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.sun.applet2.AppletParameters;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
-import org.jetbrains.annotations.NotNull;
-
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.sql.*;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.logging.Level;
 
-import static com.company.common.printBatchUpdateException;
-import static com.company.common.readPasswordFromFile;
+import static com.company.common.*;
 
 public class Deployment {
 
-    private static Map<String,  String[]> map = new HashMap<String, String[]>();
-    private static Map<String,  String[]> mapWears = new HashMap<String, String[]>();
+    private static Map<String,  String[]> map = new HashMap<>();
+    private static Map<String,  String[]> mapWears = new HashMap<>();
     private static int max_iteration = 20000;
 
-    public static void crawItemInformations() throws IOException, InterruptedException, SQLException {
+    public static void crawlItemInformations() throws IOException, InterruptedException, SQLException {
 
-        String connstring = "jdbc:postgresql://localhost/postgres";
-        Properties props = new Properties();
-        props.setProperty("user", "postgres");
-        String password = readPasswordFromFile("C:/passwords/postgres.txt");
-        props.setProperty("password", password);
-        Connection conn = DriverManager.getConnection(connstring, props);
-        conn.setAutoCommit(false);
-        System.out.println("Successfully Connected.");
+        Connection conn = getConnection();
 
         Statement st = conn.createStatement();
         st.execute("TRUNCATE TABLE steam_item_sale.item_informations");
@@ -65,7 +52,7 @@ public class Deployment {
 
             String name = item.getFirstChild().asNormalizedText();
 
-            if ("".equals(name) || name.indexOf("Souvenir Souvenir")!=-1 || name.indexOf("Sealed Graffiti")!=-1)
+            if ("".equals(name) || name.contains("Souvenir Souvenir") || name.contains("Sealed Graffiti"))
             {
                 continue;
             }
@@ -86,24 +73,24 @@ public class Deployment {
                 continue;
             }
 
-            if (name.indexOf("StatTrak")!=-1)
+            if (name.contains("StatTrak"))
             {
                 name = name.replace("StatTrak","StatTrak\u2122");
             }
 
-            if (name.indexOf("/")!=-1)
+            if (name.contains("/"))
             {
                 name = name.replace("/","-");
             }
 
             //Knife
-            if ("Covert".equals(quality)&&(weapon.indexOf("Knife")!=-1||weapon.indexOf("Bayonet")!=-1||weapon.indexOf("Shadow Daggers")!=-1||weapon.indexOf("Karambit")!=-1||"".equals(weapon)))
+            if ("Covert".equals(quality)&&(weapon.contains("Knife") || weapon.contains("Bayonet") || weapon.contains("Shadow Daggers") || weapon.contains("Karambit") ||"".equals(weapon)))
             {
                 name = "\u2605 "+name;
             }
 
             //Gloves
-            if (name.indexOf("Gloves")!=-1 || name.indexOf("Hand Wraps")!=-1)
+            if (name.contains("Gloves") || name.contains("Hand Wraps"))
             {
                 name = "\u2605 "+name;
             }
@@ -188,18 +175,11 @@ public class Deployment {
 
     }
 
-    public static void crawWearValues() throws IOException, SQLException, InterruptedException, DocumentException {
+    public static void crawlWearValues() throws IOException, SQLException, InterruptedException, DocumentException {
         String SQLinsert = "INSERT INTO steam_item_sale.item_wears(name,id,min_wear,max_wear) "
                 + "VALUES(?,?,?,?)";
 
-        String connstring = "jdbc:postgresql://localhost/postgres";
-        Properties props = new Properties();
-        props.setProperty("user", "postgres");
-        String password = readPasswordFromFile("C:/passwords/postgres.txt");
-        props.setProperty("password", password);
-        Connection conn = DriverManager.getConnection(connstring, props);
-        conn.setAutoCommit(false);
-        System.out.println("Successfully Connected.");
+        Connection conn = getConnection();
 
         //TODO
         Collection<Integer> iterators = new HashSet<>();
@@ -216,7 +196,7 @@ public class Deployment {
         while(rs.next()){
             iterators.remove(rs.getInt("id"));
             System.out.println(rs.getInt("id"));
-        };
+        }
 
         java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF);
 
@@ -232,7 +212,7 @@ public class Deployment {
 
             count++;
             try{
-                String url = "https://csgostash.com/skin/"+((Integer) i);
+                String url = "https://csgostash.com/skin/"+ i;
                 com.gargoylesoftware.htmlunit.html.HtmlPage page = webClient.getPage(url);
 
                 Thread.sleep(1000);
@@ -243,8 +223,8 @@ public class Deployment {
                 List<com.gargoylesoftware.htmlunit.html.DomElement> Items_name = page.getByXPath("//*[contains(@class, 'img-responsive center-block main-skin-img margin-top-sm margin-bot-sm')]");
 
                 try {
-                    String xml_min = ((List<DomElement>) Items_min).get(0).asXml();
-                    String xml_max = ((List<DomElement>) Items_max).get(0).asXml();
+                    String xml_min = Items_min.get(0).asXml();
+                    String xml_max = Items_max.get(0).asXml();
 
                     Document document_min = new SAXReader().read(new StringReader(xml_min));
                     String min = document_min.valueOf("/div/@data-wearmin");
@@ -256,7 +236,7 @@ public class Deployment {
 
                     String[] infos = new String[3];
                     //put in map
-                    infos[0] = ""+((Integer) i);
+                    infos[0] = ""+ i;
                     infos[1] = min;
                     infos[2] = max;
                     mapWears.put(name,infos);
@@ -264,16 +244,14 @@ public class Deployment {
                 catch (IndexOutOfBoundsException e){
                     String[] infos = new String[3];
                     //put in map
-                    infos[0] = ""+((Integer) i);
+                    infos[0] = ""+ i;
                     infos[1] = "0";
                     infos[2] = "1";
                     mapWears.put(name,infos);
                 }
             }
             catch (FailingHttpStatusCodeException e){
-                if ("404".equals(e.getStatusCode())){
-                    continue;
-                }
+                e.getStatusCode();
             }
 
             try (PreparedStatement pstmt = conn.prepareStatement(SQLinsert, Statement.RETURN_GENERATED_KEYS)) {
