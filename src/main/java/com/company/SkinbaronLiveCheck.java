@@ -27,11 +27,12 @@ public class SkinbaronLiveCheck {
                 System.out.println("Waiting for " + Math.pow(2, wait_counter) + " seconds");
                 Thread.sleep((long) (Math.pow(2, wait_counter) * 1000));
                 getBalance(secret,false,conn);
+                conn.close();
                 break;
             } catch (Exception e) {
                 System.out.println("Kaputt!!!!");
                 wait_counter++;
-                conn.close();
+
             }
 
         }
