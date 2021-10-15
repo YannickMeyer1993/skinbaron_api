@@ -358,7 +358,12 @@ public class SteamCrawler {
 
                     if ("Sticker | Navi 2020".equals(item_name)) {
                         item_name = "Sticker | Natus Vincere | 2020 RMR";
+                    };
+
+                    if ("Operation Breakout".equals(item_name)) {
+                        item_name = "Operation Breakout Weapon Case";
                     }
+
 
                     Statement stmt = conn.createStatement();
                     ResultSet rs = stmt.executeQuery("select name from steam_item_sale.item_informations");
