@@ -30,10 +30,10 @@ public class SteamItemPriceChecker {
         }
     }
 
-    public static Double getSteamPriceForGivenName(String hash_name, Connection conn) throws Exception {
+    public static double getSteamPriceForGivenName(String hash_name, Connection conn) throws Exception {
 
-        Double return_price = 0.0;
-        Boolean item_found = false;
+        double return_price = 0.0;
+        boolean item_found = false;
 
         String SQLinsert = "INSERT INTO steam_item_sale.steam_item_prices(name,quantity,price_euro) "
                 + "VALUES(?,?,?)";
@@ -57,7 +57,7 @@ public class SteamItemPriceChecker {
 
                 String name = document.valueOf("/div/@data-hash-name");
                 int quantity = Integer.parseInt(document.valueOf("/div/div/div/span/span/@data-qty"));
-                Double price = Double.parseDouble(document.valueOf("/div/div/div/span/span/@data-price"));
+                double price = Double.parseDouble(document.valueOf("/div/div/div/span/span/@data-price"));
                 int currency = Integer.parseInt(document.valueOf("/div/div/div/span/span/@data-currency"));
 
                 //Code erstellt anhand des Eingabe- und Ausgabeschemas
@@ -69,7 +69,7 @@ public class SteamItemPriceChecker {
                 java.text.DecimalFormat df = new java.text.DecimalFormat("0.00");
                 df.setRoundingMode(java.math.RoundingMode.HALF_DOWN);
 
-                Double price_euro;
+                double price_euro;
                 if (1 == currency) {
                     price_euro = Double.parseDouble(df.format(conversionFromUSDtoEUR * price / 100).replace(",", "."));
                 } else if (3 == currency) {
@@ -105,7 +105,7 @@ public class SteamItemPriceChecker {
         }
 
         System.out.println("Item \""+hash_name+"\" costs "+return_price+" Euro.");
-        Thread.sleep(20*1000);
+        Thread.sleep((long) 20*1000);
         return return_price;
     }
 }

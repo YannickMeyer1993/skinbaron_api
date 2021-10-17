@@ -79,6 +79,9 @@ public class SteamCrawler {
                     iteration++;
 
                 }
+            } catch (InterruptedException e) {
+                System.out.println("Program got interrupted.");
+                return;
             } catch (Exception e) {
                 wait_counter++;
             }
@@ -358,7 +361,7 @@ public class SteamCrawler {
 
                     if ("Sticker | Navi 2020".equals(item_name)) {
                         item_name = "Sticker | Natus Vincere | 2020 RMR";
-                    };
+                    }
 
                     if ("Operation Breakout".equals(item_name)) {
                         item_name = "Operation Breakout Weapon Case";

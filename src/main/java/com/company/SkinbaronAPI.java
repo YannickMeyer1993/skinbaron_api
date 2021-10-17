@@ -397,7 +397,7 @@ public class SkinbaronAPI {
             }
             id = "";
             //noinspection BusyWait
-            Thread.sleep(5 * 1000);
+            Thread.sleep((long) 5 * 1000);
             System.out.println("------------------------------------------------------------------");
             System.out.println("New Search started.");
             System.out.println("------------------------------------------------------------------");

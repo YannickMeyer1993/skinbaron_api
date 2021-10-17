@@ -29,7 +29,11 @@ public class SkinbaronLiveCheck {
             } catch (PSQLException e) {
                 System.out.println("Postgres is down.");
                 break;
-            } catch (Exception e) {
+            } catch (InterruptedException e) {
+                System.out.println("Program got interrupted.");
+                break;
+            }
+            catch (Exception e) {
                 System.out.println("Skibaron APIs are still down.");
                 wait_counter++;
 
