@@ -1,0 +1,1 @@
+"C:\Program Files\sonarqube\bin\sonar-scanner.bat" -D"sonar.projectKey=test1" -D"sonar.sources=." -D"sonar.host.url=http://localhost:9000" -D"sonar.login=388c4481aa85f651066cb3eacfe3b46c7ac3c355"
