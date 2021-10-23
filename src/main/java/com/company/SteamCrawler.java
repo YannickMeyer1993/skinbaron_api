@@ -237,7 +237,7 @@ public class SteamCrawler {
         rs.close();
     }
 
-    public static void getItemsfromInventory(Connection conn, String inventoryurl) throws Exception {
+    public static void getItemsfromInventory(Connection conn, String inventoryurl, String type) throws Exception {
 
         HttpGet httpGet = new HttpGet(inventoryurl);
 
@@ -273,7 +273,7 @@ public class SteamCrawler {
         }
 
         String SQLInsert = "INSERT INTO steam_item_sale.inventory(inv_type,name,still_there,amount) "
-                + "VALUES('steam',?,true,?)";
+                + "VALUES(?,?,true,?)";
 
         HashMap<String, Integer> map = new HashMap<>();
 
@@ -293,8 +293,9 @@ public class SteamCrawler {
         try (PreparedStatement pstmt = conn.prepareStatement(SQLInsert, Statement.RETURN_GENERATED_KEYS)) {
 
             for (String key : map.keySet()) {
-                pstmt.setString(1, key);
-                pstmt.setInt(2, map.get(key));
+                pstmt.setString(1,type);
+                pstmt.setString(2, key);
+                pstmt.setInt(3, map.get(key));
                 pstmt.addBatch();
             }
 
