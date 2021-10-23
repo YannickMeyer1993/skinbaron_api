@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import static com.company.SkinbaronAPI.buyItem;
 import static com.company.SkinbaronAPI.getBalance;
 import static com.company.common.getConnection;
 import static com.company.common.readPasswordFromFile;
@@ -24,7 +25,7 @@ public class SkinbaronLiveCheck {
 
                 System.out.println("Waiting for " + Math.pow(2, wait_counter) + " seconds");
                 Thread.sleep((long) (Math.pow(2, wait_counter) * 1000));
-                getBalance(secret,false,conn);
+                buyItem(conn, secret, "a52eca5d-6beb-4cf8-8173-a1eae90cbb14", 0.09);
                 break;
             } catch (PSQLException e) {
                 System.out.println("Postgres is down.");

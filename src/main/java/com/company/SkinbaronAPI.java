@@ -173,7 +173,12 @@ public class SkinbaronAPI {
         HttpResponse response = client.execute(httpPost);
         String result = EntityUtils.toString(response.getEntity());
 
-        JSONObject resultJson = (JSONObject) new JSONTokener(result).nextValue();
+        JSONObject resultJson;
+        try {resultJson = (JSONObject) new JSONTokener(result).nextValue();}
+        catch (ClassCastException exp){
+            System.out.println(result);
+            throw new ClassCastException();
+        }
 
         if ( resultJson.has("generalErrors")) {
             System.out.println( resultJson.get("generalErrors").toString());
