@@ -28,7 +28,7 @@ public class Overview {
         System.out.println("Enter Steam Balance: ");
         steam_balance = sc.nextDouble();
         System.out.println("Enter Steam Sales Value: ");
-        steam_balance = sc.nextDouble();
+        steam_sales_value = sc.nextDouble();
 
         Connection conn = getConnection();
 
@@ -95,7 +95,7 @@ public class Overview {
                 "                ,steam_balance = ?::numeric\n" +
                 "                ,steam_open_sales = ?::numeric\n" +
                 "        WHERE\n" +
-                "            s.\"DATE\" = '2021-09-26'";
+                "            s.\"DATE\" = CURRENT_DATE";
 
 
         Statement stmt3 = conn.createStatement();
@@ -111,13 +111,19 @@ public class Overview {
             pstmt.setDouble(3, steam_inv_value);
             pstmt.setDouble(4, skinbaron_inv_value);
             pstmt.setDouble(5, sum_rare_items);
-            pstmt.setDouble(5, steam_balance);
-            pstmt.setDouble(5, steam_sales_value);
+            pstmt.setDouble(6, steam_balance);
+            pstmt.setDouble(7, steam_sales_value);
 
+            pstmt.addBatch();
+
+            System.out.println(pstmt.toString());
             int[] updateCounts = pstmt.executeBatch();
             System.out.println(updateCounts.length + " were inserted!");
-
             conn.commit();
+            if (updateCounts.length==0){
+                throw new IllegalStateException("Nothing was inserted into table OVERVIEW!");
+            }
+
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
