@@ -212,7 +212,7 @@ public class SteamCrawler {
     public static void updateItemPricesLongNotSeen(Connection conn) throws Exception {
 
         Statement stmt = conn.createStatement();
-        ResultSet rs = stmt.executeQuery("select * from steam_item_sale.steam_most_recent_prices order by \"timestamp\" asc");
+        ResultSet rs = stmt.executeQuery("select * from steam_item_sale.steam_most_recent_prices where name not like 'Souvenir%' order by \"timestamp\" asc");
 
         String name;
         while (rs.next()) {
