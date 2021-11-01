@@ -245,53 +245,18 @@ public class SteamCrawler {
                 .build();
 
         HttpResponse response = client.execute(httpGet);
-        String result = EntityUtils.toString(response.getEntity());
 
-        JSONObject result_json = (JSONObject) new JSONTokener(result).nextValue();
-
-        HashMap<String, Integer> assets_map = new HashMap<>();
-        HashMap<String, String> descriptions_map = new HashMap<>();
-
-        JSONArray assets_array = result_json.getJSONArray("assets");
-        JSONArray descriptions_array = result_json.getJSONArray("descriptions");
-
-
-        for (Object jo : assets_array) {
-            if (jo instanceof JSONObject) {
-                assets_map.put(((JSONObject) jo).getString("classid"), ((JSONObject) jo).getInt("amount"));
-            }
-        }
-
-        for (Object jo : descriptions_array) {
-            if (jo instanceof JSONObject) {
-                if (((JSONObject) jo).getInt("marketable") == 1) {
-                    descriptions_map.put(((JSONObject) jo).getString("classid"), ((JSONObject) jo).getString("market_hash_name"));
-                }
-            }
-        }
+        String resultJSON = EntityUtils.toString(response.getEntity());
 
         String SQLInsert = "INSERT INTO steam_item_sale.inventory(inv_type,name,still_there,amount) "
                 + "VALUES(?,?,true,?)";
 
-        HashMap<String, Integer> map = new HashMap<>();
-
-        for (String classid : descriptions_map.keySet()) {
-            String name = descriptions_map.get(classid);
-            if (!assets_map.containsKey(classid)) {
-                continue;
-            }
-            int amount = assets_map.get(classid);
-            if (!map.containsKey(name)) {
-                map.put(name, 1);
-            } else {
-                map.put(name, map.get(name) + 1);
-            }
-        }
+        HashMap<String, Integer> map = getItemsFromSteamHTTP(resultJSON);
 
         try (PreparedStatement pstmt = conn.prepareStatement(SQLInsert, Statement.RETURN_GENERATED_KEYS)) {
 
             for (String key : map.keySet()) {
-                pstmt.setString(1,type);
+                pstmt.setString(1, type);
                 pstmt.setString(2, key);
                 pstmt.setInt(3, map.get(key));
                 pstmt.addBatch();
@@ -340,11 +305,11 @@ public class SteamCrawler {
                     String amount_string = ((JSONObject) jo).getJSONArray("descriptions").getJSONObject(2).getString("value");
                     int amount = Integer.parseInt(amount_string.split(" ")[3]);
 
-                    if (amount==0){
+                    if (amount == 0) {
                         continue;
                     }
 
-                    String item_name = ((String)(((JSONObject) jo).getJSONArray("fraudwarnings").get(0))).split("''")[1];
+                    String item_name = ((String) (((JSONObject) jo).getJSONArray("fraudwarnings").get(0))).split("''")[1];
 
                     if ("Broken Fang Case".equals(item_name)) {
                         item_name = "Operation Broken Fang Case";
@@ -372,14 +337,14 @@ public class SteamCrawler {
 
                     List<String> name_list = new ArrayList<>();
 
-                    while (rs.next()){
+                    while (rs.next()) {
                         name_list.add(rs.getString("name"));
                     }
 
                     rs.close();
                     stmt.close();
 
-                    if (!name_list.contains(item_name)){
+                    if (!name_list.contains(item_name)) {
                         continue;
                     }
 
@@ -401,6 +366,51 @@ public class SteamCrawler {
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+    }
+
+
+    public static  HashMap<String, Integer> getItemsFromSteamHTTP(String resultJSON) {
+        JSONObject result_json = (JSONObject) new JSONTokener(resultJSON).nextValue();
+
+        HashMap<String, Integer> assets_map = new HashMap<>();
+        HashMap<String, String> descriptions_map = new HashMap<>();
+
+        JSONArray assets_array = result_json.getJSONArray("assets");
+        JSONArray descriptions_array = result_json.getJSONArray("descriptions");
+
+
+        for (Object jo : assets_array) {
+            if (jo instanceof JSONObject) {
+                String classid = ((JSONObject) jo).getString("classid");
+                if (!assets_map.containsKey(classid)){
+                    assets_map.put(classid,1);
+                } else {
+                    assets_map.put(classid,assets_map.get(classid)+1);
+                }
+            }
+        }
+
+        for (Object jo : descriptions_array) {
+            if (jo instanceof JSONObject) {
+                if (((JSONObject) jo).getInt("marketable") == 1) {
+                    descriptions_map.put(((JSONObject) jo).getString("classid"), ((JSONObject) jo).getString("market_hash_name"));
+                }
+            }
+        }
+
+        HashMap<String, Integer> map = new HashMap<>();
+
+        for (String classid : descriptions_map.keySet()) {
+            String name = descriptions_map.get(classid);
+            if (!assets_map.containsKey(classid)) {
+                continue;
+            }
+            int amount = assets_map.get(classid);
+
+            map.put(name, amount);
+        }
+
+        return map;
     }
 }
 
