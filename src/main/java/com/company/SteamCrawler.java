@@ -24,12 +24,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
 import java.util.stream.IntStream;
 
 import static com.company.SteamItemPriceChecker.getSteamPriceForGivenName;
 import static com.company.common.getConnection;
-import static com.company.common.readPasswordFromFile;
 
 
 public class SteamCrawler {
