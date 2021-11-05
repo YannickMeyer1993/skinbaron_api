@@ -7,3 +7,7 @@ CREATE TABLE steam_item_sale."skinbaron_market_search_results" (
   "timestamp" timestamp NOT NULL DEFAULT now(),
   PRIMARY KEY ("id","price")
 ) ;
+
+create index smsr_name on steam_item_sale.skinbaron_market_search_results (name);
+create index smsr_price on steam_item_sale.skinbaron_market_search_results (price);
+create index smsr_id on steam_item_sale.skinbaron_market_search_results (id);
