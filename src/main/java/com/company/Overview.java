@@ -24,6 +24,7 @@ public class Overview {
 
     public static void main(String[] args) throws Exception {
 
+        System.out.println("Decimal separator is comma!");
         Scanner sc= new Scanner(System.in);    //System.in is a standard input stream
         System.out.println("Enter Steam Balance: ");
         steam_balance = sc.nextDouble();
@@ -116,7 +117,6 @@ public class Overview {
 
             pstmt.addBatch();
 
-            System.out.println(pstmt.toString());
             int[] updateCounts = pstmt.executeBatch();
             System.out.println(updateCounts.length + " were inserted!");
             conn.commit();
