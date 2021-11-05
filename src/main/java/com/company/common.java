@@ -10,16 +10,27 @@ import java.util.Properties;
 import java.util.Scanner;
 
 public class common {
-    public static String readPasswordFromFile(String path) throws FileNotFoundException {
+    public static String readPasswordFromFile(String path) throws Exception {
         Scanner sc = new Scanner(new File(path));
-        return sc.nextLine();
+        while (sc.hasNext()) {
+            String line = sc.next();
+            if (line.indexOf("password") == 0) {
+                return line.split("=")[1];
+            }
+        }
+        throw new Exception("No password within file!");
     }
 
     public static Connection getConnection() throws SQLException, FileNotFoundException {
         String url = "jdbc:postgresql://localhost/postgres";
         Properties props = new Properties();
         props.setProperty("user", "postgres");
-        String password = readPasswordFromFile("C:/passwords/postgres.txt");
+        String password = null;
+        try {
+            password = readPasswordFromFile("C:/passwords/postgres.txt");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         props.setProperty("password", password);
         Connection conn = DriverManager.getConnection(url, props);
         conn.setAutoCommit(false);
