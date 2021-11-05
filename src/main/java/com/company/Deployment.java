@@ -10,9 +10,13 @@ import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.*;
 import java.util.*;
 import java.util.logging.Level;
+import java.util.stream.Stream;
 
 import static com.company.common.*;
 
@@ -277,5 +281,16 @@ public class Deployment {
 
         conn.close();
 
+    }
+
+    public static void executeDDLs(){
+
+        String DDLDirectory = "C:\\Users\\Yanni\\IdeaProjects\\steamsale\\src\\main\\resources\\ddls";
+
+        try (Stream<Path> paths = Files.walk(Paths.get(DDLDirectory))) {
+            paths.forEach(System.out::println);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -3,12 +3,7 @@ package com.company;
 import junit.framework.TestCase;
 import org.json.JSONException;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.sql.*;
-import java.util.Properties;
-
-import static com.company.SteamItemPriceChecker.getSteamPriceForGivenName;
 import static com.company.common.getConnection;
 import static com.company.common.readPasswordFromFile;
 import static com.company.SkinbaronAPI.*;
@@ -43,7 +38,7 @@ public class SkinbaronAPITest extends TestCase {
         assertTrue(getBalance(secret,true,conn)>0);
     }
 
-    public void testSearch1() throws SQLException, IOException, InterruptedException {
+    public void testSearch1() throws Exception {
         Connection conn = getConnection();
 
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
