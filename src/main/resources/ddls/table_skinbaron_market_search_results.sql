@@ -1,4 +1,4 @@
-CREATE TABLE steam_item_sale."skinbaron_market_search_results" (
+CREATE TABLE if not exists steam_item_sale."skinbaron_market_search_results" (
   "id" varchar(100) NOT NULL,
   "name" varchar(100) NOT NULL,
   "price" decimal(12,2) NOT NULL,

@@ -1,4 +1,4 @@
-create table steam_item_sale.skinbaron_pricelist (
+create table if not exists steam_item_sale.skinbaron_pricelist (
 name varchar(100) not null,
 exterior varchar(100) not null,
 is_statTrak boolean,

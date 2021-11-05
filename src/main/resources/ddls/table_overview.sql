@@ -4,7 +4,7 @@
 
 -- DROP TABLE steam_item_sale.overview;
 
-CREATE TABLE steam_item_sale.overview (
+CREATE TABLE if not exists steam_item_sale.overview (
 	"DATE" date NOT NULL DEFAULT now(),
 	highest_iteration_steam int4 NOT NULL DEFAULT 0,
 	steam_balance float8 NOT NULL,
