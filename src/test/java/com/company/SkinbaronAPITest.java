@@ -5,11 +5,10 @@ import org.json.JSONException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Properties;
 
+import static com.company.SteamItemPriceChecker.getSteamPriceForGivenName;
 import static com.company.common.getConnection;
 import static com.company.common.readPasswordFromFile;
 import static com.company.SkinbaronAPI.*;
@@ -67,5 +66,23 @@ public class SkinbaronAPITest extends TestCase {
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 
         buyFromSelect(secret, conn);
+    }
+
+    public void testGetExtendedPricelist() throws Exception {
+        try(Connection conn = getConnection()) {
+
+            String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
+
+            getExtendedPriceList(secret, conn);
+
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("select pl.markethashname, count(*) from steam_item_sale.skinbaron_pricelist pl group by pl.markethashname having count(*) > 1");
+
+            while (rs.next()) {
+                throw new Exception("Primary Key Constraint not met!");
+            }
+
+            rs.close();
+        }
     }
 }

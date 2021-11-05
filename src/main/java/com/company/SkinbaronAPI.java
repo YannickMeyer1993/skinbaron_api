@@ -14,7 +14,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import java.io.IOException;
+import java.io.*;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.HashMap;
@@ -550,6 +551,140 @@ public class SkinbaronAPI {
             }
             rs.close();
         }
+    }
+
+    public static void getExtendedPriceList(String secret, Connection conn) throws Exception {
+
+        Statement st = conn.createStatement();
+        st.execute("TRUNCATE TABLE steam_item_sale.skinbaron_pricelist");
+        st.close();
+
+        String SQLinsert = "INSERT INTO steam_item_sale.skinbaron_pricelist (name, exterior, is_stattrak, is_souvenir, lowestprice, markethashname, minwear, maxwear, imageurl) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ? )";
+
+        LOGGER.info("Skinbaron API getExtendedPriceList has been called.");
+        String jsonInputString = "{\"apikey\": \"" + secret + "\",\"appId\": 730}";
+
+        HttpPost httpPost = new HttpPost("https://api.skinbaron.de/GetExtendedPriceList");
+        httpPost.setHeader("Content.Type", "application/json");
+        httpPost.setHeader("x-requested-with", "XMLHttpRequest");
+        httpPost.setHeader("Accept", "application/json");
+
+        HttpClient client = HttpClients.custom()
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setCookieSpec(CookieSpecs.STANDARD).build())
+                .build();
+
+        HttpEntity entity = new ByteArrayEntity(jsonInputString.getBytes(StandardCharsets.UTF_8));
+        httpPost.setEntity(entity);
+        HttpResponse response = client.execute(httpPost);
+        String result = EntityUtils.toString(response.getEntity());
+
+        System.out.println(result);
+        JSONObject resultJson = (JSONObject) new JSONTokener(result).nextValue();
+
+        if (resultJson.has("message")) {
+            System.out.println("Result: " + resultJson.get("message"));
+            throw new SkinBaronException((String) resultJson.get("message"));
+        }
+
+        JSONArray resultArray = (JSONArray) resultJson.get("map");
+
+        try (PreparedStatement pstmt = conn.prepareStatement(SQLinsert, Statement.RETURN_GENERATED_KEYS)) {
+
+            String name = null;
+            String exterior = null;
+            boolean statTrak = false;
+            boolean souvenir = false;
+            String marketHashName = null;
+            BigDecimal minWear = null;
+            BigDecimal maxWear = null;
+            String imageUrl = null;
+            BigDecimal lowestPrice = null;
+
+            for (Object o : resultArray) {
+                if (o instanceof JSONObject) {
+
+                    name = (String) ((JSONObject) o).get("name");
+
+                    if (((JSONObject) o).has("exterior")) {
+                        exterior = (String) ((JSONObject) o).get("exterior");
+                    }
+                    if (((JSONObject) o).has("statTrak")) {
+                        statTrak = (boolean) ((JSONObject) o).get("statTrak");
+                    }
+                    if (((JSONObject) o).has("souvenir")) {
+                        souvenir = (boolean) ((JSONObject) o).get("souvenir");
+                    }
+                    if (((JSONObject) o).get("lowestPrice") instanceof Integer){
+                        lowestPrice = new BigDecimal ((Integer)((JSONObject) o).get("lowestPrice"));
+                    } else {
+                        lowestPrice = (BigDecimal) ((JSONObject) o).get("lowestPrice");
+                    }
+                    marketHashName = (String) ((JSONObject) o).get("marketHashName");
+
+                    if (((JSONObject) o).has("minWear")) {
+                        minWear = (BigDecimal) ((JSONObject) o).get("minWear");
+                    }
+
+                    if (((JSONObject) o).has("maxWear")) {
+                        maxWear = (BigDecimal) ((JSONObject) o).get("maxWear");
+                    }
+                    imageUrl = (String) ((JSONObject) o).get("imageUrl");
+
+
+                    pstmt.setString(1,name );
+                    pstmt.setString(2,exterior);
+                    pstmt.setBoolean(3,statTrak);
+                    pstmt.setBoolean(4,souvenir);
+                    pstmt.setBigDecimal(5,lowestPrice);
+                    pstmt.setString(6,marketHashName);
+                    pstmt.setBigDecimal(7,minWear);
+                    pstmt.setBigDecimal(8,maxWear);
+                    pstmt.setString(9,imageUrl);
+                    pstmt.addBatch();
+                }
+
+            }
+
+            int[] updateCounts = pstmt.executeBatch();
+            System.out.println(updateCounts.length + " items were inserted!");
+            conn.commit();
+
+        }
+
+    }
+
+    public static void getNewestSales30Days(String secret, Connection conn, String itemName) throws Exception {
+
+        String ItemName = "Aufkleber | device | Atlanta 2017";
+        LOGGER.info("Skinbaron API GetNewestSales30Days has been called.");
+        String jsonInputString = "{\"apikey\": \"" + secret + "\",\"appId\": 730}";
+
+        HttpPost httpPost = new HttpPost("https://api.skinbaron.de/GetNewestSales30Days");
+        httpPost.setHeader("Content.Type", "application/json");
+        httpPost.setHeader("x-requested-with", "XMLHttpRequest");
+        httpPost.setHeader("Accept", "application/json");
+
+        HttpClient client = HttpClients.custom()
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setCookieSpec(CookieSpecs.STANDARD).build())
+                .build();
+
+        HttpEntity entity = new ByteArrayEntity(jsonInputString.getBytes(StandardCharsets.UTF_8));
+        httpPost.setEntity(entity);
+        HttpResponse response = client.execute(httpPost);
+        String result = EntityUtils.toString(response.getEntity());
+
+        System.out.println(result);
+        JSONObject resultJson = (JSONObject) new JSONTokener(result).nextValue();
+
+        if (resultJson.has("message")) {
+            System.out.println("Result: " + resultJson.get("message"));
+            throw new SkinBaronException((String) resultJson.get("message"));
+        }
+
+        //TODO API does not work yet?
+
     }
 }
 
