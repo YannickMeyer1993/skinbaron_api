@@ -2,12 +2,8 @@ package com.company;
 
 import org.postgresql.util.PSQLException;
 
-import java.io.FileNotFoundException;
 import java.sql.Connection;
-import java.sql.SQLException;
-
 import static com.company.SkinbaronAPI.buyItem;
-import static com.company.SkinbaronAPI.getBalance;
 import static com.company.common.getConnection;
 import static com.company.common.readPasswordFromFile;
 

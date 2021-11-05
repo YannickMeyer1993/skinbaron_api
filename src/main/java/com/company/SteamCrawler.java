@@ -108,7 +108,6 @@ public class SteamCrawler {
             pstmt.setInt(8, 0);
             pstmt.setInt(9, 0);
             pstmt.setString(10, "");
-            System.out.println("Steam Scrawling will be started at Iteration 1.");
             int rowsAffected = pstmt.executeUpdate();
         }
     }
