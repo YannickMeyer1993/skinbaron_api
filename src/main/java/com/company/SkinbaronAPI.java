@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
+import java.util.Scanner;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -400,6 +401,11 @@ public class SkinbaronAPI {
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 
         String id = "";
+
+        Scanner sc= new Scanner(System.in);
+        System.out.println("Enter last Id: ");
+        id = sc.nextLine();
+
         //noinspection InfiniteLoopStatement
         while (true) { //infinite times
             while (true) { //as long as there are inserts
