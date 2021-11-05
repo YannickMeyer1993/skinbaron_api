@@ -33,26 +33,25 @@ public class Overview {
 
         Connection conn = getConnection();
 
-        Statement stmt = conn.createStatement();
-        ResultSet rs = stmt.executeQuery("select highest_iteration_steam+1 as iteration from steam_item_sale.overview where \"DATE\" = CURRENT_DATE;");
+        try(Statement stmt = conn.createStatement();ResultSet rs = stmt.executeQuery("select highest_iteration_steam+1 as iteration from steam_item_sale.overview where \"DATE\" = CURRENT_DATE;")) {
 
-        if (!rs.next()) //Start of today
-        {
-            setRowInOverviewTable(conn);
+            if (!rs.next()) //Start of today
+            {
+                setRowInOverviewTable(conn);
+            }
         }
-        rs.close();
-        stmt.close();
 
-        Statement st = conn.createStatement();
-        st.execute("UPDATE steam_item_sale.inventory set still_there = false;");
-        st.close();
+
+        try(Statement st = conn.createStatement()) {
+            st.execute("UPDATE steam_item_sale.inventory set still_there = false;");
+        }
 
         Inventory.main(null);
         getItemPricesInventory(conn);
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
         getBalance(secret,true,conn);
 
-        Statement stmt2 = conn.createStatement();
+        try(Statement stmt2 = conn.createStatement();
         ResultSet rs2 = stmt2.executeQuery("with smurf as \n" +
                 "(select round(cast(x.smurf_inv_wert as numeric),2) as smurf_inv_value from (select t.smurf_inv_wert \n" +
                 "\tfrom ( select sum(si.amount*si.price_per_unit) as smurf_inv_wert\n" +
@@ -72,18 +71,17 @@ public class Overview {
                 "select smurf.*,skinbaron_open_sales.*,steam_inv.*,skinbaron_inv.* from smurf\n" +
                 "inner join skinbaron_inv on 1=1\n" +
                 "inner join steam_inv on 1=1\n" +
-                "inner join skinbaron_open_sales on 1=1");
+                "inner join skinbaron_open_sales on 1=1")) {
 
-        rs2.next();
+            rs2.next();
 
-        smurf_inv_value =            rs2.getDouble("smurf_inv_value");
-        skinbaron_open_sale_wert =   rs2.getDouble("skinbaron_open_sales_value");
-        steam_inv_value =            rs2.getDouble("steam_inv_value");
-        skinbaron_inv_value =        rs2.getDouble("skinbaron_inv_value");
+            smurf_inv_value = rs2.getDouble("smurf_inv_value");
+            skinbaron_open_sale_wert = rs2.getDouble("skinbaron_open_sales_value");
+            steam_inv_value = rs2.getDouble("steam_inv_value");
+            skinbaron_inv_value = rs2.getDouble("skinbaron_inv_value");
 
 
-        rs2.close();
-        stmt2.close();
+        }
 
         String SQLUpdate = "UPDATE\n" +
                 "            steam_item_sale.overview s\n" +
@@ -99,11 +97,10 @@ public class Overview {
                 "            s.\"DATE\" = CURRENT_DATE";
 
 
-        Statement stmt3 = conn.createStatement();
-        ResultSet rs3 = stmt3.executeQuery("select sum(zusatz_wert) as sum_rare_items from steam_item_sale.rare_skins;");
-
-        rs3.next();
-        sum_rare_items = rs3.getDouble("sum_rare_items");
+        try(Statement stmt3 = conn.createStatement();ResultSet rs3 = stmt3.executeQuery("select sum(zusatz_wert) as sum_rare_items from steam_item_sale.rare_skins;")){
+            rs3.next();
+            sum_rare_items = rs3.getDouble("sum_rare_items");
+        }
 
         try (PreparedStatement pstmt = conn.prepareStatement(SQLUpdate, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -132,16 +129,16 @@ public class Overview {
     public static void getItemPricesInventory(Connection conn) throws Exception {
 
         Statement stmt = conn.createStatement();
-        ResultSet rs = stmt.executeQuery("select \n" +
+        try(ResultSet rs = stmt.executeQuery("select \n" +
                 "distinct name from steam_item_sale.inventory_with_prices s\n" +
-                "where (round((date_part('epoch'::text, now() - s.\"timestamp\" ::timestamp with time zone) / (60 * 60 * 24)::double precision)::numeric, 1) > 1)  order by name");
+                "where (round((date_part('epoch'::text, now() - s.\"timestamp\" ::timestamp with time zone) / (60 * 60 * 24)::double precision)::numeric, 1) > 1)  order by name")) {
 
-        String name;
-        while (rs.next()){
-            name = rs.getString("name");
-            getSteamPriceForGivenName(name,conn);
+            String name;
+            while (rs.next()) {
+                name = rs.getString("name");
+                getSteamPriceForGivenName(name, conn);
+            }
+
         }
-
-        rs.close();
     }
 }
