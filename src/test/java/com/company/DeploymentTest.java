@@ -3,6 +3,7 @@ package com.company;
 import junit.framework.TestCase;
 import org.dom4j.DocumentException;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -18,7 +19,7 @@ public class DeploymentTest extends TestCase {
         crawlWearValues();
     }
 
-    public void testExecuteDDLs() {
+    public void testExecuteDDLs() throws Exception {
         executeDDLs();
     }
 }

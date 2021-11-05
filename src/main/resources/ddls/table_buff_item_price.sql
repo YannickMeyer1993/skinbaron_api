@@ -1,4 +1,4 @@
--CREATE TABLE if not exists steam_item_sale.buff_item_prices (
+CREATE TABLE if not exists steam_item_sale.buff_item_prices (
 	price_euro float8 NULL,
 	id int4 NOT NULL,
 	"timestamp" timestamp NULL,

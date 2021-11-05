@@ -8,6 +8,10 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
+import org.postgresql.util.PSQLException;
+
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Files;
@@ -283,14 +287,33 @@ public class Deployment {
 
     }
 
-    public static void executeDDLs(){
+    public static void executeDDLs() throws Exception {
 
+        try(Connection conn = getConnection()){
         String DDLDirectory = "C:\\Users\\Yanni\\IdeaProjects\\steamsale\\src\\main\\resources\\ddls";
 
-        try (Stream<Path> paths = Files.walk(Paths.get(DDLDirectory))) {
-            paths.forEach(System.out::println);
-        } catch (IOException e) {
-            e.printStackTrace();
+        File directoryPath = new File(DDLDirectory);
+        File filesList[] = directoryPath.listFiles();
+        String Sql = "";
+        for (File file : filesList) {
+            System.out.println("Execute file: "+file.getPath());
+            Sql = "";
+            try (Scanner sc = new Scanner(new File(file.getPath()))) {
+                while (sc.hasNext()) {
+                    Sql = Sql + "\n" + sc.nextLine();
+                }
+                try (Statement st = conn.createStatement()) {
+                    st.execute(Sql);
+                    conn.commit();
+                }
+            } catch (PSQLException ex) {
+                System.out.println(Sql);
+                printSQLException(ex);
+                throw new Exception("Something went wrong!");
+
+            }
+        }
+
         }
     }
 }

@@ -8,6 +8,6 @@ CREATE TABLE if not exists steam_item_sale."skinbaron_market_search_results" (
   PRIMARY KEY ("id","price")
 ) ;
 
-create index smsr_name on steam_item_sale.skinbaron_market_search_results (name);
-create index smsr_price on steam_item_sale.skinbaron_market_search_results (price);
-create index smsr_id on steam_item_sale.skinbaron_market_search_results (id);
+create index IF NOT EXISTS smsr_name on steam_item_sale.skinbaron_market_search_results (name);
+create index IF NOT EXISTS smsr_price on steam_item_sale.skinbaron_market_search_results (price);
+create index IF NOT EXISTS smsr_id on steam_item_sale.skinbaron_market_search_results (id);

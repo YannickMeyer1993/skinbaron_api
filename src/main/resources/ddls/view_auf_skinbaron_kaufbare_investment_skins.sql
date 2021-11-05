@@ -1,5 +1,3 @@
--- steam_item_sale.auf_skinbaron_kaufbare_skins_investment_skins source
-
 CREATE OR REPLACE VIEW steam_item_sale.auf_skinbaron_kaufbare_skins_investment_skins
 AS SELECT smsr.id,
     smsr.name,
