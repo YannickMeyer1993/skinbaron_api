@@ -1,32 +1,23 @@
 package com.company;
 
 import junit.framework.TestCase;
-import org.junit.Assert;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.sql.Connection;
-import java.sql.Date;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Properties;
 import java.util.Scanner;
 
 import static com.company.SteamCrawler.*;
 import static com.company.common.getConnection;
-import static com.company.common.readPasswordFromFile;
 
 public class SteamCrawlerTest extends TestCase {
 
     public void testSetIterationCounter() throws FileNotFoundException, SQLException {
-        Connection conn = getConnection();
-
-        System.out.println(Date.valueOf("2000-01-01").toString());
-        setIterationCounter(conn,0);
-
-        conn.close();
-
+        try(Connection conn = getConnection()) {
+            setIterationCounter(conn, 0);
+        }
     }
 
     public void testUpdateItemPricesLongNotSeen() throws Exception {

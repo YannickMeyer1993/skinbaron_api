@@ -28,14 +28,16 @@ public class SkinbaronAPITest extends TestCase {
 
     public void testwriteSoldItems() throws Exception {
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
-        assertEquals(200,writeSoldItems(secret));
+        try(Connection conn = getConnection()) {
+            assertEquals(200, writeSoldItems(conn,secret));
+        }
     }
 
     public void testgetBalance() throws Exception {
-        Connection conn = getConnection();
-
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
-        assertTrue(getBalance(secret,true,conn)>0);
+        try(Connection conn = getConnection()) {
+            assertTrue(getBalance(secret, true, conn) > 0);
+        }
     }
 
     public void testSearch1() throws Exception {
@@ -46,38 +48,31 @@ public class SkinbaronAPITest extends TestCase {
     }
 
     public void testBuyItemNegative() throws Exception {
-        Connection conn = getConnection();
-
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
-        try{buyItem(conn,secret,"6944b89b-dd36-49f5-b9ae-7dea17f5b0a4",0.02);}
-        catch (JSONException e){
-            assertEquals("[\"some offer(s) are already sold\"]",e.getMessage());
+        try(Connection conn = getConnection()) {
+            buyItem(conn, secret, "6944b89b-dd36-49f5-b9ae-7dea17f5b0a4", 0.02);
+        } catch (JSONException e) {
+            assertEquals("[\"some offer(s) are already sold\"]", e.getMessage());
         }
     }
 
     public void testBuyFromSelect() throws Exception {
-        Connection conn = getConnection();
-
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
-
-        buyFromSelect(secret, conn);
+        try(Connection conn = getConnection()) {
+            buyFromSelect(secret, conn);
+        }
     }
 
     public void testGetExtendedPricelist() throws Exception {
-        try(Connection conn = getConnection()) {
+        String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 
-            String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
+        String query ="select pl.markethashname, count(*) from steam_item_sale.skinbaron_pricelist pl group by pl.markethashname having count(*) > 1";
 
+        try(Connection conn = getConnection();Statement stmt = conn.createStatement();ResultSet rs = stmt.executeQuery(query)) {
             getExtendedPriceList(secret, conn);
-
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("select pl.markethashname, count(*) from steam_item_sale.skinbaron_pricelist pl group by pl.markethashname having count(*) > 1");
-
-            while (rs.next()) {
+            if (rs.next()) {
                 throw new Exception("Primary Key Constraint not met!");
             }
-
-            rs.close();
         }
     }
 }

@@ -45,53 +45,49 @@ public class SteamCrawler {
 
     public static void main(String[] args) throws Exception {
 
-        Connection conn = getConnection();
+        String query = "select highest_iteration_steam+1 as iteration from steam_item_sale.overview where \"DATE\" = CURRENT_DATE;";
 
-        Statement stmt = conn.createStatement();
-        ResultSet rs = stmt.executeQuery("select highest_iteration_steam+1 as iteration from steam_item_sale.overview where \"DATE\" = CURRENT_DATE;");
-
-        int iteration;
-        if (!rs.next()) //Start of today
-        {
-            setRowInOverviewTable(conn);
-            iteration = 1;
-        } //End Start of the Day
-        else {
-            iteration = rs.getInt("iteration"); //rs.next() was called above
-        }
-
-        System.out.println("Starte mit Iteration  " + iteration);
-
-        int MAX_ITERATION = 1600;
-        int wait_counter = 3;
-        while (iteration < MAX_ITERATION) {
-            try {
-                System.out.println("Waiting for " + Math.pow(2, wait_counter) + " seconds");
-                Thread.sleep((long) (Math.pow(2, wait_counter) * 1000));
-                Boolean works = getItemsforSteamPageNumber(conn, iteration);
-                setIterationCounter(conn, iteration);
-                conn.commit();
-                wait_counter = 4;
-
-                if (works) {
-                    iteration++;
-
-                }
-            } catch (InterruptedException e) {
-                System.out.println("Program got interrupted.");
-                return;
-            } catch (Exception e) {
-                wait_counter++;
+        try(Connection conn = getConnection();Statement stmt = conn.createStatement();ResultSet rs = stmt.executeQuery(query)) {
+            int iteration;
+            if (!rs.next()) //Start of today
+            {
+                setRowInOverviewTable(conn);
+                iteration = 1;
+            } //End Start of the Day
+            else {
+                iteration = rs.getInt("iteration"); //rs.next() was called above
             }
 
+            System.out.println("Starte mit Iteration  " + iteration);
+
+            int MAX_ITERATION = 1600;
+            int wait_counter = 3;
+            while (iteration < MAX_ITERATION) {
+                try {
+                    System.out.println("Waiting for " + Math.pow(2, wait_counter) + " seconds");
+                    Thread.sleep((long) (Math.pow(2, wait_counter) * 1000));
+                    Boolean works = getItemsforSteamPageNumber(conn, iteration);
+                    setIterationCounter(conn, iteration);
+                    conn.commit();
+                    wait_counter = 4;
+
+                    if (works) {
+                        iteration++;
+
+                    }
+                } catch (InterruptedException e) {
+                    System.out.println("Program got interrupted.");
+                    return;
+                } catch (Exception e) {
+                    wait_counter++;
+                }
+
+            }
+
+            System.out.println("Maximale Iterationsanzahl erreicht. Programm wird beendet.");
+
+            conn.commit();
         }
-
-        System.out.println("Maximale Iterationsanzahl erreicht. Programm wird beendet.");
-
-        rs.close();
-        stmt.close();
-        conn.commit();
-        conn.close();
     }
 
     public static void setRowInOverviewTable(Connection conn) throws SQLException {
@@ -208,30 +204,24 @@ public class SteamCrawler {
 
     public static void updateItemPricesLongNotSeen(Connection conn) throws Exception {
 
-        Statement stmt = conn.createStatement();
-        ResultSet rs = stmt.executeQuery("select * from steam_item_sale.steam_most_recent_prices where name not like 'Souvenir%' order by \"timestamp\" asc");
-
-        String name;
-        while (rs.next()) {
-            name = rs.getString("name");
-            getSteamPriceForGivenName(name, conn);
+        try(Statement stmt = conn.createStatement();ResultSet rs = stmt.executeQuery("select * from steam_item_sale.steam_most_recent_prices where name not like 'Souvenir%' order by \"timestamp\" asc")) {
+            String name;
+            while (rs.next()) {
+                name = rs.getString("name");
+                getSteamPriceForGivenName(name, conn);
+            }
         }
-
-        rs.close();
     }
 
     public static void updateItemPrices0Euro(Connection conn) throws Exception {
 
-        Statement stmt = conn.createStatement();
-        ResultSet rs = stmt.executeQuery("select * from steam_item_sale.steam_most_recent_prices where price_euro = 0");
-
-        String name;
-        while (rs.next()) {
-            name = rs.getString("name");
-            getSteamPriceForGivenName(name, conn);
+        try(Statement stmt = conn.createStatement();ResultSet rs = stmt.executeQuery("select * from steam_item_sale.steam_most_recent_prices where price_euro = 0")) {
+            String name;
+            while (rs.next()) {
+                name = rs.getString("name");
+                getSteamPriceForGivenName(name, conn);
+            }
         }
-
-        rs.close();
     }
 
     public static void getItemsfromInventory(Connection conn, String inventoryurl, String type) throws Exception {
@@ -330,23 +320,17 @@ public class SteamCrawler {
                         item_name = "Operation Breakout Weapon Case";
                     }
 
-
-                    Statement stmt = conn.createStatement();
-                    ResultSet rs = stmt.executeQuery("select name from steam_item_sale.item_informations");
-
                     List<String> name_list = new ArrayList<>();
 
-                    while (rs.next()) {
-                        name_list.add(rs.getString("name"));
+                    try(Statement stmt = conn.createStatement();ResultSet rs = stmt.executeQuery("select name from steam_item_sale.item_informations")) {
+                        while (rs.next()) {
+                            name_list.add(rs.getString("name"));
+                        }
                     }
-
-                    rs.close();
-                    stmt.close();
 
                     if (!name_list.contains(item_name)) {
                         continue;
                     }
-
 
                     pstmt.setString(1, item_name);
                     pstmt.setInt(2, amount);

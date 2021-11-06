@@ -14,10 +14,8 @@ public class OverviewTest extends TestCase {
 
     public void testGetItemPricesInventory() throws Exception {
 
-        Connection conn = getConnection();
-
-        getItemPricesInventory(conn);
-
-        conn.close();
+        try(Connection conn = getConnection()) {
+            getItemPricesInventory(conn);
+        }
     }
 }

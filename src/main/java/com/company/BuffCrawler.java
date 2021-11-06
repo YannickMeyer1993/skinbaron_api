@@ -9,7 +9,7 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
 
-import javax.swing.text.html.StyleSheet;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.RoundingMode;
@@ -17,10 +17,8 @@ import java.sql.*;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import static com.company.common.getConnection;
-import static com.company.common.readPasswordFromFile;
 
 public class BuffCrawler {
 
@@ -36,10 +34,7 @@ public class BuffCrawler {
 
     public static void main(String[] args) throws IOException, SQLException, DocumentException, InterruptedException {
 
-        Connection conn = getConnection();
-
-        Statement stmt = conn.createStatement();
-        ResultSet rs = stmt.executeQuery("select id from (select\n" +
+        String query = "select id from (select\n" +
                 "\trank() over ( partition by weapon_name order by timestamp ) as ranking,\n" +
                 "\tid,\n" +
                 "\ttimestamp,\n" +
@@ -52,21 +47,17 @@ public class BuffCrawler {
                 "order by\n" +
                 "\tweapon_name) sub\n" +
                 "where sub.ranking =1\n" +
-                "order by timestamp");
+                "order by timestamp";
 
-        while (rs.next()) {
-            try {
-                getBuffItem(conn, rs.getInt("id"));
-            } catch (IndexOutOfBoundsException e)
-            {
-                getBuffItemNoExterior(conn, rs.getInt("id"));
+        try(Connection conn = getConnection();Statement stmt = conn.createStatement();ResultSet rs = stmt.executeQuery(query)) {
+            while (rs.next()) {
+                try {
+                    getBuffItem(conn, rs.getInt("id"));
+                } catch (IndexOutOfBoundsException e) {
+                    getBuffItemNoExterior(conn, rs.getInt("id"));
+                }
             }
         }
-
-        rs.close();
-        stmt.close();
-        conn.close();
-
     }
 
     static void getBuffItemNoExterior(Connection conn, int id) throws SQLException, InterruptedException, IOException, DocumentException {

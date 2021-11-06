@@ -14,16 +14,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import java.io.*;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
@@ -34,13 +31,6 @@ import static com.company.common.readPasswordFromFile;
 public class SkinbaronAPI {
 
     private final static Logger LOGGER = Logger.getLogger(SkinbaronAPI.class.getName());
-
-    public static class SkinBaronException extends Exception {
-
-        public SkinBaronException(String message) {
-            super(message);
-        }
-    }
 
     public static int resendTradeOffers(String secret) throws Exception {
 
@@ -64,7 +54,7 @@ public class SkinbaronAPI {
 
         JSONObject resultJson = (JSONObject) new JSONTokener(result).nextValue();
 
-        if ( resultJson.has("message")) {
+        if (resultJson.has("message")) {
             System.out.println("Result: " + resultJson.get("message"));
             throw new SkinBaronException((String) resultJson.get("message"));
         }
@@ -73,10 +63,8 @@ public class SkinbaronAPI {
         return response.getStatusLine().getStatusCode();
     }
 
-    public static int writeSoldItems(String secret) throws Exception {
+    public static int writeSoldItems(Connection conn, String secret) throws Exception {
         String queryId = "";
-
-        Connection conn = getConnection();
 
         int counter = 0;
         while (true) {
@@ -100,7 +88,7 @@ public class SkinbaronAPI {
             String result = EntityUtils.toString(response.getEntity());
 
             JSONObject resultJson = new JSONObject(result);
-            JSONArray jArray = new JSONArray( resultJson.get("response").toString());
+            JSONArray jArray = new JSONArray(resultJson.get("response").toString());
 
             String itemId = null;
             for (int i = 0; i < jArray.length(); i++) {
@@ -117,12 +105,11 @@ public class SkinbaronAPI {
                 //String commission = jObject.get("commission").toString();
                 itemId = jObject.get("id").toString();
 
-                try(Statement stmt2 = conn.createStatement()) {
+                try (Statement stmt2 = conn.createStatement()) {
                     ResultSet rs2 = stmt2.executeQuery("select * from steam_item_sale.sold_items where sale_id='" + itemId + "'");
 
                     if (rs2.next()) {
                         conn.commit();
-                        conn.close();
                         return 200;
                     }
                 }
@@ -146,11 +133,7 @@ public class SkinbaronAPI {
             if (jArray.length() < 50) {
                 break; //This means that the last 50 items were reached
             }
-
         }
-
-        conn.close();
-
         return 200;
     }
 
@@ -176,27 +159,28 @@ public class SkinbaronAPI {
         String result = EntityUtils.toString(response.getEntity());
 
         JSONObject resultJson;
-        try {resultJson = (JSONObject) new JSONTokener(result).nextValue();}
-        catch (ClassCastException exp){
+        try {
+            resultJson = (JSONObject) new JSONTokener(result).nextValue();
+        } catch (ClassCastException exp) {
             System.out.println(result);
             throw new ClassCastException();
         }
 
-        if ( resultJson.has("generalErrors")) {
-            System.out.println( resultJson.get("generalErrors").toString());
-            if ("[\"some offer(s) are already sold\"]".equals( resultJson.get("generalErrors").toString())
-                    || "[\"count mismatch - maybe some offers have been sold or canceled or you provided wrong saleids\"]".equals( resultJson.get("generalErrors").toString())
+        if (resultJson.has("generalErrors")) {
+            System.out.println(resultJson.get("generalErrors").toString());
+            if ("[\"some offer(s) are already sold\"]".equals(resultJson.get("generalErrors").toString())
+                    || "[\"count mismatch - maybe some offers have been sold or canceled or you provided wrong saleids\"]".equals(resultJson.get("generalErrors").toString())
             ) {
-                Statement st = conn.createStatement();
-                st.execute("DELETE FROM steam_item_sale.skinbaron_market_search_results where id='" + itemId + "'");
-                System.out.println("Deleted one Id from Skinbaron table.");
-                st.close();
+                try (Statement st = conn.createStatement()) {
+                    st.execute("DELETE FROM steam_item_sale.skinbaron_market_search_results where id='" + itemId + "'");
+                    System.out.println("Deleted one Id from Skinbaron table.");
+                }
                 conn.commit();
             }
             return;
         }
 
-        if (! resultJson.has("items")) {
+        if (!resultJson.has("items")) {
             LOGGER.info("There was no json query 'result' found.");
             return;
         }
@@ -216,7 +200,7 @@ public class SkinbaronAPI {
                 price = ((JSONObject) o).getDouble("price");
             }
 
-            try(Statement stmt = conn.createStatement()) {
+            try (Statement stmt = conn.createStatement()) {
                 ResultSet rs = stmt.executeQuery("select price_euro from steam_item_sale.steam_most_recent_prices smrp where name ='" + name + "'");
 
                 if (!rs.next()) {
@@ -237,7 +221,7 @@ public class SkinbaronAPI {
                 int rowsAffected = pstmt.executeUpdate();
             }
 
-            try(Statement st = conn.createStatement()) {
+            try (Statement st = conn.createStatement()) {
                 st.execute("DELETE FROM steam_item_sale.skinbaron_market_search_results where id='" + itemId + "'");
             }
 
@@ -277,14 +261,12 @@ public class SkinbaronAPI {
 
         double skinbaronBalance = resultJson.getDouble("balance");
 
-        try(Statement stmt = conn.createStatement()) {
-            ResultSet rs = stmt.executeQuery("select count(*) from steam_item_sale.overview where \"DATE\" = CURRENT_DATE;");
+        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select count(*) from steam_item_sale.overview where \"DATE\" = CURRENT_DATE;")) {
 
             if (!rs.next()) //Start of today
             {
                 setRowInOverviewTable(conn);
-            } //End Start of the Day
-            rs.close();
+            }
         }
 
         String SQLUpdate = "Update steam_item_sale.overview set skinbaron_balance =  ? where \"DATE\" = CURRENT_DATE;";
@@ -400,9 +382,9 @@ public class SkinbaronAPI {
 
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 
-        String id = "";
+        String id;
 
-        Scanner sc= new Scanner(System.in);
+        Scanner sc = new Scanner(System.in);
         System.out.println("Enter last Id: ");
         id = sc.nextLine();
 
@@ -548,22 +530,18 @@ public class SkinbaronAPI {
 
     public static void buyFromSelect(String secret, Connection conn) throws Exception {
 
-        try(Statement stmt = conn.createStatement()) {
-            ResultSet rs = stmt.executeQuery("select smsr.price,smsr.id from steam_item_sale.skinbaron_market_search_results smsr inner join steam_item_sale.cases on smsr.name=cases.name and price = 0.02");
-
-            while (rs.next()) //Start of today
-            {
+        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select smsr.price,smsr.id from steam_item_sale.skinbaron_market_search_results smsr inner join steam_item_sale.cases on smsr.name=cases.name and price = 0.02")) {
+            while (rs.next()) {
                 buyItem(conn, secret, rs.getString("id"), rs.getDouble("price"));
             }
-            rs.close();
         }
     }
 
     public static void getExtendedPriceList(String secret, Connection conn) throws Exception {
 
-        Statement st = conn.createStatement();
-        st.execute("TRUNCATE TABLE steam_item_sale.skinbaron_pricelist");
-        st.close();
+        try (Statement st = conn.createStatement()) {
+            st.execute("TRUNCATE TABLE steam_item_sale.skinbaron_pricelist");
+        }
 
         String SQLinsert = "INSERT INTO steam_item_sale.skinbaron_pricelist (name, exterior, is_stattrak, is_souvenir, lowestprice, markethashname, minwear, maxwear, imageurl) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ? )";
 
@@ -597,15 +575,15 @@ public class SkinbaronAPI {
 
         try (PreparedStatement pstmt = conn.prepareStatement(SQLinsert, Statement.RETURN_GENERATED_KEYS)) {
 
-            String name = null;
+            String name;
             String exterior = null;
             boolean statTrak = false;
             boolean souvenir = false;
-            String marketHashName = null;
+            String marketHashName;
             BigDecimal minWear = null;
             BigDecimal maxWear = null;
-            String imageUrl = null;
-            BigDecimal lowestPrice = null;
+            String imageUrl;
+            BigDecimal lowestPrice;
 
             for (Object o : resultArray) {
                 if (o instanceof JSONObject) {
@@ -621,8 +599,8 @@ public class SkinbaronAPI {
                     if (((JSONObject) o).has("souvenir")) {
                         souvenir = (boolean) ((JSONObject) o).get("souvenir");
                     }
-                    if (((JSONObject) o).get("lowestPrice") instanceof Integer){
-                        lowestPrice = new BigDecimal ((Integer)((JSONObject) o).get("lowestPrice"));
+                    if (((JSONObject) o).get("lowestPrice") instanceof Integer) {
+                        lowestPrice = new BigDecimal((Integer) ((JSONObject) o).get("lowestPrice"));
                     } else {
                         lowestPrice = (BigDecimal) ((JSONObject) o).get("lowestPrice");
                     }
@@ -638,15 +616,15 @@ public class SkinbaronAPI {
                     imageUrl = (String) ((JSONObject) o).get("imageUrl");
 
 
-                    pstmt.setString(1,name );
-                    pstmt.setString(2,exterior);
-                    pstmt.setBoolean(3,statTrak);
-                    pstmt.setBoolean(4,souvenir);
-                    pstmt.setBigDecimal(5,lowestPrice);
-                    pstmt.setString(6,marketHashName);
-                    pstmt.setBigDecimal(7,minWear);
-                    pstmt.setBigDecimal(8,maxWear);
-                    pstmt.setString(9,imageUrl);
+                    pstmt.setString(1, name);
+                    pstmt.setString(2, exterior);
+                    pstmt.setBoolean(3, statTrak);
+                    pstmt.setBoolean(4, souvenir);
+                    pstmt.setBigDecimal(5, lowestPrice);
+                    pstmt.setString(6, marketHashName);
+                    pstmt.setBigDecimal(7, minWear);
+                    pstmt.setBigDecimal(8, maxWear);
+                    pstmt.setString(9, imageUrl);
                     pstmt.addBatch();
                 }
 
@@ -691,6 +669,13 @@ public class SkinbaronAPI {
 
         //TODO API does not work yet?
 
+    }
+
+    public static class SkinBaronException extends Exception {
+
+        public SkinBaronException(String message) {
+            super(message);
+        }
     }
 }
 

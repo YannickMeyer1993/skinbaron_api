@@ -34,9 +34,9 @@ public class Deployment {
 
         Connection conn = getConnection();
 
-        Statement st = conn.createStatement();
-        st.execute("TRUNCATE TABLE steam_item_sale.item_informations");
-        st.close();
+        try(Statement st = conn.createStatement()) {
+            st.execute("TRUNCATE TABLE steam_item_sale.item_informations");
+        }
 
         String url = "https://csgo.exchange/prices/";
 
@@ -103,7 +103,7 @@ public class Deployment {
                 name = "\u2605 "+name;
             }
 
-            name = name.replaceAll("  "," ");
+            name = name.replaceAll(" {2}"," ");
 
             //Denormalize
 
@@ -187,103 +187,99 @@ public class Deployment {
         String SQLinsert = "INSERT INTO steam_item_sale.item_wears(name,id,min_wear,max_wear) "
                 + "VALUES(?,?,?,?)";
 
-        Connection conn = getConnection();
+        try(Connection conn = getConnection()) {
 
-        //TODO
-        Collection<Integer> iterators = new HashSet<>();
+            Collection<Integer> iterators = new HashSet<>();
 
-        for (int i=250;i<=max_iteration;i++){
-            iterators.add(i);
-        }
-        iterators.add(Integer.MAX_VALUE);
+            for (int i = 250; i <= max_iteration; i++) {
+                iterators.add(i);
+            }
+            iterators.add(Integer.MAX_VALUE);
 
-        //select all ids and excute the complement
-        Statement stmt = conn.createStatement();
-        ResultSet rs = stmt.executeQuery("select id from steam_item_sale.item_wears");
+            //select all ids and excute the complement
+            try(Statement stmt = conn.createStatement();ResultSet rs = stmt.executeQuery("select id from steam_item_sale.item_wears")) {
 
-        while(rs.next()){
-            iterators.remove(rs.getInt("id"));
-            System.out.println(rs.getInt("id"));
-        }
+                while (rs.next()) {
+                    iterators.remove(rs.getInt("id"));
+                    System.out.println(rs.getInt("id"));
+                }
+            }
 
-        java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF);
+            java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF);
 
-        com.gargoylesoftware.htmlunit.WebClient webClient = new com.gargoylesoftware.htmlunit.WebClient(com.gargoylesoftware.htmlunit.BrowserVersion.FIREFOX);
-        webClient.getOptions().setJavaScriptEnabled(true); // enable javascript
-        webClient.getOptions().setCssEnabled(true);
-        webClient.getOptions().setThrowExceptionOnScriptError(false); //even if there is error in js continue
-        webClient.waitForBackgroundJavaScriptStartingBefore (1000000);
-        webClient.waitForBackgroundJavaScript(10000000); // important! wait when javascript finishes rendering
+            com.gargoylesoftware.htmlunit.WebClient webClient = new com.gargoylesoftware.htmlunit.WebClient(com.gargoylesoftware.htmlunit.BrowserVersion.FIREFOX);
+            webClient.getOptions().setJavaScriptEnabled(true); // enable javascript
+            webClient.getOptions().setCssEnabled(true);
+            webClient.getOptions().setThrowExceptionOnScriptError(false); //even if there is error in js continue
+            webClient.waitForBackgroundJavaScriptStartingBefore(1000000);
+            webClient.waitForBackgroundJavaScript(10000000); // important! wait when javascript finishes rendering
 
-        int count = 0;
-        for (Object i:iterators){
+            int count = 0;
+            for (Object i : iterators) {
 
-            count++;
-            try{
-                String url = "https://csgostash.com/skin/"+ i;
-                com.gargoylesoftware.htmlunit.html.HtmlPage page = webClient.getPage(url);
-
-                Thread.sleep(1000);
-
-                String name = page.getTitleText().replace(" - CS:GO Stash", "");
-                List<com.gargoylesoftware.htmlunit.html.DomElement> Items_min = page.getByXPath("//*[contains(@class, 'marker-wrapper wear-min-value')]");
-                List<com.gargoylesoftware.htmlunit.html.DomElement> Items_max = page.getByXPath("//*[contains(@class, 'marker-wrapper wear-max-value')]");
-                List<com.gargoylesoftware.htmlunit.html.DomElement> Items_name = page.getByXPath("//*[contains(@class, 'img-responsive center-block main-skin-img margin-top-sm margin-bot-sm')]");
-
+                count++;
                 try {
-                    String xml_min = Items_min.get(0).asXml();
-                    String xml_max = Items_max.get(0).asXml();
+                    String url = "https://csgostash.com/skin/" + i;
+                    com.gargoylesoftware.htmlunit.html.HtmlPage page = webClient.getPage(url);
 
-                    Document document_min = new SAXReader().read(new StringReader(xml_min));
-                    String min = document_min.valueOf("/div/@data-wearmin");
+                    Thread.sleep(1000);
 
-                    Document document_max = new SAXReader().read(new StringReader(xml_max));
-                    String max = document_max.valueOf("/div/@data-wearmax");
+                    String name = page.getTitleText().replace(" - CS:GO Stash", "");
+                    List<com.gargoylesoftware.htmlunit.html.DomElement> Items_min = page.getByXPath("//*[contains(@class, 'marker-wrapper wear-min-value')]");
+                    List<com.gargoylesoftware.htmlunit.html.DomElement> Items_max = page.getByXPath("//*[contains(@class, 'marker-wrapper wear-max-value')]");
+                    List<com.gargoylesoftware.htmlunit.html.DomElement> Items_name = page.getByXPath("//*[contains(@class, 'img-responsive center-block main-skin-img margin-top-sm margin-bot-sm')]");
 
-                    //System.out.println(name + " " + min + " " + max);
+                    try {
+                        String xml_min = Items_min.get(0).asXml();
+                        String xml_max = Items_max.get(0).asXml();
 
-                    String[] infos = new String[3];
-                    //put in map
-                    infos[0] = ""+ i;
-                    infos[1] = min;
-                    infos[2] = max;
-                    mapWears.put(name,infos);
-                }
-                catch (IndexOutOfBoundsException e){
-                    String[] infos = new String[3];
-                    //put in map
-                    infos[0] = ""+ i;
-                    infos[1] = "0";
-                    infos[2] = "1";
-                    mapWears.put(name,infos);
-                }
-            }
-            catch (FailingHttpStatusCodeException e){
-                e.getStatusCode();
-            }
+                        Document document_min = new SAXReader().read(new StringReader(xml_min));
+                        String min = document_min.valueOf("/div/@data-wearmin");
 
-            try (PreparedStatement pstmt = conn.prepareStatement(SQLinsert, Statement.RETURN_GENERATED_KEYS)) {
-                System.out.println(i);
-                if (count % 100 == 0 || ((Integer)i).equals(Integer.MAX_VALUE)) {
-                    count = 0;
-                    for (String key : mapWears.keySet()) {
-                        pstmt.setString(1, key); //name
-                        pstmt.setInt(2, Integer.parseInt(mapWears.get(key)[0])); //i
-                        pstmt.setDouble(3, Double.parseDouble(mapWears.get(key)[1])); //min
-                        pstmt.setDouble(4, Double.parseDouble(mapWears.get(key)[2])); //max
-                        pstmt.addBatch();
+                        Document document_max = new SAXReader().read(new StringReader(xml_max));
+                        String max = document_max.valueOf("/div/@data-wearmax");
+
+                        //System.out.println(name + " " + min + " " + max);
+
+                        String[] infos = new String[3];
+                        //put in map
+                        infos[0] = "" + i;
+                        infos[1] = min;
+                        infos[2] = max;
+                        mapWears.put(name, infos);
+                    } catch (IndexOutOfBoundsException e) {
+                        String[] infos = new String[3];
+                        //put in map
+                        infos[0] = "" + i;
+                        infos[1] = "0";
+                        infos[2] = "1";
+                        mapWears.put(name, infos);
                     }
-                    mapWears.clear();
-
-                    int[] updateCounts = pstmt.executeBatch();
-                    System.out.println(updateCounts.length + " were inserted!");
-                    conn.commit();
+                } catch (FailingHttpStatusCodeException e) {
+                    e.getStatusCode();
                 }
 
+                try (PreparedStatement pstmt = conn.prepareStatement(SQLinsert, Statement.RETURN_GENERATED_KEYS)) {
+                    System.out.println(i);
+                    if (count % 100 == 0 || (i).equals(Integer.MAX_VALUE)) {
+                        count = 0;
+                        for (String key : mapWears.keySet()) {
+                            pstmt.setString(1, key); //name
+                            pstmt.setInt(2, Integer.parseInt(mapWears.get(key)[0])); //i
+                            pstmt.setDouble(3, Double.parseDouble(mapWears.get(key)[1])); //min
+                            pstmt.setDouble(4, Double.parseDouble(mapWears.get(key)[2])); //max
+                            pstmt.addBatch();
+                        }
+                        mapWears.clear();
+
+                        int[] updateCounts = pstmt.executeBatch();
+                        System.out.println(updateCounts.length + " were inserted!");
+                        conn.commit();
+                    }
+
+                }
             }
         }
-
-        conn.close();
 
     }
 
@@ -293,8 +289,11 @@ public class Deployment {
         String DDLDirectory = "C:\\Users\\Yanni\\IdeaProjects\\steamsale\\src\\main\\resources\\ddls";
 
         File directoryPath = new File(DDLDirectory);
-        File filesList[] = directoryPath.listFiles();
-        String Sql = "";
+        File[] filesList = directoryPath.listFiles();
+        if (filesList.length==0){
+            return;
+        }
+        String Sql;
         for (File file : filesList) {
             System.out.println("Execute file: "+file.getPath());
             Sql = "";
