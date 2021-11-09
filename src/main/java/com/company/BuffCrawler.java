@@ -166,8 +166,8 @@ public class BuffCrawler {
                 "            s.id = to_be_upserted.id\n" +
                 "        RETURNING s.id\n" +
                 "    )\n" +
-                "INSERT INTO steam_item_sale.buff_item_prices\n" +
-                "    SELECT * FROM to_be_upserted\n" +
+                "INSERT INTO steam_item_sale.buff_item_prices (id,price_euro,timestamp,has_enterior,name)\n" +
+                "    SELECT id,price_euro,timestamp,has_enterior,name FROM to_be_upserted\n" +
                 "    WHERE id NOT IN (SELECT id FROM updated);";
 
         DecimalFormat df = new DecimalFormat("0.00");
@@ -241,10 +241,12 @@ public class BuffCrawler {
                 pstmt.addBatch();
 
             }
+            System.out.println(pstmt.toString());
             int[] updateCounts = pstmt.executeBatch();
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();
+            throw new SQLException();
         }
         conn.commit();
     }

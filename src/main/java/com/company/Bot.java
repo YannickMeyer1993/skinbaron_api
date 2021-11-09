@@ -51,7 +51,7 @@ public class Bot {
                                     System.out.println(rs2.getString("name") + " " + rs2.getString("id") + " " + rs2.getDouble("price"));
                                     try {
                                         buyItem(conn, secret, rs2.getString("id"), rs2.getDouble("price"));
-                                    } catch (SkinbaronAPI.SkinBaronException e) {
+                                    } catch (Exception e) {
                                         System.out.println("Item isn't there anymore.");
                                     }
                                 }
