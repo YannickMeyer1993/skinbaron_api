@@ -56,7 +56,7 @@ public class SkinbaronAPI {
 
         if (resultJson.has("message")) {
             System.out.println("Result: " + resultJson.get("message"));
-            throw new SkinBaronException((String) resultJson.get("message"));
+            throw new Exception((String) resultJson.get("message"));
         }
 
         System.out.println("Result: " + response.getStatusLine().getStatusCode());
@@ -256,7 +256,7 @@ public class SkinbaronAPI {
 
         if (resultJson.has("message")) {
             System.out.println("Result: " + resultJson.get("message"));
-            throw new SkinBaronException((String) resultJson.get("message"));
+            throw new Exception((String) resultJson.get("message"));
         }
 
         double skinbaronBalance = resultJson.getDouble("balance");
@@ -568,7 +568,7 @@ public class SkinbaronAPI {
 
         if (resultJson.has("message")) {
             System.out.println("Result: " + resultJson.get("message"));
-            throw new SkinBaronException((String) resultJson.get("message"));
+            throw new Exception((String) resultJson.get("message"));
         }
 
         JSONArray resultArray = (JSONArray) resultJson.get("map");
@@ -664,18 +664,11 @@ public class SkinbaronAPI {
 
         if (resultJson.has("message")) {
             System.out.println("Result: " + resultJson.get("message"));
-            throw new SkinBaronException((String) resultJson.get("message"));
+            throw new Exception((String) resultJson.get("message"));
         }
 
         //TODO API does not work yet?
 
-    }
-
-    public static class SkinBaronException extends Exception {
-
-        public SkinBaronException(String message) {
-            super(message);
-        }
     }
 }
 
