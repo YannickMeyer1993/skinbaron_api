@@ -4,8 +4,7 @@ import java.sql.*;
 import java.util.Properties;
 import java.util.Scanner;
 
-import static com.company.SkinbaronAPI.buyItem;
-import static com.company.SkinbaronAPI.getBalance;
+import static com.company.SkinbaronAPI.*;
 import static com.company.SteamItemPriceChecker.getSteamPriceForGivenName;
 import static com.company.common.getConnection;
 import static com.company.common.readPasswordFromFile;
@@ -17,12 +16,15 @@ public class Bot {
 
     public static void main(String[] args) throws Exception {
 
+        Scanner sc= new Scanner(System.in);    //System.in is a standard input stream
+        System.out.println("Buy items?");
+        Boolean buy_item =sc.nextBoolean();
+
         Connection conn = getConnection();
 
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
         Double balance = getBalance(secret,false,conn);
 
-        Scanner sc= new Scanner(System.in);    //System.in is a standard input stream
         System.out.println("Enter max price: ");
         max_price = min(sc.nextDouble(),balance);
 
@@ -50,7 +52,12 @@ public class Bot {
                                 while (rs2.next()) {
                                     System.out.println(rs2.getString("name") + " " + rs2.getString("id") + " " + rs2.getDouble("price"));
                                     try {
-                                        buyItem(conn, secret, rs2.getString("id"), rs2.getDouble("price"));
+                                        if (buy_item) {
+                                            buyItem(conn, secret, rs2.getString("id"), rs2.getDouble("price"));
+                                        } else
+                                        {
+                                            checkIfExists(conn,secret,rs2.getString("name"),rs2.getDouble("price"));
+                                        }
                                     } catch (Exception e) {
                                         System.out.println("Item isn't there anymore.");
                                     }
@@ -64,4 +71,6 @@ public class Bot {
             }
         }
     }
+
+
 }

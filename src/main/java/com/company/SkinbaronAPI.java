@@ -231,6 +231,10 @@ public class SkinbaronAPI {
         }
     }
 
+    public static void checkIfExists(Connection conn, String secret, String name, double price) {
+
+    }
+
     public static Double getBalance(String secret, Boolean overwriteDB, Connection conn) throws Exception {
 
 
@@ -376,6 +380,48 @@ public class SkinbaronAPI {
             return returnObject;
         }
     }
+
+    /*
+    Search for an item and delete cheaper items from search results.
+    get all items, even # > 50 until there are no results left.
+
+     */
+    public static void SearchForItemAndDeleteInvalids(String secret, Connection conn, String after_saleid, String name, double price) throws IOException, InterruptedException {
+
+        LOGGER.info("Skinbaron API Search has been called.");
+        Thread.sleep(1000);
+        String jsonInputString = "{\"apikey\": \"" + secret + "\",\"appid\": 730,\"items_per_page\": 50" + (!"".equals(after_saleid) ? ",\"after_saleid\":\"" + after_saleid + "\"" : "") + "}";
+
+        HttpPost httpPost = new HttpPost("https://api.skinbaron.de/Search");
+        httpPost.setHeader("Content.Type", "application/json");
+        httpPost.setHeader("x-requested-with", "XMLHttpRequest");
+        httpPost.setHeader("Accept", "application/json");
+
+        HttpClient client = HttpClients.custom()
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setCookieSpec(CookieSpecs.STANDARD).build())
+                .build();
+
+        HttpEntity entity = new ByteArrayEntity(jsonInputString.getBytes(StandardCharsets.UTF_8));
+        httpPost.setEntity(entity);
+        HttpResponse response = client.execute(httpPost);
+        String result = EntityUtils.toString(response.getEntity());
+        JSONObject resultJson = (JSONObject) new JSONTokener(result).nextValue();
+        JSONArray resultArray = ((JSONArray) resultJson.get("sales"));
+        String id = null;
+        Double wear;
+
+        for (Object o : resultArray) {
+            if (o instanceof JSONObject) {
+                id = ((JSONObject) o).getString("id");
+                double price_euro = ((JSONObject) o).getDouble("price");
+                String OutputName = ((JSONObject) o).getString("market_name");
+            }
+        }
+
+        String nextId = id;
+    }
+
 
     public static void main(String[] args) throws Exception {
         Connection conn = getConnection();
