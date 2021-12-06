@@ -2,6 +2,7 @@ package com.company;
 
 import junit.framework.TestCase;
 import org.json.JSONException;
+import org.junit.Test;
 
 import java.sql.*;
 import static com.company.common.getConnection;
@@ -13,6 +14,17 @@ public class SkinbaronAPITest extends TestCase {
     public void testResendTradeOffersPositive() throws Exception {
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
         assertEquals(200,resendTradeOffers(secret));
+    }
+
+    @Test
+    public void testCheckIfExists() throws Exception {
+        String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
+        String name="Fracture Case";
+        double price = 10d;
+        try(Connection conn = getConnection()) {
+            assertTrue(checkIfExists(conn,secret,name,price));
+        }
+
     }
 
     @SuppressWarnings("CatchMayIgnoreException")
