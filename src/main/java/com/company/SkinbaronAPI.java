@@ -422,11 +422,17 @@ public class SkinbaronAPI {
         //noinspection InfiniteLoopStatement
         while (true) { //infinite times
             while (true) { //as long as there are inserts
-                String[] output = Search(secret, conn, id);
-                if (Integer.parseInt(output[0]) == 0) {
-                    break;
+                try {
+                    String[] output = Search(secret, conn, id);
+                    if (Integer.parseInt(output[0]) == 0) {
+                        break;
+                    }
+                    id = output[1];
+
+                } catch (org.apache.http.conn.HttpHostConnectException e)
+                {
+                    Thread.sleep(2000);
                 }
-                id = output[1];
                 System.out.println("Not finished yet. Last id=" + id + " (" + (new Timestamp(System.currentTimeMillis())) + ")");
             }
             id = "";

@@ -17,7 +17,7 @@ public class Bot {
     public static void main(String[] args) throws Exception {
 
         Scanner sc= new Scanner(System.in);    //System.in is a standard input stream
-        System.out.println("Buy items?");
+        System.out.println("Buy items (true/false)?");
         Boolean buy_item =sc.nextBoolean();
 
         Connection conn = getConnection();
