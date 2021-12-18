@@ -43,7 +43,7 @@ public class BuffCrawler {
                 "\tsteam_item_sale.buff_item_prices bip\n" +
                 "where DATE_PART('day', now()-timestamp )>1 and name not like 'Souvenir%' and name not like 'Sealed Graffiti%' and price_euro<>0\n" +
                 "group by\n" +
-                "\tweapon_name,id\n" +
+                "\tweapon_name,id,bip.timestamp\n" +
                 "order by\n" +
                 "\tweapon_name) sub\n" +
                 "where sub.ranking =1\n" +
