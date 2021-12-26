@@ -11,7 +11,7 @@ public class CleanUp {
         try(Connection conn = getConnection()) {
 
             try(Statement st = conn.createStatement()) {
-                st.execute("delete from steam_item_sales.skinbaron_market_search_results where name like '%Sealed Graffiti%'");
+                st.execute("delete from steam_item_sale.skinbaron_market_search_results where name like '%Sealed Graffiti%'");
             }
 
             try(Statement st2 = conn.createStatement()) {
