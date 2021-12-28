@@ -7,6 +7,8 @@ public class Item {
     private final String name;
     private final Integer BuffId;
 
+    private ItemCollection collection;
+
     private Boolean hasExterior =null;
 
     private Double SteamPrice = null;
@@ -15,7 +17,7 @@ public class Item {
 
     private List<SkinbaronItem> SkinbaronItemList = new ArrayList();
     private List<SteamPrice> SteamPriceList = new ArrayList();
-    private List<BuffPrice> BuffPriceList = new ArrayList();
+    private List<Price> BuffPriceList = new ArrayList();
 
     public Item(String ItemName,int id) {
         this.name = ItemName;
@@ -86,5 +88,13 @@ public class Item {
 
     public void setHasExterior(Boolean has_exterior) {
         hasExterior = has_exterior;
+    }
+
+    public ItemCollection getCollection() {
+        return collection;
+    }
+
+    public void setCollection(ItemCollection collection) {
+        this.collection = collection;
     }
 }
