@@ -1,4 +1,4 @@
-package com.company.buff;
+package com.company.postgres.buff;
 
 import com.company.CurrencyConverter;
 import com.gargoylesoftware.htmlunit.BrowserVersion;

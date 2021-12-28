@@ -1,15 +1,14 @@
-package com.company;
+package com.company.service;
 
 import org.postgresql.util.PSQLException;
 
 import java.sql.Connection;
+
 import static com.company.SkinbaronAPI.buyItem;
 import static com.company.common.getConnection;
 import static com.company.common.readPasswordFromFile;
 
-@SuppressWarnings("BusyWait")
-public class SkinbaronLiveCheck {
-
+public class CheckLiveSkinbaron {
     public static void main(String[] args) throws Exception {
 
         int wait_counter = 3;

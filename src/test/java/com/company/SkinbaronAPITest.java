@@ -2,7 +2,6 @@ package com.company;
 
 import junit.framework.TestCase;
 import org.json.JSONException;
-import org.junit.Test;
 
 import java.sql.*;
 import static com.company.common.getConnection;
@@ -16,7 +15,6 @@ public class SkinbaronAPITest extends TestCase {
         assertEquals(200,resendTradeOffers(secret));
     }
 
-    @Test
     public void testCheckIfExists() throws Exception {
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
         String name="Fracture Case";
@@ -35,13 +33,6 @@ public class SkinbaronAPITest extends TestCase {
         catch (Exception e)
         {
             assertEquals(e.getMessage(),"wrong or unauthenticated request");
-        }
-    }
-
-    public void testwriteSoldItems() throws Exception {
-        String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
-        try(Connection conn = getConnection()) {
-            assertEquals(200, writeSoldItems(conn,secret));
         }
     }
 
@@ -68,23 +59,4 @@ public class SkinbaronAPITest extends TestCase {
         }
     }
 
-    public void testBuyFromSelect() throws Exception {
-        String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
-        try(Connection conn = getConnection()) {
-            buyFromSelect(secret, conn);
-        }
-    }
-
-    public void testGetExtendedPricelist() throws Exception {
-        String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
-
-        String query ="select pl.markethashname, count(*) from steam_item_sale.skinbaron_pricelist pl group by pl.markethashname having count(*) > 1";
-
-        try(Connection conn = getConnection();Statement stmt = conn.createStatement();ResultSet rs = stmt.executeQuery(query)) {
-            getExtendedPriceList(secret, conn);
-            if (rs.next()) {
-                throw new Exception("Primary Key Constraint not met!");
-            }
-        }
-    }
 }

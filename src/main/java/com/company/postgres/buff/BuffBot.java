@@ -1,11 +1,11 @@
-package com.company.buff;
+package com.company.postgres.buff;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import static com.company.buff.BuffCrawler.getBuffItem;
-import static com.company.buff.BuffCrawler.getBuffItemNoExterior;
+import static com.company.postgres.buff.BuffCrawler.getBuffItem;
+import static com.company.postgres.buff.BuffCrawler.getBuffItemNoExterior;
 import static com.company.SteamItemPriceChecker.getSteamPriceForGivenName;
 import static com.company.common.getConnection;
 
