@@ -1,17 +1,13 @@
-package com.company;
+package com.company.buff;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.Properties;
 
-import static com.company.BuffCrawler.getBuffItem;
-import static com.company.BuffCrawler.getBuffItemNoExterior;
-import static com.company.SkinbaronAPI.getBalance;
+import static com.company.buff.BuffCrawler.getBuffItem;
+import static com.company.buff.BuffCrawler.getBuffItemNoExterior;
 import static com.company.SteamItemPriceChecker.getSteamPriceForGivenName;
 import static com.company.common.getConnection;
-import static com.company.common.readPasswordFromFile;
 
 public class BuffBot {
 
