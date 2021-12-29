@@ -8,8 +8,8 @@ public class Item {
 
     private ItemCollection collection;
 
-    private Double SteamPrice = null;
-    private Double SkinbaronPrice = null;
+    private Price SteamPrice = null;
+    private Price SkinbaronPrice = null;
 
     private List<SkinbaronItem> SkinbaronItemList = new ArrayList<>();
     private List<SteamPrice> SteamPriceList = new ArrayList<>();
@@ -22,7 +22,7 @@ public class Item {
         return name;
     }
 
-    public Double getSteamPrice() {
+    public Price getSteamPrice() {
         return SteamPrice;
     }
 
@@ -30,11 +30,11 @@ public class Item {
     sets the current steam price
     triggered if there is a new steam price
      */
-    public void setSteamPrice(Double steamPrice) {
+    public void setSteamPrice(Price steamPrice) {
         SteamPrice = steamPrice;
     }
 
-    public Double getSkinbaronPrice() {
+    public Price getSkinbaronPrice() {
         return SkinbaronPrice;
     }
 
@@ -42,14 +42,14 @@ public class Item {
     sets the lowest current Skinbaron price
     triggered after change in SkinbaronItem list
      */
-    public void setSkinbaronPrice(Double price) {
+    public void setSkinbaronPrice(Price price) {
         if (SkinbaronPrice==null) {
             SkinbaronPrice = price;
             return;
         }
 
         for (SkinbaronItem item: SkinbaronItemList) {
-            if (item.getPrice() < SkinbaronPrice) {
+            if (item.getPrice().getValue() < SkinbaronPrice.getValue()) {
                 SkinbaronPrice = item.getPrice();
             }
         }
@@ -61,5 +61,15 @@ public class Item {
 
     public void setCollection(ItemCollection collection) {
         this.collection = collection;
+    }
+
+    public String toString() {
+
+        StringBuilder result = new StringBuilder();
+        result.append("Item Name: "+name)
+                .append("\nCollection Name: "+collection.getName())
+                .append("\nSteam Price: "+SteamPrice.getValue())
+                .append("\nSkinbaron Price: "+SkinbaronPrice.getValue());
+        return result.toString();
     }
 }

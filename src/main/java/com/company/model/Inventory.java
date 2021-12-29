@@ -18,10 +18,10 @@ public class Inventory {
         InventoryList.clear();
     }
 
-    public Double getValue() {
-        Double value = 0d;
+    public double getValue() {
+        double value = 0d;
         for (Item item: InventoryList) {
-            value = value + item.getSteamPrice();
+            value = value + item.getSteamPrice().getValue();
         }
         return value;
     }

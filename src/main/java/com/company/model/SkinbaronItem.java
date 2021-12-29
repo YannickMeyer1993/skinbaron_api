@@ -2,21 +2,21 @@ package com.company.model;
 
 public class SkinbaronItem {
     private final String id;
-    private Double price;
+    private Price price;
 
     public String getId() {
         return id;
     }
 
-    public Double getPrice() {
+    public Price getPrice() {
         return price;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(Price price) {
         this.price = price;
     }
 
-    public SkinbaronItem(String id, Double price) {
+    public SkinbaronItem(String id, Price price) {
         this.id = id;
         this.price = price;
     }
