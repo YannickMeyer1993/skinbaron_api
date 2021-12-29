@@ -65,8 +65,6 @@ public class SkinbaronAPI {
 
     public static void buyItem(Connection conn, String secret, String itemId, Double price) throws Exception {
 
-        String SqlInsert = "Insert into steam_item_sale.skinbaron_transactions (steam_price,success,name,saleid,price) VALUES (?,?,?,?,?)";
-
         String jsonInputString = "{\"apikey\": \"" + secret + "\",\"total\":" + price + ",\"saleids\":[\"" + itemId + "\"]}";
 
         HttpPost httpPost = new HttpPost("https://api.skinbaron.de/BuyItems");
@@ -134,17 +132,6 @@ public class SkinbaronAPI {
                 }
 
                 steamPrice = rs.getDouble("price_euro");
-            }
-
-
-            try (PreparedStatement pstmt = conn.prepareStatement(SqlInsert, Statement.RETURN_GENERATED_KEYS)) {
-                //steam_price,success,name,saleid,price
-                pstmt.setDouble(1, steamPrice);
-                pstmt.setBoolean(2, true);
-                pstmt.setString(3, name);
-                pstmt.setString(4, saleId);
-                pstmt.setDouble(5, price);
-                int rowsAffected = pstmt.executeUpdate();
             }
 
             try (Statement st = conn.createStatement()) {
