@@ -10,19 +10,13 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 
-import static com.company.common.readPasswordFromFile;
+import static com.company.helper.readPasswordFromFile;
 
 public class BuyService {
     private final static Logger LOGGER = Logger.getLogger(SkinbaronAPI.class.getName());

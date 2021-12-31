@@ -1,15 +1,13 @@
 package com.company;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.util.Properties;
 
 import static com.company.SkinbaronAPI.getSales;
 import static com.company.SkinbaronAPI.getSkinbaronInventory;
 import static com.company.SteamCrawler.getItemsfromInventory;
 import static com.company.SteamCrawler.getStorageItems;
-import static com.company.common.getConnection;
-import static com.company.common.readPasswordFromFile;
+import static com.company.helper.getConnection;
+import static com.company.helper.readPasswordFromFile;
 
 public class Inventory {
 

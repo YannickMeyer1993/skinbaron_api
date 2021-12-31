@@ -3,12 +3,9 @@ package com.company;
 import junit.framework.TestCase;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.util.Properties;
 
 import static com.company.Overview.getItemPricesInventory;
-import static com.company.common.getConnection;
-import static com.company.common.readPasswordFromFile;
+import static com.company.helper.getConnection;
 
 public class OverviewTest extends TestCase {
 

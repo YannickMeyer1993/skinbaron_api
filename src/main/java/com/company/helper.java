@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.Scanner;
 
-public class common {
+public class helper {
     public static String readPasswordFromFile(String path) throws Exception {
         Scanner sc = new Scanner(new File(path));
         while (sc.hasNext()) {

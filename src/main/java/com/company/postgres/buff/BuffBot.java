@@ -7,7 +7,7 @@ import java.sql.Statement;
 import static com.company.postgres.buff.BuffCrawler.getBuffItem;
 import static com.company.postgres.buff.BuffCrawler.getBuffItemNoExterior;
 import static com.company.SteamItemPriceChecker.getSteamPriceForGivenName;
-import static com.company.common.getConnection;
+import static com.company.helper.getConnection;
 
 public class BuffBot {
 

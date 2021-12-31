@@ -19,7 +19,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.company.common.getConnection;
+import static com.company.helper.getConnection;
 
 public class BuffCrawler {
 
@@ -28,7 +28,7 @@ public class BuffCrawler {
     static {
         try {
             conversionFromRMBtoEUR = CurrencyConverter.getRMBinEURO();
-        } catch (Exception e) {
+        } catch (NullPointerException e) {
             e.printStackTrace();
         }
     }

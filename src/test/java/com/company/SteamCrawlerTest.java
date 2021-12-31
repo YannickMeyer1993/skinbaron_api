@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 import static com.company.SteamCrawler.*;
-import static com.company.common.getConnection;
+import static com.company.helper.getConnection;
 
 public class SteamCrawlerTest extends TestCase {
 

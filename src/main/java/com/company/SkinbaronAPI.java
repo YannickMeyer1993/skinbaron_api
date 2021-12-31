@@ -15,7 +15,6 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.HashMap;
@@ -25,8 +24,8 @@ import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
 import static com.company.SteamCrawler.setRowInOverviewTable;
-import static com.company.common.getConnection;
-import static com.company.common.readPasswordFromFile;
+import static com.company.helper.getConnection;
+import static com.company.helper.readPasswordFromFile;
 
 public class SkinbaronAPI {
 

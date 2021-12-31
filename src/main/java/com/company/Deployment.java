@@ -11,18 +11,13 @@ import org.dom4j.io.SAXReader;
 import org.postgresql.util.PSQLException;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.*;
 import java.util.*;
 import java.util.logging.Level;
-import java.util.stream.Stream;
 
-import static com.company.common.*;
+import static com.company.helper.*;
 
 public class Deployment {
 

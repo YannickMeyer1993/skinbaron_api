@@ -9,13 +9,9 @@ import org.dom4j.io.SAXReader;
 
 import java.io.StringReader;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.List;
-import java.util.Properties;
-
-import static com.company.common.readPasswordFromFile;
 
 public class SteamItemPriceChecker {
 

@@ -1,15 +1,13 @@
 package com.company;
 
-import java.io.FileNotFoundException;
 import java.sql.*;
-import java.util.Properties;
 import java.util.Scanner;
 
 import static com.company.SkinbaronAPI.getBalance;
 import static com.company.SteamCrawler.setRowInOverviewTable;
 import static com.company.SteamItemPriceChecker.getSteamPriceForGivenName;
-import static com.company.common.getConnection;
-import static com.company.common.readPasswordFromFile;
+import static com.company.helper.getConnection;
+import static com.company.helper.readPasswordFromFile;
 import static java.lang.Math.min;
 
 public class Overview {

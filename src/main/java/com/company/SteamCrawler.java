@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import static com.company.SteamItemPriceChecker.getSteamPriceForGivenName;
-import static com.company.common.getConnection;
+import static com.company.helper.getConnection;
 
 
 public class SteamCrawler {

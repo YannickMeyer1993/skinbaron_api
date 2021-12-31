@@ -20,8 +20,8 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.logging.Logger;
 
-import static com.company.common.getConnection;
-import static com.company.common.readPasswordFromFile;
+import static com.company.helper.getConnection;
+import static com.company.helper.readPasswordFromFile;
 
 public class SoldItems {
 

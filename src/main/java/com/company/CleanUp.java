@@ -3,7 +3,7 @@ package com.company;
 import java.io.FileNotFoundException;
 import java.sql.*;
 
-import static com.company.common.getConnection;
+import static com.company.helper.getConnection;
 
 public class CleanUp {
 
@@ -48,6 +48,8 @@ public class CleanUp {
                     "\t\twhere smsr .price > 3*steam_most_recent_prices.price_euro)\n" +
                     "delete from steam_item_sale.skinbaron_market_search_results where id in (select id from deletable_ids);");
             }
+
+            conn.commit();
         }
     }
 
