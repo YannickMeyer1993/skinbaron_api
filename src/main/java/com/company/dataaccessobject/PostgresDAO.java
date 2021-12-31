@@ -116,4 +116,9 @@ public class PostgresDAO implements ItemDAO {
     public String[] getItemsToBuy() {
         return new String[0];
     }
+
+    @Override
+    public int getHighestSteamIteration() {
+        return 0;
+    }
 }

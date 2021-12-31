@@ -17,5 +17,6 @@ public interface ItemDAO {
 
    String[] getItemsToBuy();
 
+   int getHighestSteamIteration();
 
 }
