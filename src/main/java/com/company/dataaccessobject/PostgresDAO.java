@@ -2,7 +2,9 @@ package com.company.dataaccessobject;
 
 import com.company.model.Price;
 import com.company.model.SkinbaronItem;
+import com.company.model.SteamPrice;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -56,8 +58,7 @@ public class PostgresDAO implements ItemDAO {
                 "    SELECT * FROM to_be_upserted\n" +
                 "    WHERE id NOT IN (SELECT id FROM updated);";
 
-        Connection connection = getConnection();
-        try (PreparedStatement pstmt = connection.prepareStatement(SQLUpsert, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = getConnection();PreparedStatement pstmt = connection.prepareStatement(SQLUpsert, Statement.RETURN_GENERATED_KEYS)) {
 
             for (SkinbaronItem item: items) {
                 pstmt.setString(1, item.getId());
@@ -81,8 +82,34 @@ public class PostgresDAO implements ItemDAO {
     }
 
     @Override
-    public void addSteamPrice(Price price) {
+    public void addSteamPrice(SteamPrice price) throws Exception {
+        ArrayList<SteamPrice> list = new ArrayList<>();
+        list.add(price);
+        addSteamPrices(list);
+    }
 
+    public void addSteamPrices(List<SteamPrice> prices) throws Exception{
+        String Insert = "INSERT INTO steam.steam_prices(name,quantity,price_euro) VALUES(?,?,?)";
+
+        try (Connection connection = getConnection();PreparedStatement pstmt = connection.prepareStatement(Insert, Statement.RETURN_GENERATED_KEYS)) {
+
+            for (SteamPrice price: prices) {
+                pstmt.setString(1,price.getItemName());
+                pstmt.setInt(2, price.getQuantity());
+                pstmt.setDouble(3, price.getValue());
+                pstmt.addBatch();
+            }
+
+            LOGGER.info(pstmt.toString());
+
+            int[] updateCounts = pstmt.executeBatch();
+            int amountInserts = IntStream.of(updateCounts).sum();
+            if (amountInserts != 0) {
+                LOGGER.info(amountInserts + " items were inserted!");
+            }
+
+            connection.commit();
+        }
     }
 
     @Override

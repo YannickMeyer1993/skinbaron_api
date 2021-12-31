@@ -7,10 +7,11 @@ import java.sql.Timestamp;
 public class ItemTest extends TestCase {
 
     public void testToString() {
-        Item item = new Item("Kniff");
+        String ItemName = "Kniff";
+        Item item = new Item(ItemName);
         item.setCollection(new ItemCollection("Cobble",false));
-        item.setSteamPrice(new Price(new Timestamp(System.currentTimeMillis()) ,1d));
-        item.setSkinbaronPrice(new Price(new Timestamp(System.currentTimeMillis()),2d));
+        item.setSteamPrice(new Price(new Timestamp(System.currentTimeMillis()) ,1d, ItemName));
+        item.setSkinbaronPrice(new Price(new Timestamp(System.currentTimeMillis()),2d, ItemName));
 
         assertEquals(item.toString(),"Item Name: Kniff\n" +
                 "Collection Name: Cobble\n" +

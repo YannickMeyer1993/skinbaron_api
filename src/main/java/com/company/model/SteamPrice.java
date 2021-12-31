@@ -6,8 +6,8 @@ public class SteamPrice extends Price{
 
     private Integer quantity;
 
-    public SteamPrice(Date timestamp, Double price,Integer quantity) {
-        super(timestamp,price);
+    public SteamPrice(String ItemName,Date timestamp, Double price,Integer quantity) {
+        super(timestamp,price, ItemName);
         this.quantity = quantity;
     }
 
