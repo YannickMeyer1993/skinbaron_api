@@ -17,6 +17,10 @@ public interface ItemDAO {
 
    String[] getItemsToBuy();
 
-   int getHighestSteamIteration();
+   int getHighestSteamIteration() throws Exception;
+
+   void initHightestSteamIteration() throws Exception;
+
+   void setHighestSteamIteration(int iteration) throws Exception;
 
 }

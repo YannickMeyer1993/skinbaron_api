@@ -1,22 +1,18 @@
 package com.company.dataaccessobject;
 
-import com.company.model.Price;
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
-import static com.company.common.PostgresHelper.executeDDLfromPath;
-import static com.company.common.PostgresHelper.getConnection;
+import static com.company.common.PostgresHelper.*;
+import static com.company.common.PostgresHelper.checkIfResultsetIsEmpty;
 
 
 public class PostgresDAO implements ItemDAO {
@@ -25,9 +21,11 @@ public class PostgresDAO implements ItemDAO {
 
     @Override
     public void init() throws SQLException, IOException {
-        executeDDLfromPath("src/main/resources/PostgresDAO/0_schema.sql");
-        executeDDLfromPath("src/main/resources/PostgresDAO/1_table_skinbaron_items.sql");
-        executeDDLfromPath("src/main/resources/PostgresDAO/1_table_steam_item_prices.sql");
+        String resourcePath = "src/main/resources/PostgresDAO/";
+        executeDDLfromPath(resourcePath + "0_schema.sql");
+        executeDDLfromPath(resourcePath + "1_table_skinbaron_items.sql");
+        executeDDLfromPath(resourcePath + "1_table_steam_item_prices.sql");
+        executeDDLfromPath(resourcePath + "1_steam_iteration.sql");
     }
 
     @Override
@@ -58,9 +56,9 @@ public class PostgresDAO implements ItemDAO {
                 "    SELECT * FROM to_be_upserted\n" +
                 "    WHERE id NOT IN (SELECT id FROM updated);";
 
-        try (Connection connection = getConnection();PreparedStatement pstmt = connection.prepareStatement(SQLUpsert, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = getConnection(); PreparedStatement pstmt = connection.prepareStatement(SQLUpsert, Statement.RETURN_GENERATED_KEYS)) {
 
-            for (SkinbaronItem item: items) {
+            for (SkinbaronItem item : items) {
                 pstmt.setString(1, item.getId());
                 pstmt.setString(2, item.getName());
                 pstmt.setDouble(3, item.getPrice().getValue());
@@ -88,13 +86,13 @@ public class PostgresDAO implements ItemDAO {
         addSteamPrices(list);
     }
 
-    public void addSteamPrices(List<SteamPrice> prices) throws Exception{
+    public void addSteamPrices(List<SteamPrice> prices) throws Exception {
         String Insert = "INSERT INTO steam.steam_prices(name,quantity,price_euro) VALUES(?,?,?)";
 
-        try (Connection connection = getConnection();PreparedStatement pstmt = connection.prepareStatement(Insert, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = getConnection(); PreparedStatement pstmt = connection.prepareStatement(Insert, Statement.RETURN_GENERATED_KEYS)) {
 
-            for (SteamPrice price: prices) {
-                pstmt.setString(1,price.getItemName());
+            for (SteamPrice price : prices) {
+                pstmt.setString(1, price.getItemName());
                 pstmt.setInt(2, price.getQuantity());
                 pstmt.setDouble(3, price.getValue());
                 pstmt.addBatch();
@@ -118,7 +116,53 @@ public class PostgresDAO implements ItemDAO {
     }
 
     @Override
-    public int getHighestSteamIteration() {
-        return 0;
+    public int getHighestSteamIteration() throws Exception {
+        String query = "select iteration from steam.steam_iteration where \"date\" = CURRENT_DATE;";
+
+        try (Connection conn = getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
+            if (!rs.next()) {
+                initHightestSteamIteration();
+                return getHighestSteamIteration();
+            } else {
+                return rs.getInt("iteration"); //rs.next() was called above
+            }
+        }
+    }
+
+    @Override
+    public void initHightestSteamIteration() throws Exception {
+
+        Connection connection = getConnection();
+
+        if (!checkIfResultsetIsEmpty("select iteration from steam.steam_iteration where \"date\" = CURRENT_DATE;")) {
+            return;
+        }
+        String SQLinsert = "INSERT INTO steam.steam_iteration(iteration) "
+                + "VALUES(0)";
+        try (PreparedStatement pstmt = connection.prepareStatement(SQLinsert, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.executeUpdate();
+            connection.commit();
+        }
+
+        LOGGER.info("table steam_iteration has a new entry for today.");
+
+    }
+
+    @Override
+    public void setHighestSteamIteration(int iteration) throws Exception {
+
+        String SQLinsert = "UPDATE steam.steam_iteration set iteration=? where \"date\"=current_date";
+
+        if (checkIfResultsetIsEmpty("select iteration from steam.steam_iteration where \"date\" = CURRENT_DATE;")) {
+            throw new Exception("steam.steam_iteration must be initialized.");
+        }
+
+        try (Connection connection = getConnection();PreparedStatement pstmt = connection.prepareStatement(SQLinsert, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setInt(1, iteration);
+
+            pstmt.executeUpdate();
+            connection.commit();
+        }
+        LOGGER.info("Highest steam iteration for today is: "+iteration);
     }
 }

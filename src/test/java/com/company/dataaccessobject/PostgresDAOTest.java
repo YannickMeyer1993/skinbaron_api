@@ -5,6 +5,10 @@ import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
 import junit.framework.TestCase;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
 import static com.company.common.PostgresHelper.*;
 
 public class PostgresDAOTest extends TestCase {
@@ -39,5 +43,16 @@ public class PostgresDAOTest extends TestCase {
         dao.addSteamPrice(price);
         assertFalse(checkIfResultsetIsEmpty("select * from steam.steam_prices where name = 'Item Name'"));
         executeDDL("DELETE from steam.steam_prices where name = 'Item Name'");
+    }
+
+    public void testSteamIteration() throws Exception {
+        PostgresDAO dao = new PostgresDAO();
+        dao.init();
+        int iteration = dao.getHighestSteamIteration();
+        System.out.println(iteration);
+        dao.initHightestSteamIteration();
+        dao.setHighestSteamIteration(iteration);
+
+        assertEquals(dao.getHighestSteamIteration(),iteration);
     }
 }
