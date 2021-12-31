@@ -1,23 +1,16 @@
 package com.company.common;
 
-import com.company.CurrencyConverter;
-import org.junit.jupiter.api.Test;
+import junit.framework.TestCase;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+public class CurrencyHelperTest extends TestCase {
 
-class CurrencyHelperTest {
-
-    @Test
-    public void getUSDinEURtest() throws Exception {
+    public void testGetUSDinEURtest() throws Exception {
         Double usd = CurrencyHelper.getConversionRateToEuro("USD");
         assertNotNull(usd);
     }
 
-    @Test
-    public void testGet_RMB_in_EURO() throws Exception{
+    public void testGetRMBinEUROtest() throws Exception{
         Double cny = CurrencyHelper.getConversionRateToEuro("CNY");
         assertNotNull(cny);
     }
-
 }
