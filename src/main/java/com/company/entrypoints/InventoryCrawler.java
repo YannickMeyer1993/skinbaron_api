@@ -55,7 +55,7 @@ public class InventoryCrawler {
         HashMap<String, Integer> map = getItemsFromSteamHTTP(resultJSON);
 
         for (String key : map.keySet()) {
-            //TODO send request to insert InventoryItem
+            sendRequest(key,type);
         }
     }
 
@@ -104,7 +104,7 @@ public class InventoryCrawler {
                     case "Vanguard Case":item_name = "Operation Vanguard Weapon Case";
                         break;
                 }
-                //TODO send request #amount times to insert Inventory Item
+                sendRequest(item_name,"storage");
             }
         }
     }
@@ -184,7 +184,7 @@ public class InventoryCrawler {
         for (Object o : resultArray) {
             if (o instanceof JSONObject) {
                 String name = ((JSONObject) o).getString("marketHashName");
-                //TODO send request to insert Inventory Item
+                sendRequest(name,"skinbaron");
             }
         }
     }
@@ -224,9 +224,14 @@ public class InventoryCrawler {
                 if (o instanceof JSONObject) {
                     String name = ((JSONObject) o).getString("name");
                     id = ((JSONObject) o).getString("id");
-                    //TODO send request to insert Inventory Item
+
+                    sendRequest(name,"skinbaron sales");
                 }
             }
         }
+    }
+
+    private static void sendRequest(String ItemName, String InventoryType) {
+        //TODO send request
     }
 }
