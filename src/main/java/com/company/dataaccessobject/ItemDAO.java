@@ -23,4 +23,6 @@ public interface ItemDAO {
 
    void setHighestSteamIteration(int iteration) throws Exception;
 
+   void insertInventoryItem() throws Exception;
+
 }

@@ -10,6 +10,7 @@ public class Item {
 
     private Price SteamPrice = null;
     private Price SkinbaronPrice = null;
+    private List<String> exists_in_inventory = null;
 
     private List<SkinbaronItem> SkinbaronItemList = new ArrayList<>();
     private List<SteamPrice> SteamPriceList = new ArrayList<>();
@@ -26,7 +27,7 @@ public class Item {
         return SteamPrice;
     }
 
-    /*
+    /**
     sets the current steam price
     triggered if there is a new steam price
      */
@@ -38,7 +39,7 @@ public class Item {
         return SkinbaronPrice;
     }
 
-    /*
+    /**
     sets the lowest current Skinbaron price
     triggered after change in SkinbaronItem list
      */
@@ -65,11 +66,32 @@ public class Item {
 
     public String toString() {
 
-        StringBuilder result = new StringBuilder();
-        result.append("Item Name: "+name)
-                .append("\nCollection Name: "+collection.getName())
-                .append("\nSteam Price: "+SteamPrice.getValue())
-                .append("\nSkinbaron Price: "+SkinbaronPrice.getValue());
-        return result.toString();
+        String result = "";
+        result = result.concat("Item Name: "+name)
+                .concat("\nCollection Name: "+collection.getName())
+                .concat("\nSteam Price: "+SteamPrice.getValue())
+                .concat("\nSkinbaron Price: "+SkinbaronPrice.getValue());
+        return result;
+    }
+
+    /**
+     * Inventory Type must be one of steam, storage, skinbaron, skinbaron sales, smurf
+     */
+    public void addToInventory(String InventoryType){
+        List<String> AllowedInventoryTypes = new ArrayList<>();
+        AllowedInventoryTypes.add("steam");
+        AllowedInventoryTypes.add("storage");
+        AllowedInventoryTypes.add("skinbaron");
+        AllowedInventoryTypes.add("skinbaron sales");
+        AllowedInventoryTypes.add("smurf");
+        if (AllowedInventoryTypes.contains(InventoryType)) {
+            throw new IllegalArgumentException("Unknown Inventory Type");
+        }
+        exists_in_inventory.add(InventoryType);
+
+    }
+
+    public void clearInventory() {
+        exists_in_inventory = null;
     }
 }

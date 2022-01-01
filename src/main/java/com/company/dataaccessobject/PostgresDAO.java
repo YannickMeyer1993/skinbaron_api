@@ -165,4 +165,9 @@ public class PostgresDAO implements ItemDAO {
         }
         LOGGER.info("Highest steam iteration for today is: "+iteration);
     }
+
+    @Override
+    public void insertInventoryItem() throws Exception {
+
+    }
 }
