@@ -1,46 +1,61 @@
 package com.company.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import junit.framework.TestCase;
 import org.json.JSONObject;
-import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.UUID;
 
-public class SteamItemControllerTest extends TestCase {
+import static com.company.common.PostgresHelper.checkIfResultsetIsEmpty;
+import static com.company.common.PostgresHelper.executeDDL;
+import static junit.framework.TestCase.*;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    private JSONObject personJsonObject;
+@RunWith(SpringRunner.class)
+@WebMvcTest(SteamItemController.class)
+public class SteamItemControllerTest {
 
-    @BeforeClass
-    public static void runBeforeAllTestMethods() {
-        String url = "http://localhost:8082/api/v1/AddSteamPrice";
+    @MockBean
+    SteamItemController steamItemController;
+
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Test
+    public void testAddNewSkinbaronItem() {
+    }
+
+    @Test
+    public void testAddNewSteamPrice() throws Exception {
+        String url = "http://localhost:8080/api/v1/AddSteamPrice";
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        JSONObject personJsonObject = new JSONObject();
-        personJsonObject.put("id", 1);
-        personJsonObject.put("name", "John");
-    }
+        JSONObject JsonObject = new JSONObject();
+        UUID uuid = UUID.randomUUID();
 
+        JsonObject.put("itemname", uuid.toString());
+        JsonObject.put("price", 3d);
+        JsonObject.put("quantity",2);
+        
+        HttpEntity<String> request = new HttpEntity<>(JsonObject.toString(), headers);
 
-    public void testAddNewSkinbaronItem() {
-    }
+        restTemplate.postForObject(url, request, String.class);
 
-    public void testAddNewSteamPrice() {
-        HttpEntity<String> request =
-                new HttpEntity<String>(personJsonObject.toString(), headers);
+        assertFalse(checkIfResultsetIsEmpty("Select * from steam.steam_prices where name='"+uuid+"'"));
+        executeDDL("DELETE FROM steam.steam_prices where name='"+uuid+"'");
 
-        String personResultAsJsonStr =
-                restTemplate.postForObject(createPersonUrl, request, String.class);
-        JsonNode root = objectMapper.readTree(personResultAsJsonStr);
-
-        assertNotNull(personResultAsJsonStr);
-        assertNotNull(root);
-        assertNotNull(root.path("name").asText());
     }
 }
