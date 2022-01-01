@@ -6,17 +6,18 @@ import java.util.List;
 public class Item {
     private final String name;
 
-    private ItemCollection collection;
+    private final ItemCollection collection;
 
-    private Price SteamPrice = null;
-    private Price SkinbaronPrice = null;
+    private Price CurrentSteamPrice = null;
+    private Price CheapestSkinbaronPrice = null;
     private List<String> exists_in_inventory = null;
 
     private final List<SkinbaronItem> SkinbaronItemList = new ArrayList<>();
     private final List<SteamPrice> SteamPriceList = new ArrayList<>();
 
-    public Item(String ItemName) {
+    public Item(String ItemName, ItemCollection collection) {
         this.name = ItemName;
+        this.collection = collection;
     }
 
     public String getName() {
@@ -24,7 +25,7 @@ public class Item {
     }
 
     public Price getSteamPrice() {
-        return SteamPrice;
+        return CurrentSteamPrice;
     }
 
     /**
@@ -32,11 +33,11 @@ public class Item {
     triggered if there is a new steam price
      */
     public void setSteamPrice(Price steamPrice) {
-        SteamPrice = steamPrice;
+        CurrentSteamPrice = steamPrice;
     }
 
     public Price getSkinbaronPrice() {
-        return SkinbaronPrice;
+        return CheapestSkinbaronPrice;
     }
 
     /**
@@ -44,14 +45,14 @@ public class Item {
     triggered after change in SkinbaronItem list
      */
     public void setSkinbaronPrice(Price price) {
-        if (SkinbaronPrice==null) {
-            SkinbaronPrice = price;
+        if (CheapestSkinbaronPrice==null) {
+            CheapestSkinbaronPrice = price;
             return;
         }
 
         for (SkinbaronItem item: SkinbaronItemList) {
-            if (item.getPrice().getValue() < SkinbaronPrice.getValue()) {
-                SkinbaronPrice = item.getPrice();
+            if (item.getPrice().getValue() < CheapestSkinbaronPrice.getValue()) {
+                CheapestSkinbaronPrice = item.getPrice();
             }
         }
     }
@@ -60,17 +61,13 @@ public class Item {
         return collection;
     }
 
-    public void setCollection(ItemCollection collection) {
-        this.collection = collection;
-    }
-
     public String toString() {
 
         String result = "";
         result = result.concat("Item Name: "+name)
                 .concat("\nCollection Name: "+collection.getName())
-                .concat("\nSteam Price: "+SteamPrice.getValue())
-                .concat("\nSkinbaron Price: "+SkinbaronPrice.getValue());
+                .concat("\nSteam Price: "+CurrentSteamPrice.getValue())
+                .concat("\nSkinbaron Price: "+CheapestSkinbaronPrice.getValue());
         return result;
     }
 
@@ -93,5 +90,29 @@ public class Item {
 
     public void clearInventory() {
         exists_in_inventory = null;
+    }
+
+    public List<SkinbaronItem> getSkinbaronItemList() {
+        return SkinbaronItemList;
+    }
+
+    public List<SteamPrice> getSteamPriceList() {
+        return SteamPriceList;
+    }
+
+    public void addSkinbaronItemToList(SkinbaronItem item) {
+        SkinbaronItemList.add(item);
+    }
+
+    public void addSteamPricetoList(SteamPrice price) {
+        SteamPriceList.add(price);
+    }
+
+    public void deleteSkinbaronItemFromList(SkinbaronItem item) {
+        SkinbaronItemList.remove(item);
+    }
+
+    public void deleteSteamPriceFromList(SteamPrice price) {
+        SteamPriceList.remove(price);
     }
 }

@@ -1,8 +1,10 @@
 package com.company.dataaccessobject;
 
 import com.company.model.Item;
+import com.company.model.ItemCollection;
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
+import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
 import java.sql.*;
@@ -13,7 +15,7 @@ import java.util.stream.IntStream;
 
 import static com.company.common.PostgresHelper.*;
 
-
+@Repository("postgres")
 public class PostgresDAO implements ItemDAO {
 
     private final static Logger LOGGER = Logger.getLogger(PostgresDAO.class.getName());
@@ -26,6 +28,8 @@ public class PostgresDAO implements ItemDAO {
         executeDDLfromPath(resourcePath + "1_table_steam_item_prices.sql");
         executeDDLfromPath(resourcePath + "1_steam_iteration.sql");
         executeDDLfromPath(resourcePath + "1_table_inventory.sql");
+
+        //all data is already inside the tables
     }
 
     @Override
@@ -192,4 +196,13 @@ public class PostgresDAO implements ItemDAO {
 
         LOGGER.info("Item \""+ItemName+"\" was inserted to inventory.");
     }
+
+    @Override
+    public Item getItem(String ItemName) {
+        ItemCollection collection = new ItemCollection("",false);
+        Item item = new Item(ItemName, collection);
+        //item.setSkinbaronPrice();
+        return item;
+    }
+
 }

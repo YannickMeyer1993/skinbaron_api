@@ -8,8 +8,8 @@ public class ItemTest extends TestCase {
 
     public void testToString() {
         String ItemName = "Kniff";
-        Item item = new Item(ItemName);
-        item.setCollection(new ItemCollection("Cobble",false));
+
+        Item item = new Item(ItemName, new ItemCollection("Cobble",false));
         item.setSteamPrice(new Price(new Timestamp(System.currentTimeMillis()) ,1d, ItemName));
         item.setSkinbaronPrice(new Price(new Timestamp(System.currentTimeMillis()),2d, ItemName));
 

@@ -1,12 +1,8 @@
 package com.company.dataaccessobject;
 
-import com.company.model.Price;
+import com.company.model.Item;
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
-
-import java.io.FileNotFoundException;
-import java.sql.SQLException;
-
 
 public interface ItemDAO {
     void init() throws Exception;
@@ -25,4 +21,5 @@ public interface ItemDAO {
 
    void insertInventoryItem(String ItemName, String InventoryType) throws Exception;
 
+   Item getItem(String ItemName);
 }
