@@ -1,18 +1,17 @@
 package com.company.dataaccessobject;
 
+import com.company.model.Item;
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
 
 import java.io.IOException;
 import java.sql.*;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
 import static com.company.common.PostgresHelper.*;
-import static com.company.common.PostgresHelper.checkIfResultsetIsEmpty;
 
 
 public class PostgresDAO implements ItemDAO {
@@ -26,6 +25,7 @@ public class PostgresDAO implements ItemDAO {
         executeDDLfromPath(resourcePath + "1_table_skinbaron_items.sql");
         executeDDLfromPath(resourcePath + "1_table_steam_item_prices.sql");
         executeDDLfromPath(resourcePath + "1_steam_iteration.sql");
+        executeDDLfromPath(resourcePath + "1_table_inventory.sql");
     }
 
     @Override
@@ -157,17 +157,39 @@ public class PostgresDAO implements ItemDAO {
             throw new Exception("steam.steam_iteration must be initialized.");
         }
 
-        try (Connection connection = getConnection();PreparedStatement pstmt = connection.prepareStatement(SQLinsert, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = getConnection(); PreparedStatement pstmt = connection.prepareStatement(SQLinsert, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setInt(1, iteration);
 
             pstmt.executeUpdate();
             connection.commit();
         }
-        LOGGER.info("Highest steam iteration for today is: "+iteration);
+        LOGGER.info("Highest steam iteration for today is: " + iteration);
     }
 
     @Override
-    public void insertInventoryItem() throws Exception {
+    public void insertInventoryItem(String ItemName, String InventoryType) throws Exception {
+        List<String> name_list = new ArrayList<>();
 
+        try (Connection connection = getConnection();Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery("select name from steam_item_sale.item_informations")) {
+            while (rs.next()) {
+                name_list.add(rs.getString("name"));
+            }
+        }
+
+        if (!name_list.contains(ItemName)) {
+            return;
+        }
+
+        String SQLInsert = "INSERT INTO steam_item_sale.inventory(inv_type,name,still_there) "
+                + "VALUES(?,?,true)";
+
+        try (Connection connection = getConnection(); PreparedStatement pstmt = connection.prepareStatement(SQLInsert, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setString(1, InventoryType);
+            pstmt.setString(2,ItemName);
+            pstmt.execute();
+            connection.commit();
+        }
+
+        LOGGER.info("Item \""+ItemName+"\" was inserted to inventory.");
     }
 }

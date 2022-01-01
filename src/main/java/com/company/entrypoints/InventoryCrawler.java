@@ -1,10 +1,14 @@
 package com.company.entrypoints;
 
+import com.company.SkinbaronAPI;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
@@ -12,32 +16,30 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import java.io.IOException;
-import java.sql.*;
-import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
-import java.util.stream.IntStream;
+import java.util.logging.Logger;
 
-import static com.company.SkinbaronAPI.getSales;
-import static com.company.SkinbaronAPI.getSkinbaronInventory;
+import static com.company.helper.readPasswordFromFile;
 
 public class InventoryCrawler {
-    public InventoryCrawler() {
 
+    private final static Logger LOGGER = Logger.getLogger(SkinbaronAPI.class.getName());
 
+    public static void main(String[] args) throws Exception {
         clearInventory();
-        getSkinbaronInventory(secret, conn);
-        getItemsfromInventory(conn, "https://steamcommunity.com/inventory/76561198286004569/730/2?count=2000", "steam");
-        getItemsfromInventory(conn, "https://steamcommunity.com/inventory/76561198331678576/730/2?count=2000", "smurf");
-        getSales(secret, conn);
-        getStorageItems(conn);
+        getSkinbaronInventory();
+        getItemsfromInventory("https://steamcommunity.com/inventory/76561198286004569/730/2?count=2000", "steam");
+        getItemsfromInventory("https://steamcommunity.com/inventory/76561198331678576/730/2?count=2000", "smurf");
+        getSkinbaronSales();
+        getStorageItems();
     }
 
-    public void clearInventory() {
+    public static void clearInventory() {
         //TODO send Request to CLEAR InventoryLists
     }
 
-    public void getItemsfromInventory(Connection conn, String inventoryurl, String type) throws Exception {
+    public static void getItemsfromInventory(String inventoryurl, String type) throws Exception {
 
         HttpGet httpGet = new HttpGet(inventoryurl);
 
@@ -50,32 +52,14 @@ public class InventoryCrawler {
 
         String resultJSON = EntityUtils.toString(response.getEntity());
 
-        String SQLInsert = "INSERT INTO steam_item_sale.inventory(inv_type,name,still_there,amount) "
-                + "VALUES(?,?,true,?)";
-
         HashMap<String, Integer> map = getItemsFromSteamHTTP(resultJSON);
 
-        try (PreparedStatement pstmt = conn.prepareStatement(SQLInsert, Statement.RETURN_GENERATED_KEYS)) {
-
-            for (String key : map.keySet()) {
-                pstmt.setString(1, type);
-                pstmt.setString(2, key);
-                pstmt.setInt(3, map.get(key));
-                pstmt.addBatch();
-            }
-
-            int[] updateCounts = pstmt.executeBatch();
-            int amount_inserts = IntStream.of(updateCounts).sum();
-            if (amount_inserts != 0) {
-                System.out.println(amount_inserts + " items were inserted!");
-            }
+        for (String key : map.keySet()) {
+            //TODO send request to insert InventoryItem
         }
-        conn.commit();
-
-
     }
 
-    public void getStorageItems(Connection conn) throws IOException {
+    public static void getStorageItems() throws IOException {
 
         HttpGet httpGet = new HttpGet("https://steamcommunity.com/inventory/76561198286004569/730/2?count=2000");
 
@@ -91,85 +75,51 @@ public class InventoryCrawler {
 
         JSONArray assets_array = result_json.getJSONArray("descriptions");
 
-        String SQLInsert = "INSERT INTO steam_item_sale.inventory(inv_type,name,still_there,amount) "
-                + "VALUES('storage',?,true,?)";
-        try (PreparedStatement pstmt = conn.prepareStatement(SQLInsert, Statement.RETURN_GENERATED_KEYS)) {
+        for (Object jo : assets_array) {
+            if (jo instanceof JSONObject) {
 
-            for (Object jo : assets_array) {
-                if (jo instanceof JSONObject) {
-
-                    //if (!((JSONObject) jo).keySet().contains("fraudwarnings")){
-                    //    continue;
-                    //}
-                    if (!"Storage Unit".equals(((JSONObject) jo).getString("market_hash_name"))) {
-                        continue;
-                    }
-                    String amount_string = ((JSONObject) jo).getJSONArray("descriptions").getJSONObject(2).getString("value");
-                    int amount = Integer.parseInt(amount_string.split(" ")[3]);
-
-                    if (amount == 0) {
-                        continue;
-                    }
-
-                    String item_name = ((String) (((JSONObject) jo).getJSONArray("fraudwarnings").get(0))).split("''")[1];
-
-                    if ("Broken Fang Case".equals(item_name)) {
-                        item_name = "Operation Broken Fang Case";
-                    }
-
-                    if ("Sticker | Tyloo 2020".equals(item_name)) {
-                        item_name = "Sticker | TYLOO | 2020 RMR";
-                    }
-
-                    if ("Wildfire Case".equals(item_name)) {
-                        item_name = "Operation Wildfire Case";
-                    }
-
-                    if ("Sticker | Navi 2020".equals(item_name)) {
-                        item_name = "Sticker | Natus Vincere | 2020 RMR";
-                    }
-
-                    if ("Operation Breakout".equals(item_name)) {
-                        item_name = "Operation Breakout Weapon Case";
-                    }
-
-                    if ("Vanguard Case".equals(item_name)) {
-                        item_name = "Operation Vanguard Weapon Case";
-                    }
-
-                    List<String> name_list = new ArrayList<>();
-
-                    try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select name from steam_item_sale.item_informations")) {
-                        while (rs.next()) {
-                            name_list.add(rs.getString("name"));
-                        }
-                    }
-
-                    if (!name_list.contains(item_name)) {
-                        continue;
-                    }
-
-                    pstmt.setString(1, item_name);
-                    pstmt.setInt(2, amount);
-                    pstmt.addBatch();
+                if (!"Storage Unit".equals(((JSONObject) jo).getString("market_hash_name"))) {
+                    continue;
                 }
+                String amount_string = ((JSONObject) jo).getJSONArray("descriptions").getJSONObject(2).getString("value");
+                int amount = Integer.parseInt(amount_string.split(" ")[3]);
+
+                if (amount == 0) {
+                    continue;
+                }
+
+                String item_name = ((String) (((JSONObject) jo).getJSONArray("fraudwarnings").get(0))).split("''")[1];
+
+                if ("Broken Fang Case".equals(item_name)) {
+                    item_name = "Operation Broken Fang Case";
+                }
+
+                if ("Sticker | Tyloo 2020".equals(item_name)) {
+                    item_name = "Sticker | TYLOO | 2020 RMR";
+                }
+
+                if ("Wildfire Case".equals(item_name)) {
+                    item_name = "Operation Wildfire Case";
+                }
+
+                if ("Sticker | Navi 2020".equals(item_name)) {
+                    item_name = "Sticker | Natus Vincere | 2020 RMR";
+                }
+
+                if ("Operation Breakout".equals(item_name)) {
+                    item_name = "Operation Breakout Weapon Case";
+                }
+
+                if ("Vanguard Case".equals(item_name)) {
+                    item_name = "Operation Vanguard Weapon Case";
+                }
+
+                //TODO send request #amount times to insert Inventory Item
             }
-
-            int[] updateCounts = pstmt.executeBatch();
-            int amount_inserts = IntStream.of(updateCounts).sum();
-            if (amount_inserts != 0) {
-                System.out.println(amount_inserts + " items were inserted!");
-            }
-
-            conn.commit();
-
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
         }
     }
 
-
-    public HashMap<String, Integer> getItemsFromSteamHTTP(String resultJSON) {
+    public static HashMap<String, Integer> getItemsFromSteamHTTP(String resultJSON) {
         JSONObject result_json = (JSONObject) new JSONTokener(resultJSON).nextValue();
 
         HashMap<String, Integer> assets_map = new HashMap<>();
@@ -177,7 +127,6 @@ public class InventoryCrawler {
 
         JSONArray assets_array = result_json.getJSONArray("assets");
         JSONArray descriptions_array = result_json.getJSONArray("descriptions");
-
 
         for (Object jo : assets_array) {
             if (jo instanceof JSONObject) {
@@ -211,5 +160,83 @@ public class InventoryCrawler {
         }
 
         return map;
+    }
+
+    /**
+     * items_per_page is not needed
+     * @throws Exception breaks if error occurs
+     */
+    public static void getSkinbaronInventory() throws Exception {
+
+        String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
+
+        LOGGER.info("Skinbaron API GetInventory has been called.");
+        String jsonInputString = "{\"apikey\": \"" + secret + "\",\"type\": 2,\"appid\": 730,\"items_per_page\": 50}";
+
+        HttpPost httpPost = new HttpPost("https://api.skinbaron.de/GetInventory");
+        httpPost.setHeader("Content.Type", "application/json");
+        httpPost.setHeader("x-requested-with", "XMLHttpRequest");
+        httpPost.setHeader("Accept", "application/json");
+
+        HttpClient client = HttpClients.custom()
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setCookieSpec(CookieSpecs.STANDARD).build())
+                .build();
+
+        HttpEntity entity = new ByteArrayEntity(jsonInputString.getBytes(StandardCharsets.UTF_8));
+        httpPost.setEntity(entity);
+        HttpResponse response = client.execute(httpPost);
+        String result = EntityUtils.toString(response.getEntity());
+
+        JSONObject resultJson = (JSONObject) new JSONTokener(result).nextValue();
+        JSONArray resultArray = ((JSONArray) resultJson.get("items"));
+
+        for (Object o : resultArray) {
+            if (o instanceof JSONObject) {
+                String name = ((JSONObject) o).getString("marketHashName");
+                //TODO send request to insert Inventory Item
+            }
+        }
+    }
+
+    public static void getSkinbaronSales() throws Exception {
+
+        String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
+
+        LOGGER.info("Skinbaron API GetSales has been called.");
+        String id = null;
+
+        HttpPost httpPost = new HttpPost("https://api.skinbaron.de/GetSales");
+        httpPost.setHeader("Content.Type", "application/json");
+        httpPost.setHeader("x-requested-with", "XMLHttpRequest");
+        httpPost.setHeader("Accept", "application/json");
+
+        HttpClient client = HttpClients.custom()
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setCookieSpec(CookieSpecs.STANDARD).build())
+                .build();
+
+        while (true) {
+            String jsonInputString = "{\"apikey\": \"" + secret + "\",\"type\":2,\"appid\": 730,\"items_per_page\": 50" + (id == null ? "" : ",\"after_saleid\":\"" + id + "\"") + "}";
+
+            HttpEntity entity = new ByteArrayEntity(jsonInputString.getBytes(StandardCharsets.UTF_8));
+            httpPost.setEntity(entity);
+            HttpResponse response = client.execute(httpPost);
+            String result = EntityUtils.toString(response.getEntity());
+
+            JSONObject resultJson = (JSONObject) new JSONTokener(result).nextValue();
+            JSONArray resultArray = ((JSONArray) resultJson.get("response"));
+
+            if (resultArray.length() == 0) {
+                break;
+            }
+            for (Object o : resultArray) {
+                if (o instanceof JSONObject) {
+                    String name = ((JSONObject) o).getString("name");
+                    id = ((JSONObject) o).getString("id");
+                    //TODO send request to insert Inventory Item
+                }
+            }
+        }
     }
 }
