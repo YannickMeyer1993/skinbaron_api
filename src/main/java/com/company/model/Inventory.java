@@ -4,7 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Inventory {
-    private List<Item> InventoryList = new ArrayList();
+    private final List<Item> InventoryList;
+
+    public Inventory() {
+        InventoryList = new ArrayList<>();
+    }
 
     public void add(Item item) {
         InventoryList.add(item);

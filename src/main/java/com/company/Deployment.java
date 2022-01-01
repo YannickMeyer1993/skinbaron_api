@@ -21,9 +21,9 @@ import static com.company.helper.*;
 
 public class Deployment {
 
-    private static Map<String,  String[]> map = new HashMap<>();
-    private static Map<String,  String[]> mapWears = new HashMap<>();
-    private static int max_iteration = 20000;
+    private static final Map<String,  String[]> map = new HashMap<>();
+    private static final Map<String,  String[]> mapWears = new HashMap<>();
+    private static final int max_iteration = 20000;
 
     public static void crawlItemInformations() throws IOException, InterruptedException, SQLException {
 
@@ -285,7 +285,7 @@ public class Deployment {
 
         File directoryPath = new File(DDLDirectory);
         File[] filesList = directoryPath.listFiles();
-        if (filesList.length==0){
+        if (filesList == null || filesList.length==0){
             return;
         }
         String Sql;
@@ -294,7 +294,7 @@ public class Deployment {
             Sql = "";
             try (Scanner sc = new Scanner(new File(file.getPath()))) {
                 while (sc.hasNext()) {
-                    Sql = Sql + "\n" + sc.nextLine();
+                    Sql = Sql.concat("\n" + sc.nextLine());
                 }
                 try (Statement st = conn.createStatement()) {
                     st.execute(Sql);

@@ -12,8 +12,8 @@ public class Item {
     private Price SkinbaronPrice = null;
     private List<String> exists_in_inventory = null;
 
-    private List<SkinbaronItem> SkinbaronItemList = new ArrayList<>();
-    private List<SteamPrice> SteamPriceList = new ArrayList<>();
+    private final List<SkinbaronItem> SkinbaronItemList = new ArrayList<>();
+    private final List<SteamPrice> SteamPriceList = new ArrayList<>();
 
     public Item(String ItemName) {
         this.name = ItemName;

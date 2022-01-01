@@ -39,7 +39,7 @@ import static com.company.common.PostgresHelper.getConnection;
 
 public class SteamCrawler {
 
-    private static double conversionRateUSDinEUR;
+    private static Double conversionRateUSDinEUR;
     private final static Logger LOGGER = Logger.getLogger(SteamCrawler.class.getName());
     private final static int MAX_ITERATION = 1600;
 
