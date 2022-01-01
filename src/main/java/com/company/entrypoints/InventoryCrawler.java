@@ -90,30 +90,20 @@ public class InventoryCrawler {
 
                 String item_name = ((String) (((JSONObject) jo).getJSONArray("fraudwarnings").get(0))).split("''")[1];
 
-                if ("Broken Fang Case".equals(item_name)) {
-                    item_name = "Operation Broken Fang Case";
+                switch (item_name){
+                    case "Broken Fang Case":item_name = "Operation Broken Fang Case";
+                        break;
+                    case "Sticker | Tyloo 2020":item_name = "Sticker | TYLOO | 2020 RMR";
+                        break;
+                    case "Wildfire Case":item_name = "Operation Wildfire Case";
+                        break;
+                    case "Sticker | Navi 2020":item_name = "Sticker | Natus Vincere | 2020 RMR";
+                        break;
+                    case "Operation Breakout":item_name = "Operation Breakout Weapon Case";
+                        break;
+                    case "Vanguard Case":item_name = "Operation Vanguard Weapon Case";
+                        break;
                 }
-
-                if ("Sticker | Tyloo 2020".equals(item_name)) {
-                    item_name = "Sticker | TYLOO | 2020 RMR";
-                }
-
-                if ("Wildfire Case".equals(item_name)) {
-                    item_name = "Operation Wildfire Case";
-                }
-
-                if ("Sticker | Navi 2020".equals(item_name)) {
-                    item_name = "Sticker | Natus Vincere | 2020 RMR";
-                }
-
-                if ("Operation Breakout".equals(item_name)) {
-                    item_name = "Operation Breakout Weapon Case";
-                }
-
-                if ("Vanguard Case".equals(item_name)) {
-                    item_name = "Operation Vanguard Weapon Case";
-                }
-
                 //TODO send request #amount times to insert Inventory Item
             }
         }
