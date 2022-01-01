@@ -9,7 +9,7 @@ import static com.company.helper.getConnection;
 import static com.company.helper.readPasswordFromFile;
 
 public class CheckLiveSkinbaron {
-    public static void main(String[] args) throws Exception {
+    public CheckLiveSkinbaron() throws Exception {
 
         int wait_counter = 3;
 

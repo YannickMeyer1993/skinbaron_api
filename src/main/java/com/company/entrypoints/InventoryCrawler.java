@@ -24,7 +24,7 @@ import static com.company.helper.readPasswordFromFile;
 
 public class InventoryCrawler {
 
-    private final static Logger LOGGER = Logger.getLogger(SkinbaronAPI.class.getName());
+    private final static Logger LOGGER = Logger.getLogger(InventoryCrawler.class.getName());
 
     public static void main(String[] args) throws Exception {
         clearInventory();
