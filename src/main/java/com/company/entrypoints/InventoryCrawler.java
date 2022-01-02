@@ -1,6 +1,5 @@
 package com.company.entrypoints;
 
-import com.company.SkinbaronAPI;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -20,7 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
-import static com.company.helper.readPasswordFromFile;
+import static com.company.old.helper.readPasswordFromFile;
 
 public class InventoryCrawler {
 

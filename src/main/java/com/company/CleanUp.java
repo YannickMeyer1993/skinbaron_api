@@ -3,7 +3,7 @@ package com.company;
 import java.io.FileNotFoundException;
 import java.sql.*;
 
-import static com.company.helper.getConnection;
+import static com.company.old.helper.getConnection;
 
 public class CleanUp {
 

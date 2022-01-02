@@ -23,9 +23,9 @@ import java.util.Scanner;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
-import static com.company.SteamCrawler.setRowInOverviewTable;
-import static com.company.helper.getConnection;
-import static com.company.helper.readPasswordFromFile;
+import static com.company.old.SteamCrawler.setRowInOverviewTable;
+import static com.company.old.helper.getConnection;
+import static com.company.old.helper.readPasswordFromFile;
 
 public class SkinbaronAPI {
 
@@ -119,7 +119,7 @@ public class SkinbaronAPI {
         for (Object o : resultArray) {
             if (o instanceof JSONObject) {
                 name = ((JSONObject) o).getString("name");
-                saleId = ((JSONObject) o).getString("saleid");
+                //saleId = ((JSONObject) o).getString("saleid");
                 price = ((JSONObject) o).getDouble("price");
             }
 

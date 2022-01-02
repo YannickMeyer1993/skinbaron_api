@@ -21,6 +21,10 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -29,6 +33,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
@@ -42,14 +48,18 @@ public class SteamCrawler {
     private static Double conversionRateUSDinEUR;
     private final static Logger LOGGER = Logger.getLogger(SteamCrawler.class.getName());
     private final static int MAX_ITERATION = 1600;
+    private static final String UrlPost = "http://localhost:8080/api/v1/AddSteamPrice";
 
     public static void main(String[] args) throws Exception {
+
+        java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF);
+        java.util.logging.Logger.getLogger("org.apache.http").setLevel(Level.OFF);
 
         PostgresDAO dao = new PostgresDAO();
 
         conversionRateUSDinEUR = getConversionRateToEuro("USD");
 
-        int iteration = dao.getHighestSteamIteration();
+        int iteration = dao.getHighestSteamIteration()+1;
 
         LOGGER.info("Starting with iteration: " + iteration);
 
@@ -134,9 +144,22 @@ public class SteamCrawler {
                 return false;
             }
 
-            List<SteamPrice> list = new ArrayList<>();
             SteamPrice price = new SteamPrice(name,Date.valueOf(LocalDate.now()),price_eur,quantity);
-            //TODO send to API
+            //TODO over class SteamPrice
+
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            JSONObject JsonObject = new JSONObject();
+
+            JsonObject.put("itemname", name);
+            JsonObject.put("price", price_eur);
+            JsonObject.put("quantity",quantity);
+
+            HttpEntity<String> request = new HttpEntity<>(JsonObject.toString(), headers);
+
+            restTemplate.postForObject(UrlPost, request, String.class);
+
         } //End of for each Item
         return true;
     }

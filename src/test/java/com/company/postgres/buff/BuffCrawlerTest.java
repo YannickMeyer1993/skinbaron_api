@@ -4,7 +4,7 @@ import junit.framework.TestCase;
 
 import java.sql.Connection;
 
-import static com.company.helper.getConnection;
+import static com.company.old.helper.getConnection;
 
 public class BuffCrawlerTest extends TestCase {
 

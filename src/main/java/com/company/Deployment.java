@@ -17,7 +17,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.logging.Level;
 
-import static com.company.helper.*;
+import static com.company.old.helper.*;
 
 public class Deployment {
 

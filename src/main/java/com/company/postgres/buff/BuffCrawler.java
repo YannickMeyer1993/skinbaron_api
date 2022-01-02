@@ -19,7 +19,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.company.helper.getConnection;
+import static com.company.old.helper.getConnection;
 
 public class BuffCrawler {
 

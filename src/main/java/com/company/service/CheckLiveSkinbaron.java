@@ -5,8 +5,8 @@ import org.postgresql.util.PSQLException;
 import java.sql.Connection;
 
 import static com.company.SkinbaronAPI.buyItem;
-import static com.company.helper.getConnection;
-import static com.company.helper.readPasswordFromFile;
+import static com.company.old.helper.getConnection;
+import static com.company.old.helper.readPasswordFromFile;
 
 public class CheckLiveSkinbaron {
     public CheckLiveSkinbaron() throws Exception {

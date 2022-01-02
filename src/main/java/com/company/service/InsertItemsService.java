@@ -7,6 +7,7 @@ import com.company.model.SteamPrice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.HashMap;
 
@@ -24,7 +25,7 @@ public class InsertItemsService {
         this.itemdao = itemdao;
     }
 
-    public void addNewSteamPrice( SteamPrice price) throws Exception {
+    public void addNewSteamPrice(@RequestBody SteamPrice price) throws Exception {
         itemdao.addSteamPrice(price);
     }
 

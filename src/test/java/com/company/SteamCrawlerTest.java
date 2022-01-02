@@ -9,8 +9,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Scanner;
 
-import static com.company.SteamCrawler.*;
-import static com.company.helper.getConnection;
+import static com.company.old.SteamCrawler.*;
+import static com.company.old.helper.getConnection;
 
 public class SteamCrawlerTest extends TestCase {
 

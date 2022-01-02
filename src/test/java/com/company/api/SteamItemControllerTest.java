@@ -2,6 +2,7 @@ package com.company.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +56,7 @@ public class SteamItemControllerTest {
         restTemplate.postForObject(url, request, String.class);
 
         assertFalse(checkIfResultsetIsEmpty("Select * from steam.steam_prices where name='"+uuid+"'"));
-        executeDDL("DELETE FROM steam.steam_prices where name='"+uuid+"'");
+        //executeDDL("DELETE FROM steam.steam_prices where name='"+uuid+"'");
 
     }
 }

@@ -4,10 +4,10 @@ import java.sql.Connection;
 
 import static com.company.SkinbaronAPI.getSales;
 import static com.company.SkinbaronAPI.getSkinbaronInventory;
-import static com.company.SteamCrawler.getItemsfromInventory;
-import static com.company.SteamCrawler.getStorageItems;
-import static com.company.helper.getConnection;
-import static com.company.helper.readPasswordFromFile;
+import static com.company.old.SteamCrawler.getItemsfromInventory;
+import static com.company.old.SteamCrawler.getStorageItems;
+import static com.company.old.helper.getConnection;
+import static com.company.old.helper.readPasswordFromFile;
 
 public class Inventory {
 

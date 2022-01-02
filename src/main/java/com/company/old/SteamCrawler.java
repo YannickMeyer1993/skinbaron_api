@@ -1,5 +1,6 @@
-package com.company;
+package com.company.old;
 
+import com.company.CurrencyConverter;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
@@ -27,7 +28,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import static com.company.SteamItemPriceChecker.getSteamPriceForGivenName;
-import static com.company.helper.getConnection;
+import static com.company.old.helper.getConnection;
 
 
 public class SteamCrawler {

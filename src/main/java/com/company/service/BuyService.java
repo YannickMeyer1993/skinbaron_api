@@ -16,7 +16,7 @@ import org.json.JSONTokener;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
 
-import static com.company.helper.readPasswordFromFile;
+import static com.company.old.helper.readPasswordFromFile;
 
 public class BuyService {
     private final static Logger LOGGER = Logger.getLogger(SkinbaronAPI.class.getName());

@@ -4,8 +4,8 @@ import junit.framework.TestCase;
 import org.json.JSONException;
 
 import java.sql.*;
-import static com.company.helper.getConnection;
-import static com.company.helper.readPasswordFromFile;
+import static com.company.old.helper.getConnection;
+import static com.company.old.helper.readPasswordFromFile;
 import static com.company.SkinbaronAPI.*;
 
 public class SkinbaronAPITest extends TestCase {

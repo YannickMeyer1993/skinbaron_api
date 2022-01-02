@@ -5,8 +5,8 @@ import java.util.Scanner;
 
 import static com.company.SkinbaronAPI.*;
 import static com.company.SteamItemPriceChecker.getSteamPriceForGivenName;
-import static com.company.helper.getConnection;
-import static com.company.helper.readPasswordFromFile;
+import static com.company.old.helper.getConnection;
+import static com.company.old.helper.readPasswordFromFile;
 import static java.lang.Math.min;
 
 public class Bot {
@@ -17,7 +17,7 @@ public class Bot {
 
         Scanner sc= new Scanner(System.in);    //System.in is a standard input stream
         System.out.println("Buy items (true/false)?");
-        Boolean buy_item =sc.nextBoolean();
+        boolean buy_item =sc.nextBoolean();
 
         Connection conn = getConnection();
 
@@ -35,7 +35,7 @@ public class Bot {
 
                     while (rs.next()) {
                         if (!rs.getBoolean("steam_preis_aktuell")) {
-                            Double recent_price = getSteamPriceForGivenName(rs.getString("name"), conn);
+                            double recent_price = getSteamPriceForGivenName(rs.getString("name"), conn);
                             if (recent_price < rs.getDouble("steam_preis")) {
                                 System.out.println("Steam Preis nicht mehr aktuell für Item " + rs.getString("name") + ".");
                                 continue;
