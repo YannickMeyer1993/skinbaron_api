@@ -1,6 +1,7 @@
 package com.company.service;
 
 import com.company.SkinbaronAPI;
+import com.company.entrypoints.SteamCrawler;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -12,6 +13,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
@@ -19,7 +21,7 @@ import java.util.logging.Logger;
 import static com.company.old.helper.readPasswordFromFile;
 
 public class BuyService {
-    private final static Logger LOGGER = Logger.getLogger(SkinbaronAPI.class.getName());
+    private static org.slf4j.Logger logger = LoggerFactory.getLogger(SkinbaronAPI.class);
 
     public static void buyItem(String name,  String itemId, Double price) throws Exception {
 
@@ -50,23 +52,23 @@ public class BuyService {
                 if ("[\"some offer(s) are already sold\"]".equals(resultJson.get("generalErrors").toString())
                         || "[\"count mismatch - maybe some offers have been sold or canceled or you provided wrong saleids\"]".equals(resultJson.get("generalErrors").toString())
                 ) {
-                    LOGGER.info("Item is already gone.");
+                    logger.info("Item is already gone.");
                 }
                 return;
             }
 
             if (!resultJson.has("items")) {
-                LOGGER.info("There was no json query 'result' found in:");
-                LOGGER.info(resultJson.toString());
+                logger.info("There was no json query 'result' found in:");
+                logger.info(resultJson.toString());
                 return;
             }
 
             //success
-            LOGGER.info("Item \"" + name + "\" was bought for " + price +".");
+            logger.info("Item \"" + name + "\" was bought for " + price +".");
         } catch (Exception exp) {
-            LOGGER.info("Error while buying item "+name);
-            LOGGER.info("Received Message:");
-            LOGGER.info(result);
+            logger.info("Error while buying item "+name);
+            logger.info("Received Message:");
+            logger.info(result);
             throw new Exception();
         }
     }

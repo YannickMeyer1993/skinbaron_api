@@ -1,24 +1,20 @@
 package com.company.dataaccessobject;
 
-import com.company.model.Item;
-import com.company.model.ItemCollection;
-import com.company.model.SkinbaronItem;
-import com.company.model.SteamPrice;
+import com.company.model.*;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
-import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
 import static com.company.common.PostgresHelper.*;
 
 @Repository("postgres")
 public class PostgresDAO implements ItemDAO {
-
-    private final static Logger LOGGER = Logger.getLogger(PostgresDAO.class.getName());
+    
+    private static org.slf4j.Logger logger = LoggerFactory.getLogger(PostgresDAO.class);
 
     public PostgresDAO() throws Exception {
         init();
@@ -75,12 +71,12 @@ public class PostgresDAO implements ItemDAO {
                 pstmt.addBatch();
             }
 
-            LOGGER.info(pstmt.toString());
+            logger.info(pstmt.toString());
 
             int[] updateCounts = pstmt.executeBatch();
             int amountInserts = IntStream.of(updateCounts).sum();
             if (amountInserts != 0) {
-                LOGGER.info(amountInserts + " items were inserted!");
+                logger.info(amountInserts + " items were inserted!");
             }
 
             connection.commit();
@@ -106,12 +102,12 @@ public class PostgresDAO implements ItemDAO {
                 pstmt.addBatch();
             }
 
-            LOGGER.info(pstmt.toString());
+            logger.info(pstmt.toString());
 
             int[] updateCounts = pstmt.executeBatch();
             int amountInserts = IntStream.of(updateCounts).sum();
             if (amountInserts != 0) {
-                LOGGER.info(amountInserts + " items were inserted!");
+                logger.info(amountInserts + " items were inserted!");
             }
 
             connection.commit();
@@ -152,7 +148,7 @@ public class PostgresDAO implements ItemDAO {
             connection.commit();
         }
 
-        LOGGER.info("table steam_iteration has a new entry for today.");
+        logger.info("table steam_iteration has a new entry for today.");
 
     }
 
@@ -171,11 +167,11 @@ public class PostgresDAO implements ItemDAO {
             pstmt.executeUpdate();
             connection.commit();
         }
-        LOGGER.info("Highest steam iteration for today is: " + iteration);
+        logger.info("Highest steam iteration for today is: " + iteration);
     }
 
     @Override
-    public void addInventoryItem(String ItemName, String InventoryType) throws Exception {
+    public void addInventoryItem(InventoryItem item) throws Exception {
 
         String sql = "select name from steam_item_sale.item_informations where name =?;";
         String SQLInsert = "INSERT INTO steam.inventory(inv_type,name,still_there) "
@@ -184,25 +180,30 @@ public class PostgresDAO implements ItemDAO {
         try (Connection connection = getConnection();
              PreparedStatement pstmt1 = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
              PreparedStatement pstmt2 = connection.prepareStatement(SQLInsert, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt1.setString(1, ItemName);
+            pstmt1.setString(1, item.getItemName());
 
             ResultSet rs = pstmt1.executeQuery();
             if (!rs.next()) {
                 return;
             }
 
-            pstmt2.setString(1, InventoryType);
-            pstmt2.setString(2,ItemName);
+            pstmt2.setString(1, item.getInventoryType());
+            pstmt2.setString(2, item.getItemName());
             pstmt2.execute();
             connection.commit();
         }
 
-        LOGGER.info("Item \""+ItemName+"\" was inserted to inventory.");
+        logger.info("Item \""+ item.getItemName() +"\" was inserted to inventory.");
     }
 
     @Override
     public Item getItem(String ItemName) {
         ItemCollection collection = new ItemCollection("",false);
         return new Item(ItemName, collection);
+    }
+
+    @Override
+    public void deleteInventoryItems() throws Exception {
+        executeDDL("TRUNCATE TABLE steam.inventory");
     }
 }

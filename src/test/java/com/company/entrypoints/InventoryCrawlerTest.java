@@ -7,11 +7,17 @@ import static com.company.common.PostgresHelper.executeDDL;
 
 public class InventoryCrawlerTest extends TestCase {
 
-    public void testsendRequestInsertInventoryItem() throws Exception {
+    public void testTestSendRequestInsertInventoryItem() throws Exception {
         InventoryCrawler crawler = new InventoryCrawler();
         crawler.sendRequestInsertInventoryItem("AWP | Dragon Lore (Factory New)","Test Inv");
         assertFalse(checkIfResultsetIsEmpty("select * from steam.inventory where name = 'AWP | Dragon Lore (Factory New)' and inv_type='Test Inv'"));
-        //executeDDL("DELETE FROM steam.inventory where name = 'AWP | Dragon Lore (Factory New)'");
+        executeDDL("DELETE FROM steam.inventory where name = 'AWP | Dragon Lore (Factory New)'");
     }
 
+    public void testClearInventory() throws Exception {
+        InventoryCrawler crawler = new InventoryCrawler();
+        crawler.clearInventory();
+        assertTrue(checkIfResultsetIsEmpty("select * from steam.inventory"));
+
+    }
 }

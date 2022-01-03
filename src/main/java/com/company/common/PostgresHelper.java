@@ -1,24 +1,19 @@
 package com.company.common;
 
-import com.company.SkinbaronAPI;
+import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
 import java.util.Properties;
-import java.util.Scanner;
-import java.util.logging.Logger;
 
 import static com.company.common.PasswordHelper.readPasswordFromFile;
 
 public class PostgresHelper {
 
-    private final static Logger LOGGER = Logger.getLogger(PostgresHelper.class.getName());
+    private static org.slf4j.Logger logger = LoggerFactory.getLogger(PostgresHelper.class);
 
     public static Connection getConnection() throws SQLException, FileNotFoundException {
         String url = "jdbc:postgresql://localhost/postgres";
@@ -33,20 +28,23 @@ public class PostgresHelper {
         props.setProperty("password", password);
         Connection conn = DriverManager.getConnection(url, props);
         conn.setAutoCommit(false);
-        System.out.println("Successfully Connected.");
+        logger.info("Successfully Connected.");
         return conn;
     }
 
     public static void executeDDL(String statement) throws IOException, SQLException {
 
 
-        LOGGER.info(statement);
+        logger.info(statement);
         String[] sqls = statement.split(";");
 
-        LOGGER.info("Amount Statements: "+sqls.length);
+        if (sqls.length > 1){
+            logger.info("Amount Statements: "+sqls.length);
+        }
+        
         for (String sql : sqls) {
             try (Connection connection = getConnection(); Statement st = connection.createStatement()) {
-                LOGGER.info(sql);
+                logger.info(sql);
                 st.execute(sql);
                 connection.commit();
             }
@@ -68,13 +66,13 @@ public class PostgresHelper {
             return;
         }
 
-        LOGGER.info(fileContent);
+        logger.info(fileContent);
         String[] sqls = fileContent.split(";");
 
-        LOGGER.info("Amount Statements: "+sqls.length);
+        logger.info("Amount Statements: "+sqls.length);
         for (String sql : sqls) {
             try (Connection connection = getConnection(); Statement st = connection.createStatement()) {
-                LOGGER.info(sql);
+                logger.info(sql);
                 st.execute(sql);
                 connection.commit();
             }
@@ -82,7 +80,7 @@ public class PostgresHelper {
     }
 
     public static Boolean checkIfResultsetIsEmpty(String statement) throws Exception {
-        LOGGER.info(statement);
+        logger.info(statement);
         try(Connection connection = getConnection(); Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(statement)) {
             return !rs.next();
         }

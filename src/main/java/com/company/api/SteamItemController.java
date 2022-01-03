@@ -1,23 +1,18 @@
 package com.company.api;
 
+import com.company.model.InventoryItem;
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
 import com.company.service.InsertItemsService;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PostMapping;
-
-import java.util.logging.Logger;
-
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class SteamItemController {
     private final InsertItemsService insertItemsService;
 
-    private final static Logger LOGGER = Logger.getLogger(SteamItemController.class.getName());
-
+    private static org.slf4j.Logger logger = LoggerFactory.getLogger(SteamItemController.class);
 
     @Autowired
     public SteamItemController(InsertItemsService insertItemsService) {
@@ -38,7 +33,13 @@ public class SteamItemController {
 
     @RequestMapping("api/v1/AddInventoryItem")
     @PostMapping
-    public void addInventoryItem(@RequestBody String ItemName,@RequestBody String InventoryType) throws Exception {
-        insertItemsService.addInventoryItem(ItemName,InventoryType);
+    public void addInventoryItem(@RequestBody InventoryItem item) throws Exception {
+        insertItemsService.addInventoryItem(item);
+    }
+
+    @RequestMapping("api/v1/DeleteInventoryItems")
+    @PostMapping
+    public void DeleteInventoryItems() throws Exception {
+        insertItemsService.deleteInventoryItems();
     }
 }

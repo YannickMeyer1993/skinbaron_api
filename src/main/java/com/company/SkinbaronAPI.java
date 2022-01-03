@@ -13,6 +13,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -20,7 +22,6 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
-import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
 import static com.company.old.SteamCrawler.setRowInOverviewTable;
@@ -29,7 +30,7 @@ import static com.company.old.helper.readPasswordFromFile;
 
 public class SkinbaronAPI {
 
-    private final static Logger LOGGER = Logger.getLogger(SkinbaronAPI.class.getName());
+    private final static Logger LOGGER = LoggerFactory.getLogger(SkinbaronAPI.class);
 
     public static int resendTradeOffers(String secret) throws Exception {
 

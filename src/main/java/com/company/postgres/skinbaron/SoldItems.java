@@ -1,6 +1,7 @@
 package com.company.postgres.skinbaron;
 
 import com.company.SkinbaronAPI;
+import com.company.entrypoints.SteamCrawler;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -12,6 +13,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
@@ -25,7 +27,7 @@ import static com.company.old.helper.readPasswordFromFile;
 
 public class SoldItems {
 
-    private final static Logger LOGGER = Logger.getLogger(SkinbaronAPI.class.getName());
+    private static org.slf4j.Logger logger = LoggerFactory.getLogger(SkinbaronAPI.class);
 
     public static int get() throws Exception {
         Connection conn = getConnection();
@@ -36,7 +38,7 @@ public class SoldItems {
         int counter = 0;
         while (true) {
 
-            LOGGER.info("Skinbaron API getSales has been called. (" + counter + ")");
+            logger.info("Skinbaron API getSales has been called. (" + counter + ")");
             String jsonInputString = "{\"apikey\": \"" + secret + "\",\"type\":4,\"appid\": 730,\"items_per_page\": 50" + (queryId == null ? "" : ",\"after_saleid\":\"" + queryId + "\"") + ",sort_order:2}";
 
             HttpPost httpPost = new HttpPost("https://api.skinbaron.de/GetSales");

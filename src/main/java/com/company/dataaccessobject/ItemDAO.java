@@ -1,5 +1,6 @@
 package com.company.dataaccessobject;
 
+import com.company.model.InventoryItem;
 import com.company.model.Item;
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
@@ -19,8 +20,10 @@ public interface ItemDAO {
 
    void setHighestSteamIteration(int iteration) throws Exception;
 
-   void addInventoryItem(String ItemName, String InventoryType) throws Exception;
+   void addInventoryItem(InventoryItem item) throws Exception;
 
    Item getItem(String ItemName);
+
+   void deleteInventoryItems() throws Exception;
 
 }

@@ -42,33 +42,21 @@ import org.slf4j.Logger;
 
 import static com.company.SteamItemPriceChecker.getSteamPriceForGivenName;
 import static com.company.common.CurrencyHelper.getConversionRateToEuro;
+import static com.company.common.LoggingHelper.setUpClass;
 import static com.company.common.PostgresHelper.getConnection;
 
 
 public class SteamCrawler {
 
     private static Double conversionRateUSDinEUR;
-    //private final static Logger logger = Logger.getLogger(SteamCrawler.class.getName());
     private static Logger logger = LoggerFactory.getLogger(SteamCrawler.class);
 
     private final static int MAX_ITERATION = 1600;
     private static final String UrlPost = "http://localhost:8080/api/v1/AddSteamPrice";
 
-    public static void setUpClass() {
-        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger("org.apache.http");
-        root.setLevel(ch.qos.logback.classic.Level.ERROR);
-        ch.qos.logback.classic.Logger root2 = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger("com.gargoylesoftware.htmlunit");
-        root2.setLevel(ch.qos.logback.classic.Level.ERROR);
-
-        //...
-    }
-
     public static void main(String[] args) throws Exception {
 
         setUpClass();
-
-        //java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF);
-        //java.util.logging.Logger.getLogger("org.apache.http").setLevel(Level.OFF);
 
         PostgresDAO dao = new PostgresDAO();
 
@@ -94,6 +82,7 @@ public class SteamCrawler {
                 wait_counter = 3;
 
             } catch (Exception e) {
+                logger.info(e.getMessage());
                 wait_counter++;
             }
         }
@@ -123,7 +112,7 @@ public class SteamCrawler {
 
         List<DomElement> Items = page.getByXPath("//*[contains(@class, 'market_listing_row market_recent_listing_row market_listing_searchresult')]");
 
-       logger.info("There are " + Items.size() + " Items on the Steam Page no. " + pageNumber + "\n");
+       logger.info("There are " + Items.size() + " Items on the Steam Page no. " + pageNumber);
 
         if (Items.size() == 0) {
             return false;

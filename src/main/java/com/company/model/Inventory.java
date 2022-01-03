@@ -4,17 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Inventory {
-    private final List<Item> InventoryList;
+    private final List<InventoryItem> InventoryList;
 
     public Inventory() {
         InventoryList = new ArrayList<>();
     }
 
-    public void add(Item item) {
+    public void add(InventoryItem item) {
         InventoryList.add(item);
     }
 
-    public List<Item> getInventoryList() {
+    public List<InventoryItem> getInventoryList() {
         return InventoryList;
     }
 
@@ -22,11 +22,4 @@ public class Inventory {
         InventoryList.clear();
     }
 
-    public double getValue() {
-        double value = 0d;
-        for (Item item: InventoryList) {
-            value = value + item.getSteamPrice().getValue();
-        }
-        return value;
-    }
 }

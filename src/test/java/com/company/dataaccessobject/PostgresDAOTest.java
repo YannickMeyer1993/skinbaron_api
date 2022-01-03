@@ -1,13 +1,10 @@
 package com.company.dataaccessobject;
 
+import com.company.model.InventoryItem;
 import com.company.model.Price;
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
 import junit.framework.TestCase;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
 
 import static com.company.common.PostgresHelper.*;
 
@@ -58,14 +55,15 @@ public class PostgresDAOTest extends TestCase {
 
     public void testAddInventoryItem() throws Exception {
         PostgresDAO dao = new PostgresDAO();
-        dao.addInventoryItem("AWP | Dragon Lore (Factory New)","Test Inv");
+        InventoryItem item = new InventoryItem("AWP | Dragon Lore (Factory New)","Test Inv");
+        dao.addInventoryItem(item);
         assertFalse(checkIfResultsetIsEmpty("select * from steam.inventory where name = 'AWP | Dragon Lore (Factory New)' and inv_type='Test Inv'"));
         executeDDL("DELETE FROM steam.inventory where name = 'AWP | Dragon Lore (Factory New)'");
     }
 
     public void testAddInventoryItemNegative() throws Exception {
         PostgresDAO dao = new PostgresDAO();
-        dao.addInventoryItem("Wrong Name","Test Inv");
+        InventoryItem item = new InventoryItem("Wrong Name","Test Inv");
         assertTrue(checkIfResultsetIsEmpty("select * from steam.inventory where name = 'Wrong Name'"));
     }
 }

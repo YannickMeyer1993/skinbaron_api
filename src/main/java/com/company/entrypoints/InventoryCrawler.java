@@ -13,6 +13,7 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
@@ -20,16 +21,17 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.UUID;
-import java.util.logging.Logger;
 
+import static com.company.common.LoggingHelper.setUpClass;
 import static com.company.old.helper.readPasswordFromFile;
 
 public class InventoryCrawler {
 
-    private final static Logger LOGGER = Logger.getLogger(InventoryCrawler.class.getName());
+    private static org.slf4j.Logger logger = LoggerFactory.getLogger(InventoryCrawler.class);
 
     public static void main(String[] args) throws Exception {
+        setUpClass();
+
         InventoryCrawler crawler = new InventoryCrawler();
         crawler.clearInventory();
         crawler.getSkinbaronInventory();
@@ -40,11 +42,20 @@ public class InventoryCrawler {
     }
 
     public void clearInventory() {
-        //TODO send Request to CLEAR InventoryLists
+        String url = "http://localhost:8080/api/v1/DeleteInventoryItems";
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(null, headers);
+
+        restTemplate.postForObject(url, request, String.class);
     }
 
     public void getItemsfromInventory(String inventoryurl, String type) throws Exception {
 
+        logger.info("Getting inventory: "+type);
         HttpGet httpGet = new HttpGet(inventoryurl);
 
         HttpClient client = HttpClients.custom()
@@ -164,7 +175,7 @@ public class InventoryCrawler {
 
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 
-        LOGGER.info("Skinbaron API GetInventory has been called.");
+        logger.info("Skinbaron API GetInventory has been called.");
         String jsonInputString = "{\"apikey\": \"" + secret + "\",\"type\": 2,\"appid\": 730,\"items_per_page\": 50}";
 
         HttpPost httpPost = new HttpPost("https://api.skinbaron.de/GetInventory");
@@ -197,7 +208,7 @@ public class InventoryCrawler {
 
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 
-        LOGGER.info("Skinbaron API GetSales has been called.");
+        logger.info("Skinbaron API GetSales has been called.");
         String id = null;
 
         HttpPost httpPost = new HttpPost("https://api.skinbaron.de/GetSales");
@@ -242,7 +253,6 @@ public class InventoryCrawler {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         JSONObject JsonObject = new JSONObject();
-        UUID uuid = UUID.randomUUID();
 
         JsonObject.put("itemname", ItemName);
         JsonObject.put("inventorytype", InventoryType);

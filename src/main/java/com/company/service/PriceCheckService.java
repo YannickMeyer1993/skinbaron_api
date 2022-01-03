@@ -1,11 +1,13 @@
 package com.company.service;
 
+import com.company.entrypoints.SteamCrawler;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.dom4j.Document;
 import org.dom4j.io.SAXReader;
+import org.slf4j.LoggerFactory;
 
 import java.io.StringReader;
 import java.util.List;
@@ -16,7 +18,7 @@ import static com.company.common.CurrencyHelper.getConversionRateToEuro;
 public class PriceCheckService {
     private static Double conversionRateUSDinEUR;
 
-    private final static Logger LOGGER = Logger.getLogger(PriceCheckService.class.getName());
+    private static org.slf4j.Logger logger = LoggerFactory.getLogger(PriceCheckService.class);
 
     public double getSteamPriceForGivenName(String hash_name) throws Exception {
 
@@ -77,7 +79,7 @@ public class PriceCheckService {
                 return_price = 0.0;
             }
 
-        LOGGER.info("Item \""+hash_name+"\" costs "+return_price+" Euro.");
+        logger.info("Item \""+hash_name+"\" costs "+return_price+" Euro.");
         Thread.sleep((long) 20*1000);
         return return_price;
     }
