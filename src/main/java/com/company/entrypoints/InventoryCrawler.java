@@ -13,10 +13,14 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import static com.company.old.helper.readPasswordFromFile;
@@ -26,19 +30,20 @@ public class InventoryCrawler {
     private final static Logger LOGGER = Logger.getLogger(InventoryCrawler.class.getName());
 
     public static void main(String[] args) throws Exception {
-        clearInventory();
-        getSkinbaronInventory();
-        getItemsfromInventory("https://steamcommunity.com/inventory/76561198286004569/730/2?count=2000", "steam");
-        getItemsfromInventory("https://steamcommunity.com/inventory/76561198331678576/730/2?count=2000", "smurf");
-        getSkinbaronSales();
-        getStorageItems();
+        InventoryCrawler crawler = new InventoryCrawler();
+        crawler.clearInventory();
+        crawler.getSkinbaronInventory();
+        crawler.getItemsfromInventory("https://steamcommunity.com/inventory/76561198286004569/730/2?count=2000", "steam");
+        crawler.getItemsfromInventory("https://steamcommunity.com/inventory/76561198331678576/730/2?count=2000", "smurf");
+        crawler.getSkinbaronSales();
+        crawler.getStorageItems();
     }
 
-    public static void clearInventory() {
+    public void clearInventory() {
         //TODO send Request to CLEAR InventoryLists
     }
 
-    public static void getItemsfromInventory(String inventoryurl, String type) throws Exception {
+    public void getItemsfromInventory(String inventoryurl, String type) throws Exception {
 
         HttpGet httpGet = new HttpGet(inventoryurl);
 
@@ -54,11 +59,11 @@ public class InventoryCrawler {
         HashMap<String, Integer> map = getItemsFromSteamHTTP(resultJSON);
 
         for (String key : map.keySet()) {
-            sendRequest(key,type);
+            sendRequestInsertInventoryItem(key,type);
         }
     }
 
-    public static void getStorageItems() throws IOException {
+    public void getStorageItems() throws IOException {
 
         HttpGet httpGet = new HttpGet("https://steamcommunity.com/inventory/76561198286004569/730/2?count=2000");
 
@@ -103,12 +108,12 @@ public class InventoryCrawler {
                     case "Vanguard Case":item_name = "Operation Vanguard Weapon Case";
                         break;
                 }
-                sendRequest(item_name,"storage");
+                sendRequestInsertInventoryItem(item_name,"storage");
             }
         }
     }
 
-    public static HashMap<String, Integer> getItemsFromSteamHTTP(String resultJSON) {
+    public HashMap<String, Integer> getItemsFromSteamHTTP(String resultJSON) {
         JSONObject result_json = (JSONObject) new JSONTokener(resultJSON).nextValue();
 
         HashMap<String, Integer> assets_map = new HashMap<>();
@@ -155,7 +160,7 @@ public class InventoryCrawler {
      * items_per_page is not needed
      * @throws Exception breaks if error occurs
      */
-    public static void getSkinbaronInventory() throws Exception {
+    public void getSkinbaronInventory() throws Exception {
 
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 
@@ -183,12 +188,12 @@ public class InventoryCrawler {
         for (Object o : resultArray) {
             if (o instanceof JSONObject) {
                 String name = ((JSONObject) o).getString("marketHashName");
-                sendRequest(name,"skinbaron");
+                sendRequestInsertInventoryItem(name,"skinbaron");
             }
         }
     }
 
-    public static void getSkinbaronSales() throws Exception {
+    public void getSkinbaronSales() throws Exception {
 
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 
@@ -224,13 +229,26 @@ public class InventoryCrawler {
                     String name = ((JSONObject) o).getString("name");
                     id = ((JSONObject) o).getString("id");
 
-                    sendRequest(name,"skinbaron sales");
+                    sendRequestInsertInventoryItem(name,"skinbaron sales");
                 }
             }
         }
     }
 
-    private static void sendRequest(String ItemName, String InventoryType) {
-        //TODO send request
+    public void sendRequestInsertInventoryItem(String ItemName, String InventoryType) {
+        String url = "http://localhost:8080/api/v1/AddInventoryItem";
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        JSONObject JsonObject = new JSONObject();
+        UUID uuid = UUID.randomUUID();
+
+        JsonObject.put("itemname", ItemName);
+        JsonObject.put("inventorytype", InventoryType);
+
+        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(JsonObject.toString(), headers);
+
+        restTemplate.postForObject(url, request, String.class);
     }
 }

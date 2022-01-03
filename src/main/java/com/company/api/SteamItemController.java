@@ -35,4 +35,10 @@ public class SteamItemController {
     public void addNewSteamPrice(@RequestBody SteamPrice price) throws Exception {
         insertItemsService.addNewSteamPrice(price);
     }
+
+    @RequestMapping("api/v1/AddInventoryItem")
+    @PostMapping
+    public void addInventoryItem(@RequestBody String ItemName,@RequestBody String InventoryType) throws Exception {
+        insertItemsService.addInventoryItem(ItemName,InventoryType);
+    }
 }

@@ -19,7 +19,8 @@ public interface ItemDAO {
 
    void setHighestSteamIteration(int iteration) throws Exception;
 
-   void insertInventoryItem(String ItemName, String InventoryType) throws Exception;
+   void addInventoryItem(String ItemName, String InventoryType) throws Exception;
 
    Item getItem(String ItemName);
+
 }

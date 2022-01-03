@@ -17,8 +17,6 @@ public class InsertItemsService {
     //TODO update Item Object
 
     private final ItemDAO itemdao;
-    //Map with all items
-    private final HashMap<String, Item> capitalCities = new HashMap<String, Item>();
 
     @Autowired
     public InsertItemsService(@Qualifier("postgres") ItemDAO itemdao) {
@@ -33,4 +31,7 @@ public class InsertItemsService {
         itemdao.addSkinbaronItem(skinbaronitem);
     }
 
+    public void addInventoryItem(String ItemName,String InventoryType) throws Exception {
+        itemdao.addInventoryItem(ItemName,InventoryType);
+    }
 }

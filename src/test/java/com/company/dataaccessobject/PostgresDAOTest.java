@@ -55,4 +55,17 @@ public class PostgresDAOTest extends TestCase {
 
         assertEquals(dao.getHighestSteamIteration(),iteration);
     }
+
+    public void testAddInventoryItem() throws Exception {
+        PostgresDAO dao = new PostgresDAO();
+        dao.addInventoryItem("AWP | Dragon Lore (Factory New)","Test Inv");
+        assertFalse(checkIfResultsetIsEmpty("select * from steam.inventory where name = 'AWP | Dragon Lore (Factory New)' and inv_type='Test Inv'"));
+        executeDDL("DELETE FROM steam.inventory where name = 'AWP | Dragon Lore (Factory New)'");
+    }
+
+    public void testAddInventoryItemNegative() throws Exception {
+        PostgresDAO dao = new PostgresDAO();
+        dao.addInventoryItem("Wrong Name","Test Inv");
+        assertTrue(checkIfResultsetIsEmpty("select * from steam.inventory where name = 'Wrong Name'"));
+    }
 }

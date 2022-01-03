@@ -56,7 +56,7 @@ public class SteamItemControllerTest {
         restTemplate.postForObject(url, request, String.class);
 
         assertFalse(checkIfResultsetIsEmpty("Select * from steam.steam_prices where name='"+uuid+"'"));
-        //executeDDL("DELETE FROM steam.steam_prices where name='"+uuid+"'");
+        executeDDL("DELETE FROM steam.steam_prices where name='"+uuid+"'");
 
     }
 }

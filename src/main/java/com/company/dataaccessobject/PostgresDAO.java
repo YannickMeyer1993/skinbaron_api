@@ -20,8 +20,12 @@ public class PostgresDAO implements ItemDAO {
 
     private final static Logger LOGGER = Logger.getLogger(PostgresDAO.class.getName());
 
+    public PostgresDAO() throws Exception {
+        init();
+    }
+
     @Override
-    public void init() throws SQLException, IOException {
+    public void init() throws Exception {
         String resourcePath = "src/main/resources/PostgresDAO/";
         executeDDLfromPath(resourcePath + "0_schema.sql");
         executeDDLfromPath(resourcePath + "1_table_skinbaron_items.sql");
@@ -171,26 +175,25 @@ public class PostgresDAO implements ItemDAO {
     }
 
     @Override
-    public void insertInventoryItem(String ItemName, String InventoryType) throws Exception {
-        List<String> name_list = new ArrayList<>();
+    public void addInventoryItem(String ItemName, String InventoryType) throws Exception {
 
-        try (Connection connection = getConnection();Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery("select name from steam_item_sale.item_informations")) {
-            while (rs.next()) {
-                name_list.add(rs.getString("name"));
-            }
-        }
-
-        if (!name_list.contains(ItemName)) {
-            return;
-        }
-
-        String SQLInsert = "INSERT INTO steam_item_sale.inventory(inv_type,name,still_there) "
+        String sql = "select name from steam_item_sale.item_informations where name =?;";
+        String SQLInsert = "INSERT INTO steam.inventory(inv_type,name,still_there) "
                 + "VALUES(?,?,true)";
 
-        try (Connection connection = getConnection(); PreparedStatement pstmt = connection.prepareStatement(SQLInsert, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt.setString(1, InventoryType);
-            pstmt.setString(2,ItemName);
-            pstmt.execute();
+        try (Connection connection = getConnection();
+             PreparedStatement pstmt1 = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+             PreparedStatement pstmt2 = connection.prepareStatement(SQLInsert, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt1.setString(1, ItemName);
+
+            ResultSet rs = pstmt1.executeQuery();
+            if (!rs.next()) {
+                return;
+            }
+
+            pstmt2.setString(1, InventoryType);
+            pstmt2.setString(2,ItemName);
+            pstmt2.execute();
             connection.commit();
         }
 
@@ -200,9 +203,6 @@ public class PostgresDAO implements ItemDAO {
     @Override
     public Item getItem(String ItemName) {
         ItemCollection collection = new ItemCollection("",false);
-        Item item = new Item(ItemName, collection);
-        //item.setSkinbaronPrice();
-        return item;
+        return new Item(ItemName, collection);
     }
-
 }
