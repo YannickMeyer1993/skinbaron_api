@@ -2,7 +2,6 @@ package com.company.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,11 +21,11 @@ import static com.company.common.PostgresHelper.executeDDL;
 import static junit.framework.TestCase.*;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(SteamItemController.class)
+@WebMvcTest(ItemController.class)
 public class SteamItemControllerTest {
 
     @MockBean
-    SteamItemController steamItemController;
+    ItemController steamItemController;
 
     ObjectMapper objectMapper = new ObjectMapper();
 

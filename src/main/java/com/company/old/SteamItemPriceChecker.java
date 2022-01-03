@@ -1,31 +1,34 @@
-package com.company.service;
+package com.company.old;
 
-import com.company.entrypoints.SteamCrawler;
+import com.company.CurrencyConverter;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.dom4j.Document;
 import org.dom4j.io.SAXReader;
-import org.slf4j.LoggerFactory;
 
 import java.io.StringReader;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.List;
-import java.util.logging.Logger;
 
 import static com.company.common.CurrencyHelper.getConversionRateToEuro;
 
-public class PriceCheckService {
+public class SteamItemPriceChecker {
+
     private static Double conversionRateUSDinEUR;
 
-    private static org.slf4j.Logger logger = LoggerFactory.getLogger(PriceCheckService.class);
-
-    public double getSteamPriceForGivenName(String hash_name) throws Exception {
+    public static double getSteamPriceForGivenName(String hash_name, Connection conn) throws Exception {
 
         conversionRateUSDinEUR = getConversionRateToEuro("USD");
 
         double return_price = 0.0;
         boolean item_found = false;
+
+        String SQLinsert = "INSERT INTO steam_item_sale.steam_item_prices(name,quantity,price_euro) "
+                + "VALUES(?,?,?)";
 
         String url = "https://steamcommunity.com/market/search?q="+java.net.URLDecoder.decode(hash_name, "UTF-8")+"#p1_default_desc";
 
@@ -39,6 +42,7 @@ public class PriceCheckService {
 
         List<DomElement> Items = page.getByXPath("//*[contains(@class, 'market_listing_row market_recent_listing_row market_listing_searchresult')]");
 
+        try (PreparedStatement pstmt = conn.prepareStatement(SQLinsert, Statement.RETURN_GENERATED_KEYS)) {
             for (DomElement element : Items) {
                 String item_xml = element.asXml();
                 Document document = new SAXReader().read(new StringReader(item_xml));
@@ -52,6 +56,7 @@ public class PriceCheckService {
                 if (name == null) {
                     throw new Exception("Fehlerhafte Ergebnisse für Skin: " + hash_name);
                 }
+
 
                 java.text.DecimalFormat df = new java.text.DecimalFormat("0.00");
                 df.setRoundingMode(java.math.RoundingMode.HALF_DOWN);
@@ -71,15 +76,27 @@ public class PriceCheckService {
                     return_price = price_euro;
                 }
 
-                //TODO send request to add Steam Price
+                pstmt.setString(1, name);
+                pstmt.setInt(2, quantity);
+                pstmt.setDouble(3, price_euro);
+                pstmt.addBatch();
             }
+            int[] updateCounts = pstmt.executeBatch();
+            System.out.println(updateCounts.length + " items were inserted!");
+            conn.commit();
 
             if (!item_found){
-                //TODO send request to add Steam Price
+                pstmt.setString(1, hash_name);
+                pstmt.setInt(2, 0);
+                pstmt.setDouble(3, 0.0);
+                int rowsAffected = pstmt.executeUpdate();
+                conn.commit();
                 return_price = 0.0;
-            }
 
-        logger.info("Item \""+hash_name+"\" costs "+return_price+" Euro.");
+            }
+        }
+
+        System.out.println("Item \""+hash_name+"\" costs "+return_price+" Euro.");
         Thread.sleep((long) 20*1000);
         return return_price;
     }

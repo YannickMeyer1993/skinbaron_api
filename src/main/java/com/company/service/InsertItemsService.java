@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Service
 public class InsertItemsService {
 
-    //TODO update Item Object
-
     private final ItemDAO itemdao;
 
     @Autowired

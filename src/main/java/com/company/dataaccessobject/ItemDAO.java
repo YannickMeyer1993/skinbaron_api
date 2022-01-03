@@ -26,4 +26,11 @@ public interface ItemDAO {
 
    void deleteInventoryItems() throws Exception;
 
+   void cleanUp() throws Exception;
+
+   void crawlWearValues() throws Exception;
+
+   void crawlItemInformations() throws Exception;
+
+
 }

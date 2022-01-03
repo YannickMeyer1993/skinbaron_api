@@ -76,6 +76,8 @@ public class InventoryCrawler {
 
     public void getStorageItems() throws IOException {
 
+        logger.info("Getting storage items");
+
         HttpGet httpGet = new HttpGet("https://steamcommunity.com/inventory/76561198286004569/730/2?count=2000");
 
         HttpClient client = HttpClients.custom()

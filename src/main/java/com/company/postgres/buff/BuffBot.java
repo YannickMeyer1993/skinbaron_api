@@ -6,7 +6,7 @@ import java.sql.Statement;
 
 import static com.company.postgres.buff.BuffCrawler.getBuffItem;
 import static com.company.postgres.buff.BuffCrawler.getBuffItemNoExterior;
-import static com.company.SteamItemPriceChecker.getSteamPriceForGivenName;
+import static com.company.old.SteamItemPriceChecker.getSteamPriceForGivenName;
 import static com.company.old.helper.getConnection;
 
 public class BuffBot {

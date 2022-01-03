@@ -18,7 +18,4 @@ public class DeploymentTest extends TestCase {
         crawlWearValues();
     }
 
-    public void testExecuteDDLs() throws Exception {
-        executeDDLs();
-    }
 }

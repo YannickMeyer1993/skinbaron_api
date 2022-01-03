@@ -66,4 +66,10 @@ public class PostgresDAOTest extends TestCase {
         InventoryItem item = new InventoryItem("Wrong Name","Test Inv");
         assertTrue(checkIfResultsetIsEmpty("select * from steam.inventory where name = 'Wrong Name'"));
     }
+
+    public void testCrawlItemInformations() throws Exception {
+        PostgresDAO dao = new PostgresDAO();
+        dao.crawlItemInformations();
+        assertFalse(checkIfResultsetIsEmpty("select * from steam.item_informations"));
+    }
 }

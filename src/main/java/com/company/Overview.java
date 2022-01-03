@@ -1,11 +1,13 @@
 package com.company;
 
+import com.company.old.Inventory;
+
 import java.sql.*;
 import java.util.Scanner;
 
 import static com.company.SkinbaronAPI.getBalance;
 import static com.company.old.SteamCrawler.setRowInOverviewTable;
-import static com.company.SteamItemPriceChecker.getSteamPriceForGivenName;
+import static com.company.old.SteamItemPriceChecker.getSteamPriceForGivenName;
 import static com.company.old.helper.getConnection;
 import static com.company.old.helper.readPasswordFromFile;
 import static java.lang.Math.min;

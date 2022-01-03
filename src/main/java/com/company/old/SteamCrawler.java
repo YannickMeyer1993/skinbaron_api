@@ -20,7 +20,6 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.event.Level;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -31,7 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static com.company.SteamItemPriceChecker.getSteamPriceForGivenName;
+import static com.company.old.SteamItemPriceChecker.getSteamPriceForGivenName;
 import static com.company.old.helper.getConnection;
 
 

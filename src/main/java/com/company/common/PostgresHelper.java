@@ -28,7 +28,7 @@ public class PostgresHelper {
         props.setProperty("password", password);
         Connection conn = DriverManager.getConnection(url, props);
         conn.setAutoCommit(false);
-        logger.info("Successfully Connected.");
+        logger.debug("Successfully Connected.");
         return conn;
     }
 

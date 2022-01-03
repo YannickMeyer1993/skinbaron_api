@@ -9,13 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-public class SteamItemController {
+public class ItemController {
     private final InsertItemsService insertItemsService;
 
-    private static org.slf4j.Logger logger = LoggerFactory.getLogger(SteamItemController.class);
+    private static org.slf4j.Logger logger = LoggerFactory.getLogger(ItemController.class);
 
     @Autowired
-    public SteamItemController(InsertItemsService insertItemsService) {
+    public ItemController(InsertItemsService insertItemsService) {
         this.insertItemsService = insertItemsService;
     }
 

@@ -278,36 +278,4 @@ public class Deployment {
 
     }
 
-    public static void executeDDLs() throws Exception {
-
-        try(Connection conn = getConnection()){
-        String DDLDirectory = "C:\\Users\\Yanni\\IdeaProjects\\steamsale\\src\\main\\resources\\ddls";
-
-        File directoryPath = new File(DDLDirectory);
-        File[] filesList = directoryPath.listFiles();
-        if (filesList == null || filesList.length==0){
-            return;
-        }
-        String Sql;
-        for (File file : filesList) {
-            System.out.println("Execute file: "+file.getPath());
-            Sql = "";
-            try (Scanner sc = new Scanner(new File(file.getPath()))) {
-                while (sc.hasNext()) {
-                    Sql = Sql.concat("\n" + sc.nextLine());
-                }
-                try (Statement st = conn.createStatement()) {
-                    st.execute(Sql);
-                    conn.commit();
-                }
-            } catch (PSQLException ex) {
-                System.out.println(Sql);
-                printSQLException(ex);
-                throw new Exception("Something went wrong!");
-
-            }
-        }
-
-        }
-    }
 }
