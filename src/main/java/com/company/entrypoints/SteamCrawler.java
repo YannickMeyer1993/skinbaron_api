@@ -21,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -34,9 +35,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+//import java.util.logging.Level;
+//import java.util.logging.Logger;
 import java.util.stream.IntStream;
+import org.slf4j.Logger;
 
 import static com.company.SteamItemPriceChecker.getSteamPriceForGivenName;
 import static com.company.common.CurrencyHelper.getConversionRateToEuro;
@@ -46,14 +48,27 @@ import static com.company.common.PostgresHelper.getConnection;
 public class SteamCrawler {
 
     private static Double conversionRateUSDinEUR;
-    private final static Logger LOGGER = Logger.getLogger(SteamCrawler.class.getName());
+    //private final static Logger logger = Logger.getLogger(SteamCrawler.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(SteamCrawler.class);
+
     private final static int MAX_ITERATION = 1600;
     private static final String UrlPost = "http://localhost:8080/api/v1/AddSteamPrice";
 
+    public static void setUpClass() {
+        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger("org.apache.http");
+        root.setLevel(ch.qos.logback.classic.Level.ERROR);
+        ch.qos.logback.classic.Logger root2 = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger("com.gargoylesoftware.htmlunit");
+        root2.setLevel(ch.qos.logback.classic.Level.ERROR);
+
+        //...
+    }
+
     public static void main(String[] args) throws Exception {
 
-        java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF);
-        java.util.logging.Logger.getLogger("org.apache.http").setLevel(Level.OFF);
+        setUpClass();
+
+        //java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF);
+        //java.util.logging.Logger.getLogger("org.apache.http").setLevel(Level.OFF);
 
         PostgresDAO dao = new PostgresDAO();
 
@@ -61,13 +76,13 @@ public class SteamCrawler {
 
         int iteration = dao.getHighestSteamIteration()+1;
 
-        LOGGER.info("Starting with iteration: " + iteration);
+        logger.info("Starting with iteration: " + iteration);
 
         int wait_counter = 3;
         boolean iteration_successfull = false;
         while (iteration < MAX_ITERATION || !iteration_successfull) {
             try {
-                LOGGER.info("Waiting for " + Math.pow(2, wait_counter) + " seconds");
+                logger.info("Waiting for " + Math.pow(2, wait_counter) + " seconds");
                 Thread.sleep((long) (Math.pow(2, wait_counter) * 1000));
 
                 iteration_successfull = getItemsforSteamPageNumber(iteration);
@@ -82,17 +97,17 @@ public class SteamCrawler {
                 wait_counter++;
             }
         }
-        LOGGER.info("Reached maximum iteration.");
+        logger.info("Reached maximum iteration.");
     }
 
     public static @NotNull Boolean getItemsforSteamPageNumber(int pageNumber) throws Exception {
         Connection conn = getConnection();
 
-       LOGGER.info("Iteration: " + pageNumber);
+       logger.info("Iteration: " + pageNumber);
 
         if (pageNumber % 50 == 0) {
             conversionRateUSDinEUR = getConversionRateToEuro("USD");
-            LOGGER.info("Conversion Factor from USD to EUR: " + conversionRateUSDinEUR);
+            logger.info("Conversion Factor from USD to EUR: " + conversionRateUSDinEUR);
         }
 
         String url = "https://steamcommunity.com/market/search?appid=730&currency=3#p" + pageNumber + "_popular_desc";
@@ -108,7 +123,7 @@ public class SteamCrawler {
 
         List<DomElement> Items = page.getByXPath("//*[contains(@class, 'market_listing_row market_recent_listing_row market_listing_searchresult')]");
 
-       LOGGER.info("There are " + Items.size() + " Items on the Steam Page no. " + pageNumber + "\n");
+       logger.info("There are " + Items.size() + " Items on the Steam Page no. " + pageNumber + "\n");
 
         if (Items.size() == 0) {
             return false;

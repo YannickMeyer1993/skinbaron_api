@@ -18,6 +18,10 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.sql.*;
@@ -34,7 +38,7 @@ import static com.company.old.helper.getConnection;
 public class SteamCrawler {
 
     private static double conversionFromUSDtoEUR;
-
+    private static Logger logger = LoggerFactory.getLogger(SteamCrawler.class);
 
     static {
         try {
