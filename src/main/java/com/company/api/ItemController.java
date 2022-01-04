@@ -22,11 +22,15 @@ public class ItemController {
         this.insertItemsService = insertItemsService;
     }
 
+    /**
+     * @param item Skinbaron Item to insert
+     * @return the id if it's not known yet else null
+     * @throws Exception don't care
+     */
     @ResponseBody
     @PostMapping("AddSkinbaronItem")
     public String addNewSkinbaronItem(@RequestBody SkinbaronItem item) throws Exception {
         return insertItemsService.addNewSkinbaronItem(item);
-        //TODO response is missing
     }
 
 

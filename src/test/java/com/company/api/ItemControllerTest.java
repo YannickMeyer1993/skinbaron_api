@@ -77,8 +77,7 @@ public class ItemControllerTest {
 
         ResponseEntity<String> responseEntityStr = restTemplate.postForEntity(url, request, String.class);
 
-        System.out.println("TEST"+responseEntityStr.getBody());
-
+        assertEquals((responseEntityStr.getBody()!=null?responseEntityStr.getBody().trim():null),uuid.toString().trim());
         assertFalse(checkIfResultsetIsEmpty("Select * from steam.skinbaron_items where id='"+uuid+"'"));
         executeDDL("DELETE FROM steam.skinbaron_items where id='"+uuid+"'");
 

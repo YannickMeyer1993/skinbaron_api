@@ -105,7 +105,7 @@ public class PostgresDAO implements ItemDAO {
             connection.commit();
         }
 
-        return (amountInserts==50?last_id:"");
+        return (amountInserts==1?last_id:"");
     }
 
     @Override
