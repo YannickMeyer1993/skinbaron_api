@@ -4,11 +4,14 @@ import com.company.model.InventoryItem;
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
 import com.company.service.InsertItemsService;
+import org.eclipse.jetty.http.MetaData;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/api/v1")
 public class ItemController {
     private final InsertItemsService insertItemsService;
 
@@ -19,25 +22,27 @@ public class ItemController {
         this.insertItemsService = insertItemsService;
     }
 
-    @PostMapping
-    public void addNewSkinbaronItem(@RequestBody SkinbaronItem item) throws Exception {
-        insertItemsService.addNewSkinbaronItem(item);
+    @ResponseBody
+    @PostMapping("AddSkinbaronItem")
+    public String addNewSkinbaronItem(@RequestBody SkinbaronItem item) throws Exception {
+        return insertItemsService.addNewSkinbaronItem(item);
+        //TODO response is missing
     }
 
 
-    @RequestMapping("api/v1/AddSteamPrice")
+    @RequestMapping("AddSteamPrice")
     @PostMapping
     public void addNewSteamPrice(@RequestBody SteamPrice price) throws Exception {
         insertItemsService.addNewSteamPrice(price);
     }
 
-    @RequestMapping("api/v1/AddInventoryItem")
+    @RequestMapping("AddInventoryItem")
     @PostMapping
     public void addInventoryItem(@RequestBody InventoryItem item) throws Exception {
         insertItemsService.addInventoryItem(item);
     }
 
-    @RequestMapping("api/v1/DeleteInventoryItems")
+    @RequestMapping("DeleteInventoryItems")
     @PostMapping
     public void DeleteInventoryItems() throws Exception {
         insertItemsService.deleteInventoryItems();

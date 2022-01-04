@@ -23,8 +23,8 @@ public class InsertItemsService {
         itemdao.addSteamPrice(price);
     }
 
-    public void addNewSkinbaronItem(SkinbaronItem skinbaronitem) throws Exception {
-        itemdao.addSkinbaronItem(skinbaronitem);
+    public String addNewSkinbaronItem(@RequestBody SkinbaronItem skinbaronitem) throws Exception {
+        return itemdao.addSkinbaronItem(skinbaronitem);
     }
 
     public void addInventoryItem(@RequestBody InventoryItem item) throws Exception {

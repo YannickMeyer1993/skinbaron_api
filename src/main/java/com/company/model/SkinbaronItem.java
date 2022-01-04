@@ -1,5 +1,9 @@
 package com.company.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.time.LocalDate;
+
 public class SkinbaronItem {
     private final String id;
     private Price price;
@@ -19,9 +23,13 @@ public class SkinbaronItem {
         this.price = price;
     }
 
-    public SkinbaronItem(String id, Price price, String name, String stickers, double wear) {
+    public SkinbaronItem(@JsonProperty("id") String id,
+                         @JsonProperty("price") double price,
+                         @JsonProperty("name") String name,
+                         @JsonProperty("sticker")String stickers,
+                         @JsonProperty("wear") double wear) {
         this.id = id;
-        this.price = price;
+        this.price = new Price(java.sql.Date.valueOf(LocalDate.now()),price,name);
         this.name = name;
         Stickers = stickers;
         this.wear = wear;

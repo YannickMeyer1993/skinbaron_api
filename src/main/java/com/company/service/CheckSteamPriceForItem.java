@@ -7,6 +7,7 @@ import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.dom4j.Document;
 import org.dom4j.io.SAXReader;
+import org.springframework.stereotype.Service;
 
 import java.io.StringReader;
 import java.sql.Connection;
@@ -16,6 +17,7 @@ import java.util.List;
 
 import static com.company.common.CurrencyHelper.getConversionRateToEuro;
 
+@Service
 public class CheckSteamPriceForItem {
 
     private static Double conversionRateUSDinEUR;

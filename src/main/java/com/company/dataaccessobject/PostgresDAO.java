@@ -52,13 +52,15 @@ public class PostgresDAO implements ItemDAO {
     }
 
     @Override
-    public void addSkinbaronItem(SkinbaronItem item) throws Exception {
+    public String addSkinbaronItem(SkinbaronItem item) throws Exception {
         ArrayList<SkinbaronItem> list = new ArrayList<>();
         list.add(item);
-        addSkinbaronItems(list);
+        return addSkinbaronItems(list);
     }
 
-    public void addSkinbaronItems(List<SkinbaronItem> items) throws Exception {
+    public String addSkinbaronItems(List<SkinbaronItem> items) throws Exception {
+        int amountInserts;
+        String last_id = null;
         String SQLUpsert = "WITH\n" +
                 "    to_be_upserted (id,name,price,stickers,wear) AS (\n" +
                 "        VALUES\n" +
@@ -88,18 +90,22 @@ public class PostgresDAO implements ItemDAO {
                 pstmt.setString(4, item.getStickers());
                 pstmt.setDouble(5, item.getWear());
                 pstmt.addBatch();
+
+                last_id = item.getId();
             }
 
             logger.info(pstmt.toString());
 
             int[] updateCounts = pstmt.executeBatch();
-            int amountInserts = IntStream.of(updateCounts).sum();
+            amountInserts = IntStream.of(updateCounts).sum();
             if (amountInserts != 0) {
                 logger.info(amountInserts + " items were inserted!");
             }
 
             connection.commit();
         }
+
+        return (amountInserts==50?last_id:"");
     }
 
     @Override

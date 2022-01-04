@@ -27,7 +27,7 @@ public class PostgresDAOTest extends TestCase {
     public void testAddSkinbaronItem() throws Exception {
         PostgresDAO dao = new PostgresDAO();
         String ItemName = "Item Name";
-        SkinbaronItem item = new SkinbaronItem("testTestAddSkinbaronItem",new Price(null,0d, ItemName),ItemName,"Keine Sticker",0d);
+        SkinbaronItem item = new SkinbaronItem("testTestAddSkinbaronItem",0d,ItemName,"",0d);
         dao.addSkinbaronItem(item);
         assertFalse(checkIfResultsetIsEmpty("select * from steam.skinbaron_items where id = 'testTestAddSkinbaronItem'"));
         executeDDL("DELETE from steam.skinbaron_items where id = 'testTestAddSkinbaronItem'");
@@ -71,5 +71,18 @@ public class PostgresDAOTest extends TestCase {
         PostgresDAO dao = new PostgresDAO();
         dao.crawlItemInformations();
         assertFalse(checkIfResultsetIsEmpty("select * from steam.item_informations"));
+    }
+
+    public void testcleanUp() throws Exception {
+        PostgresDAO dao = new PostgresDAO();
+        dao.cleanUp();
+    }
+
+    public void testTestAddSkinbaronItem() throws Exception {
+        PostgresDAO dao = new PostgresDAO();
+        SkinbaronItem item = new SkinbaronItem("FakeID",3d,"AWP Drachlore","Keine",0.12345d);
+        dao.addSkinbaronItem(item);
+        assertFalse(checkIfResultsetIsEmpty("select * from steam.skinbaron_items where id='FakeID' and name='AWP Drachlore'"));
+        executeDDL("delete from steam.skinbaron_items where id='FakeID' and name='AWP Drachlore'");
     }
 }

@@ -4,11 +4,12 @@ import com.company.model.InventoryItem;
 import com.company.model.Item;
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
+import org.apache.xpath.operations.Bool;
 
 public interface ItemDAO {
     void init() throws Exception;
 
-    void addSkinbaronItem(SkinbaronItem item) throws Exception;
+    String addSkinbaronItem(SkinbaronItem item) throws Exception;
 
     void addSteamPrice(SteamPrice price) throws Exception;
 
