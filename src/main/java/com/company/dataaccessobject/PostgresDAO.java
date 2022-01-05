@@ -20,7 +20,6 @@ import java.util.logging.Level;
 import java.util.stream.IntStream;
 
 import static com.company.common.PostgresHelper.*;
-import static com.company.old.helper.getConnection;
 
 @Repository("postgres")
 public class PostgresDAO implements ItemDAO {

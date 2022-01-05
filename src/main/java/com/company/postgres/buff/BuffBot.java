@@ -1,14 +1,16 @@
 package com.company.postgres.buff;
 
+import com.company.entrypoints.SteamCrawler;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
+import static com.company.common.PostgresHelper.getConnection;
 import static com.company.postgres.buff.BuffCrawler.getBuffItem;
 import static com.company.postgres.buff.BuffCrawler.getBuffItemNoExterior;
-import static com.company.old.SteamItemPriceChecker.getSteamPriceForGivenName;
-import static com.company.old.helper.getConnection;
 
+//TODO
 public class BuffBot {
 
     private static Double max_price;
@@ -23,7 +25,7 @@ public class BuffBot {
 
             while (rs.next()) {
                 if (!rs.getBoolean("steam_preis_ok")) {
-                    getSteamPriceForGivenName(rs.getString("name"), conn);
+                    SteamCrawler.getSteamPriceForGivenName(rs.getString("name"));
                 }
 
                 if (!rs.getBoolean("buff_preis_ok")) {

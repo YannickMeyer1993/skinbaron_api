@@ -1,6 +1,5 @@
 package com.company.entrypoints;
 
-import com.company.old.helper;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -23,14 +22,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.Scanner;
 
 import static com.company.common.LoggingHelper.setUpClass;
 import static com.company.common.PasswordHelper.readPasswordFromFile;
+import static com.company.common.PostgresHelper.getConnection;
 import static com.company.entrypoints.Bot.buyItem;
-import static com.company.old.helper.getConnection;
 
 public class SkinbaronCrawler {
     private final static Logger logger = LoggerFactory.getLogger(SkinbaronCrawler.class);
@@ -186,7 +186,7 @@ public class SkinbaronCrawler {
 
         int wait_counter = 3;
 
-        String secret = helper.readPasswordFromFile("C:/passwords/api_secret.txt");
+        String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 
         while (true) {
             try (Connection conn = getConnection()){
@@ -209,5 +209,35 @@ public class SkinbaronCrawler {
             }
 
         }
+    }
+
+    public static Boolean checkIfExists( String secret, String name, double price) throws IOException, InterruptedException {
+
+        logger.info("Skinbaron API Search has been called.");
+        Thread.sleep(1000);
+        String jsonInputString = "{\"apikey\": \"" + secret + "\",\"appid\": 730,\"search_item\"=\"" + name + "\",\"max\"=" + price + ",\"items_per_page\": 50}";
+
+        System.out.println(jsonInputString);
+        HttpPost httpPost = new HttpPost("https://api.skinbaron.de/Search");
+        httpPost.setHeader("Content.Type", "application/json");
+        httpPost.setHeader("x-requested-with", "XMLHttpRequest");
+        httpPost.setHeader("Accept", "application/json");
+
+        HttpClient client = HttpClients.custom()
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setCookieSpec(CookieSpecs.STANDARD).build())
+                .build();
+
+        HttpEntity entity = new ByteArrayEntity(jsonInputString.getBytes(StandardCharsets.UTF_8));
+        httpPost.setEntity(entity);
+        HttpResponse response = client.execute(httpPost);
+        String result = EntityUtils.toString(response.getEntity());
+        System.out.println(result);
+        JSONObject resultJson = (JSONObject) new JSONTokener(result).nextValue();
+        JSONArray resultArray = ((JSONArray) resultJson.get("sales"));
+
+        //TODO delete from dao
+
+        return resultArray.length() != 0;
     }
 }

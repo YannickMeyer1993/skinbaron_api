@@ -19,9 +19,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import static com.company.old.helper.getConnection;
-import static com.company.old.helper.readPasswordFromFile;
+import static com.company.common.PasswordHelper.readPasswordFromFile;
+import static com.company.common.PostgresHelper.getConnection;
 
+//TODO
 public class SoldItems {
 
     private static org.slf4j.Logger logger = LoggerFactory.getLogger(SoldItems.class);

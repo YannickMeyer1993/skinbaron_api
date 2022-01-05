@@ -2,10 +2,14 @@ package com.company.entrypoints;
 
 import junit.framework.TestCase;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.Scanner;
 import java.util.UUID;
 
 import static com.company.common.PostgresHelper.checkIfResultsetIsEmpty;
 import static com.company.common.PostgresHelper.executeDDL;
+import static com.company.entrypoints.InventoryCrawler.getItemsFromSteamHTTP;
 import static com.company.entrypoints.SteamCrawler.requestInsertNewSteamprice;
 
 public class SteamCrawlerTest extends TestCase {
@@ -25,5 +29,17 @@ public class SteamCrawlerTest extends TestCase {
     public void testGetSteamPriceForGivenNameNegative() throws Exception {
         double price = SteamCrawler.getSteamPriceForGivenName("UMP-45 | Fade (Factory New)");
         assertTrue(price> 0.0);
+    }
+
+    public void testExtractItemsFromJSON() throws Exception {
+        Scanner sc = new Scanner(new File("src/test/resources/entrypoints/SteamCrawlerTest/InventoryJSON.json"));
+        String testInventoryJSON = sc.nextLine();
+
+        HashMap<String, Integer> map = getItemsFromSteamHTTP(testInventoryJSON);
+
+        assert(map.size()>0);
+
+        assertEquals((int)map.get("Sticker | Fnatic (Holo) | Cologne 2014"),4);
+
     }
 }

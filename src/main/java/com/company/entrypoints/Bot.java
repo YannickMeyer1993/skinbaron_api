@@ -23,11 +23,11 @@ import java.sql.Statement;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
+import static com.company.common.PasswordHelper.readPasswordFromFile;
+import static com.company.common.PostgresHelper.getConnection;
 import static com.company.entrypoints.OverviewGetter.getBalance;
-import static com.company.entrypoints.ToBeTested.checkIfExists;
-import static com.company.old.SteamItemPriceChecker.getSteamPriceForGivenName;
-import static com.company.old.helper.getConnection;
-import static com.company.old.helper.readPasswordFromFile;
+import static com.company.entrypoints.SkinbaronCrawler.checkIfExists;
+import static com.company.entrypoints.SteamCrawler.getSteamPriceForGivenName;
 import static java.lang.Math.min;
 
 
@@ -58,7 +58,7 @@ public class Bot {
 
                 while (rs.next()) {
                     if (!rs.getBoolean("steam_preis_aktuell")) {
-                        double recent_price = getSteamPriceForGivenName(rs.getString("name"), conn);
+                        double recent_price = getSteamPriceForGivenName(rs.getString("name"));
                         if (recent_price < rs.getDouble("steam_preis")) {
                             logger.info("Steam Preis nicht mehr aktuell für Item " + rs.getString("name") + ".");
                             continue;
@@ -173,7 +173,5 @@ public class Bot {
             conn.commit();
         }
     }
-
-
 
 }

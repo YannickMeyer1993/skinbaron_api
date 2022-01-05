@@ -4,11 +4,11 @@ import junit.framework.TestCase;
 
 import java.util.UUID;
 
+import static com.company.common.PasswordHelper.readPasswordFromFile;
 import static com.company.common.PostgresHelper.checkIfResultsetIsEmpty;
 import static com.company.common.PostgresHelper.executeDDL;
 import static com.company.entrypoints.SkinbaronCrawler.Search;
 import static com.company.entrypoints.SkinbaronCrawler.requestInsertSkinbaronItem;
-import static com.company.old.helper.readPasswordFromFile;
 
 public class SkinbaronCrawlerTest extends TestCase {
 

@@ -23,7 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 import static com.company.common.LoggingHelper.setUpClass;
-import static com.company.old.helper.readPasswordFromFile;
+import static com.company.common.PasswordHelper.readPasswordFromFile;
 
 public class InventoryCrawler {
 
@@ -126,7 +126,7 @@ public class InventoryCrawler {
         }
     }
 
-    public HashMap<String, Integer> getItemsFromSteamHTTP(String resultJSON) {
+    public static HashMap<String, Integer> getItemsFromSteamHTTP(String resultJSON) {
         JSONObject result_json = (JSONObject) new JSONTokener(resultJSON).nextValue();
 
         HashMap<String, Integer> assets_map = new HashMap<>();

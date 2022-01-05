@@ -1,6 +1,5 @@
 package com.company.postgres.buff;
 
-import com.company.old.CurrencyConverter;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
@@ -20,8 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.company.common.CurrencyHelper.getConversionRateToEuro;
-import static com.company.old.helper.getConnection;
+import static com.company.common.PostgresHelper.getConnection;
 
+//TODO
 public class BuffCrawler {
 
     private static Double conversionRateRMBinEUR;

@@ -9,6 +9,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.slf4j.Logger;
@@ -16,13 +17,14 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.Scanner;
 
-import static com.company.old.SteamCrawler.setRowInOverviewTable;
-import static com.company.old.SteamItemPriceChecker.getSteamPriceForGivenName;
-import static com.company.old.helper.getConnection;
-import static com.company.old.helper.readPasswordFromFile;
+import static com.company.common.PasswordHelper.readPasswordFromFile;
+import static com.company.common.PostgresHelper.getConnection;
+import static com.company.entrypoints.SteamCrawler.getSteamPriceForGivenName;
 
+//TODO
 public class OverviewGetter {
 
     private static double smurf_inv_value;
@@ -148,7 +150,7 @@ public class OverviewGetter {
             String name;
             while (rs.next()) {
                 name = rs.getString("name");
-                getSteamPriceForGivenName(name, conn);
+                getSteamPriceForGivenName(name);
             }
         }
     }
@@ -203,6 +205,39 @@ public class OverviewGetter {
         logger.info("Skinbaron Balance ist zur Zeit bei: " + skinbaronBalance + " Euro.");
         conn.close();
         return skinbaronBalance;
+    }
+
+    public static void setRowInOverviewTable(Connection conn) throws SQLException {
+        String SQLinsert = "INSERT INTO steam_item_sale.overview(\"DATE\",highest_iteration_steam,steam_balance,steam_open_sales,skinbaron_balance,smurf_inv_value,skinbaron_open_sales_wert,steam_inv_value,skinbaron_inv_value,kommentar) "
+                + "VALUES(?,?,?,?,?,?,?,?,?,?)";
+        try (PreparedStatement pstmt = conn.prepareStatement(SQLinsert, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setDate(1, Date.valueOf(LocalDate.now()));
+            pstmt.setInt(2, 0);
+            pstmt.setInt(3, 0);
+            pstmt.setInt(4, 0);
+            pstmt.setInt(5, 0);
+            pstmt.setInt(6, 0);
+            pstmt.setInt(7, 0);
+            pstmt.setInt(8, 0);
+            pstmt.setInt(9, 0);
+            pstmt.setString(10, "");
+            int rowsAffected = pstmt.executeUpdate();
+        }
+    }
+
+    public static void setIterationCounter(@NotNull Connection conn, int i) {
+        String SQLinsert = "UPDATE steam_item_sale.overview set highest_iteration_steam=? where \"DATE\"=current_date";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(SQLinsert, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setInt(1, i);
+
+            //System.out.println(pstmt);
+            int rowsAffected = pstmt.executeUpdate();
+            conn.commit();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
     }
 
 }
