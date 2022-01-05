@@ -48,6 +48,7 @@ public class SkinbaronCrawler {
         Scanner sc = new Scanner(System.in);
         logger.info("Enter last Id: ");
         String id = sc.nextLine();
+        //TODO get last inserted id
 
         //noinspection InfiniteLoopStatement
         while (true) { //infinite times
