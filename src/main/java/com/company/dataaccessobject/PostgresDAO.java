@@ -228,7 +228,7 @@ public class PostgresDAO implements ItemDAO {
 
     @Override
     public void deleteInventoryItems() throws Exception {
-        executeDDL("TRUNCATE TABLE steam.inventory");
+        executeDDL("update steam.inventory set still_there = false where still_there;");
     }
 
     @Override
