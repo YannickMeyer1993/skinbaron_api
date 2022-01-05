@@ -1,7 +1,6 @@
 package com.company.entrypoints;
 
 import com.company.dataaccessobject.PostgresDAO;
-import com.company.model.SteamPrice;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
@@ -18,10 +17,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.StringReader;
 import java.sql.*;
-import java.time.LocalDate;
 import java.util.List;
-//import java.util.logging.Level;
-//import java.util.logging.Logger;
 import org.slf4j.Logger;
 
 import static com.company.common.CurrencyHelper.getConversionRateToEuro;
@@ -130,28 +126,28 @@ public class SteamCrawler {
             } else {
                 return false;
             }
-
-            SteamPrice price = new SteamPrice(name,Date.valueOf(LocalDate.now()),price_eur,quantity);
-            //TODO over class SteamPrice
-
-            RestTemplate restTemplate = new RestTemplate();
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            JSONObject JsonObject = new JSONObject();
-
-            JsonObject.put("itemname", name);
-            JsonObject.put("price", price_eur);
-            JsonObject.put("quantity",quantity);
-
-            HttpEntity<String> request = new HttpEntity<>(JsonObject.toString(), headers);
-
-            restTemplate.postForObject(UrlPost, request, String.class);
+            requestInsertNewSteamprice(name,price_eur,quantity);
 
         } //End of for each Item
         return true;
     }
 
-    public double getSteamPriceForGivenName(String hash_name) throws Exception {
+    public static void requestInsertNewSteamprice(String name,Double price, int quantity) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        JSONObject JsonObject = new JSONObject();
+
+        JsonObject.put("itemname", name);
+        JsonObject.put("price", price);
+        JsonObject.put("quantity",quantity);
+
+        HttpEntity<String> request = new HttpEntity<>(JsonObject.toString(), headers);
+
+        restTemplate.postForObject(UrlPost, request, String.class);
+    }
+
+    public static double getSteamPriceForGivenName(String hash_name) throws Exception {
 
         conversionRateUSDinEUR = getConversionRateToEuro("USD");
 
@@ -179,7 +175,6 @@ public class SteamCrawler {
             double price = Double.parseDouble(document.valueOf("/div/div/div/span/span/@data-price"));
             int currency = Integer.parseInt(document.valueOf("/div/div/div/span/span/@data-currency"));
 
-            //Code erstellt anhand des Eingabe- und Ausgabeschemas
             if (name == null) {
                 throw new Exception("Fehlerhafte Ergebnisse für Skin: " + hash_name);
             }
@@ -202,12 +197,12 @@ public class SteamCrawler {
                 return_price = price_euro;
             }
 
-            //TODO send request to add Steam Price
+            requestInsertNewSteamprice(name,price_euro,quantity);
         }
 
         if (!item_found){
-            //TODO send request to add Steam Price
-            return_price = 0.0;
+            requestInsertNewSteamprice(hash_name,0d,0); //does not exist
+            return_price = 0d;
         }
 
         logger.info("Item \""+hash_name+"\" costs "+return_price+" Euro.");

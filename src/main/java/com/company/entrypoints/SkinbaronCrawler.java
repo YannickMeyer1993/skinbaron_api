@@ -45,7 +45,7 @@ public class SkinbaronCrawler {
         String id = sc.nextLine();
 
         //noinspection InfiniteLoopStatement
-        while (true) { //infinite times  //TODO überprüfen, ob while true x2 notwendig
+        while (true) { //infinite times
             while (true) { //as long as there are inserts
                 try {
                     String[] output = Search(secret, id,50);
