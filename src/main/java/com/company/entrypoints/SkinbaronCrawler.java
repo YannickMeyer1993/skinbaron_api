@@ -9,21 +9,26 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.Scanner;
+import java.util.UUID;
 import java.util.stream.IntStream;
 
 import static com.company.common.PasswordHelper.readPasswordFromFile;
-import static com.company.common.PostgresHelper.getConnection;
 
 public class SkinbaronCrawler {
     private final static Logger logger = LoggerFactory.getLogger(SkinbaronCrawler.class);
@@ -61,27 +66,7 @@ public class SkinbaronCrawler {
     }
 
     public static String[] Search(String secret, String after_saleid) throws IOException, InterruptedException {
-
         int amountInserts = 0;
-        String SQLUpsert = "WITH\n" +
-                "    to_be_upserted (id,name,price,stickers,wear) AS (\n" +
-                "        VALUES\n" +
-                "            (?,?,?,?,?)\n" +
-                "    ),\n" +
-                "    updated AS (\n" +
-                "        UPDATE\n" +
-                "            steam_item_sale.skinbaron_market_search_results s\n" +
-                "        SET\n" +
-                "            price = to_be_upserted.price::numeric\n" +
-                "        FROM\n" +
-                "            to_be_upserted\n" +
-                "        WHERE\n" +
-                "            s.id = to_be_upserted.id\n" +
-                "        RETURNING s.id\n" +
-                "    )\n" +
-                "INSERT INTO steam_item_sale.skinbaron_market_search_results\n" +
-                "    SELECT * FROM to_be_upserted\n" +
-                "    WHERE id NOT IN (SELECT id FROM updated);";
 
         logger.info("Skinbaron API Search has been called.");
         Thread.sleep(1000);
@@ -107,7 +92,9 @@ public class SkinbaronCrawler {
             JSONArray resultArray = ((JSONArray) resultJson.get("sales"));
 
             String id = null;
-            try (Connection conn = getConnection();PreparedStatement pstmt = conn.prepareStatement(SQLUpsert, Statement.RETURN_GENERATED_KEYS)) {
+            Double wear;
+            boolean alreadyExisting;
+
                 for (Object o : resultArray) {
                     if (o instanceof JSONObject) {
                         id = ((JSONObject) o).getString("id");
@@ -115,30 +102,21 @@ public class SkinbaronCrawler {
                         String name = ((JSONObject) o).getString("market_name");
                         String stickers = ((JSONObject) o).getString("stickers");
                         try {
-                            pstmt.setDouble(5, ((JSONObject) o).getDouble("wear"));
+                            wear =  ((JSONObject) o).getDouble("wear");
                         } catch (JSONException je) {
-                            pstmt.setNull(5, Types.DOUBLE);
+                            wear = null;
                         }
+                        alreadyExisting = requestInsertSkinbaronItem(id,name,price_euro,stickers,wear);
 
-                        pstmt.setString(1, id);
-                        pstmt.setString(2, name);
-                        pstmt.setDouble(3, price_euro);
-                        pstmt.setString(4, stickers);
-                        pstmt.addBatch();
+                        if (!alreadyExisting) {
+                            amountInserts++;
+                        }
                     }
                 }
-                int[] updateCounts = pstmt.executeBatch();
-                amountInserts = IntStream.of(updateCounts).sum();
+
                 if (amountInserts != 0) {
                     logger.info(amountInserts + " items were inserted!");
                 }
-
-                conn.commit();
-
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
-
 
             String[] returnObject = new String[2];
             returnObject[0] = "" + amountInserts;
@@ -151,5 +129,27 @@ public class SkinbaronCrawler {
             returnObject[1] = after_saleid;
             return returnObject;
         }
+    }
+
+    static boolean requestInsertSkinbaronItem(@NotNull String id, String name, double price_euro, String stickers, Double wear) {
+        String url = "http://localhost:8080/api/v1/AddSkinbaronItem";
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        JSONObject JsonObject = new JSONObject();
+
+        JsonObject.put("id",id);
+        JsonObject.put("price",price_euro);
+        JsonObject.put("name",name);
+        JsonObject.put("sticker",stickers);
+        JsonObject.put("wear",wear);
+
+        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(JsonObject.toString(), headers);
+
+        ResponseEntity<String> responseEntityStr = restTemplate.postForEntity(url, request, String.class);
+
+        //exists already if not id as response
+        return (!id.equals(responseEntityStr.getBody()));
     }
 }

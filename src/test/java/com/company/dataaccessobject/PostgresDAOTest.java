@@ -81,7 +81,6 @@ public class PostgresDAOTest extends TestCase {
     public void testTestAddSkinbaronItem() throws Exception {
         PostgresDAO dao = new PostgresDAO();
         SkinbaronItem item = new SkinbaronItem("FakeID",3d,"AWP Drachlore","Keine",0.12345d);
-        System.out.println("Test"+dao.addSkinbaronItem(item));
         assertFalse(checkIfResultsetIsEmpty("select * from steam.skinbaron_items where id='FakeID' and name='AWP Drachlore'"));
         executeDDL("delete from steam.skinbaron_items where id='FakeID' and name='AWP Drachlore'");
     }
