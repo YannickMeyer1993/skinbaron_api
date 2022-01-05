@@ -1,5 +1,6 @@
 package com.company.entrypoints;
 
+import com.company.old.helper;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -14,6 +15,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -21,15 +23,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.Scanner;
-import java.util.UUID;
-import java.util.stream.IntStream;
 
 import static com.company.common.LoggingHelper.setUpClass;
 import static com.company.common.PasswordHelper.readPasswordFromFile;
+import static com.company.entrypoints.Bot.buyItem;
+import static com.company.old.helper.getConnection;
 
 public class SkinbaronCrawler {
     private final static Logger logger = LoggerFactory.getLogger(SkinbaronCrawler.class);
@@ -39,6 +40,8 @@ public class SkinbaronCrawler {
         setUpClass(); //disable Logging
 
         requestCleanUp();
+
+        checkLiveSkinbaron();
 
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 
@@ -177,5 +180,34 @@ public class SkinbaronCrawler {
 
         //exists already if not id as response
         return (!id.equals(responseEntityStr.getBody()));
+    }
+
+    public static void checkLiveSkinbaron() throws Exception {
+
+        int wait_counter = 3;
+
+        String secret = helper.readPasswordFromFile("C:/passwords/api_secret.txt");
+
+        while (true) {
+            try (Connection conn = getConnection()){
+
+                System.out.println("Waiting for " + Math.pow(2, wait_counter) + " seconds");
+                Thread.sleep((long) (Math.pow(2, wait_counter) * 1000));
+                buyItem( secret, "a52eca5d-6beb-4cf8-8173-a1eae90cbb14", 0.09);
+                break;
+            } catch (PSQLException e) {
+                System.out.println("Postgres is down.");
+                break;
+            } catch (InterruptedException e) {
+                System.out.println("Program got interrupted.");
+                break;
+            }
+            catch (Exception e) {
+                System.out.println("Skibaron APIs are still down.");
+                wait_counter++;
+
+            }
+
+        }
     }
 }

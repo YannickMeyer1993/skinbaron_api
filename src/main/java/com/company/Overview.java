@@ -3,12 +3,11 @@ package com.company;
 import java.sql.*;
 import java.util.Scanner;
 
-import static com.company.SkinbaronAPI.getBalance;
+import static com.company.entrypoints.OverviewGetter.getBalance;
 import static com.company.old.SteamCrawler.setRowInOverviewTable;
 import static com.company.old.SteamItemPriceChecker.getSteamPriceForGivenName;
 import static com.company.old.helper.getConnection;
 import static com.company.old.helper.readPasswordFromFile;
-import static java.lang.Math.min;
 
 public class Overview {
 
@@ -47,7 +46,7 @@ public class Overview {
         //TODO trigger InventoryCrawler
         getItemPricesInventory(conn);
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
-        getBalance(secret,true,conn);
+        getBalance(secret,true);
 
         try(Statement stmt2 = conn.createStatement();
         ResultSet rs2 = stmt2.executeQuery("with smurf as \n" +
@@ -122,6 +121,8 @@ public class Overview {
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+
+        conn.close();
     }
 
     public static void getItemPricesInventory(Connection conn) throws Exception {

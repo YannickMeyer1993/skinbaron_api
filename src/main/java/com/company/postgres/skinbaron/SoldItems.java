@@ -1,7 +1,5 @@
 package com.company.postgres.skinbaron;
 
-import com.company.SkinbaronAPI;
-import com.company.entrypoints.SteamCrawler;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -20,14 +18,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.logging.Logger;
 
 import static com.company.old.helper.getConnection;
 import static com.company.old.helper.readPasswordFromFile;
 
 public class SoldItems {
 
-    private static org.slf4j.Logger logger = LoggerFactory.getLogger(SkinbaronAPI.class);
+    private static org.slf4j.Logger logger = LoggerFactory.getLogger(SoldItems.class);
 
     public static int get() throws Exception {
         Connection conn = getConnection();
