@@ -1,6 +1,6 @@
 package com.company.postgres.buff;
 
-import com.company.CurrencyConverter;
+import com.company.old.CurrencyConverter;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
@@ -19,21 +19,16 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.company.common.CurrencyHelper.getConversionRateToEuro;
 import static com.company.old.helper.getConnection;
 
 public class BuffCrawler {
 
-    private static double conversionFromRMBtoEUR;
+    private static Double conversionRateRMBinEUR;
 
-    static {
-        try {
-            conversionFromRMBtoEUR = CurrencyConverter.getRMBinEURO();
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
-    }
+    public static void main(String[] args) throws Exception {
 
-    public static void main(String[] args) throws IOException, SQLException, DocumentException, InterruptedException {
+        conversionRateRMBinEUR = getConversionRateToEuro("RMB");
 
         String query = "select id from (select\n" +
                 "\trank() over ( partition by weapon_name order by timestamp ) as ranking,\n" +
@@ -132,7 +127,7 @@ public class BuffCrawler {
 
             if (min_price_rmb == Double.MAX_VALUE){ return;}
 
-            double price_euro = Double.parseDouble(df.format(conversionFromRMBtoEUR * min_price_rmb).replace(",","."));
+            double price_euro = Double.parseDouble(df.format(conversionRateRMBinEUR * min_price_rmb).replace(",","."));
 
             pstmt.setInt(1, id);
             pstmt.setDouble(2, price_euro);
@@ -224,7 +219,7 @@ public class BuffCrawler {
                 System.out.print(goodsId + " ");
                 System.out.print(price_rmb + " ");
 
-                double price_euro = Double.parseDouble(df.format(conversionFromRMBtoEUR * Double.parseDouble(price_rmb)).replace(",", "."));
+                double price_euro = Double.parseDouble(df.format(conversionRateRMBinEUR * Double.parseDouble(price_rmb)).replace(",", "."));
                 System.out.print(price_euro + " ");
                 System.out.println();
 

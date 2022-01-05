@@ -1,7 +1,5 @@
 package com.company;
 
-import com.company.old.Inventory;
-
 import java.sql.*;
 import java.util.Scanner;
 
@@ -46,7 +44,7 @@ public class Overview {
             st.execute("UPDATE steam_item_sale.inventory set still_there = false;");
         }
 
-        Inventory.main(null);
+        //TODO trigger InventoryCrawler
         getItemPricesInventory(conn);
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
         getBalance(secret,true,conn);

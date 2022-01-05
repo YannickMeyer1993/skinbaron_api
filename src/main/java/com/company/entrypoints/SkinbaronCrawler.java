@@ -38,6 +38,8 @@ public class SkinbaronCrawler {
 
         setUpClass(); //disable Logging
 
+        requestCleanUp();
+
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 
         Scanner sc = new Scanner(System.in);
@@ -67,6 +69,19 @@ public class SkinbaronCrawler {
             logger.info("New Search started.");
             logger.info("------------------------------------------------------------------");
         }
+    }
+
+    private static void requestCleanUp() {
+        String url = "http://localhost:8080/api/v1/cleanup";
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        JSONObject JsonObject = new JSONObject();
+
+        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(JsonObject.toString(), headers);
+
+        restTemplate.postForObject(url, request, String.class);
     }
 
 

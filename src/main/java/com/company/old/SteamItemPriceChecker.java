@@ -1,6 +1,5 @@
 package com.company.old;
 
-import com.company.CurrencyConverter;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;

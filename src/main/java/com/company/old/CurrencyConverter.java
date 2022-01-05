@@ -1,4 +1,4 @@
-package com.company;
+package com.company.old;
 
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -79,12 +79,8 @@ public class CurrencyConverter {
 
                 return Double.parseDouble(line_RMBtoEUR.replace("1 CNY = ","").replace(" EUR","").replace(",", "."));
             }
-            catch (FailingHttpStatusCodeException e)
+            catch (FailingHttpStatusCodeException | IOException e)
             {
-                e.printStackTrace();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
                 e.printStackTrace();
             }
         return null;
