@@ -3,7 +3,7 @@ CREATE TABLE if not exists steam.skinbaron_items (
   "name" varchar(100) NOT NULL,
   "price" decimal(12,2) NOT NULL,
   "stickers" varchar(300) DEFAULT NULL,
-  "wear" varchar(20) DEFAULT NULL,
+  "wear" varchar(50) DEFAULT NULL,
   "timestamp" timestamp NOT NULL DEFAULT now(),
   PRIMARY KEY ("id")
 ) ;

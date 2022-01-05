@@ -39,7 +39,7 @@ public class SteamCrawler {
 
     public static void main(String[] args) throws Exception {
 
-        setUpClass();
+        setUpClass(); //disable Logging
 
         PostgresDAO dao = new PostgresDAO();
 

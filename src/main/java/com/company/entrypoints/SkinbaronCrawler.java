@@ -28,12 +28,16 @@ import java.util.Scanner;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
+import static com.company.common.LoggingHelper.setUpClass;
 import static com.company.common.PasswordHelper.readPasswordFromFile;
 
 public class SkinbaronCrawler {
     private final static Logger logger = LoggerFactory.getLogger(SkinbaronCrawler.class);
 
     public static void main(String[] args) throws Exception {
+
+        setUpClass(); //disable Logging
+
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 
         Scanner sc = new Scanner(System.in);
@@ -44,7 +48,7 @@ public class SkinbaronCrawler {
         while (true) { //infinite times  //TODO überprüfen, ob while true x2 notwendig
             while (true) { //as long as there are inserts
                 try {
-                    String[] output = Search(secret, id);
+                    String[] output = Search(secret, id,50);
                     if (Integer.parseInt(output[0]) == 0) {
                         break;
                     }
@@ -65,12 +69,19 @@ public class SkinbaronCrawler {
         }
     }
 
-    public static String[] Search(String secret, String after_saleid) throws IOException, InterruptedException {
+
+    /**
+     *
+     * @param secret api secret
+     * @param after_saleid last id
+     * @return [0] amount_inserts [1] last id
+     */
+    public static String[] Search(String secret, String after_saleid, int items_per_page) throws Exception {
         int amountInserts = 0;
 
         logger.info("Skinbaron API Search has been called.");
         Thread.sleep(1000);
-        String jsonInputString = "{\"apikey\": \"" + secret + "\",\"appid\": 730,\"items_per_page\": 50" + (!"".equals(after_saleid) ? ",\"after_saleid\":\"" + after_saleid + "\"" : "") + "}";
+        String jsonInputString = "{\"apikey\": \"" + secret + "\",\"appid\": 730,\"items_per_page\": "+items_per_page + (!"".equals(after_saleid) ? ",\"after_saleid\":\"" + after_saleid + "\"" : "") + "}";
 
         HttpPost httpPost = new HttpPost("https://api.skinbaron.de/Search");
         httpPost.setHeader("Content.Type", "application/json");
