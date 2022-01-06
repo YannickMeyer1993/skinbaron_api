@@ -25,6 +25,8 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 import static com.company.common.LoggingHelper.setUpClass;
@@ -42,6 +44,8 @@ public class SkinbaronCrawler {
         requestCleanUp();
 
         checkLiveSkinbaron();
+
+        getSoldItems();
 
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 
@@ -240,5 +244,95 @@ public class SkinbaronCrawler {
         //TODO delete from dao
 
         return resultArray.length() != 0;
+    }
+
+    //TODO
+    public static void getSoldItems() throws Exception {
+        Connection conn = getConnection();
+        String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
+
+        String queryId = "";
+
+        int counter = 0;
+        while (true) {
+
+            logger.info("Skinbaron API getSales has been called. (" + counter + ")");
+            String jsonInputString = "{\"apikey\": \"" + secret + "\",\"type\":4,\"appid\": 730,\"items_per_page\": 50" + (queryId == null ? "" : ",\"after_saleid\":\"" + queryId + "\"") + ",sort_order:2}";
+
+            HttpPost httpPost = new HttpPost("https://api.skinbaron.de/GetSales");
+            httpPost.setHeader("Content.Type", "application/json");
+            httpPost.setHeader("x-requested-with", "XMLHttpRequest");
+            httpPost.setHeader("Accept", "application/json");
+
+            HttpClient client = HttpClients.custom()
+                    .setDefaultRequestConfig(RequestConfig.custom()
+                            .setCookieSpec(CookieSpecs.STANDARD).build())
+                    .build();
+
+            HttpEntity entity = new ByteArrayEntity(jsonInputString.getBytes(StandardCharsets.UTF_8));
+            httpPost.setEntity(entity);
+            HttpResponse response = client.execute(httpPost);
+            String result = EntityUtils.toString(response.getEntity());
+
+            JSONObject resultJson = new JSONObject(result);
+            JSONArray jArray = new JSONArray(resultJson.get("response").toString());
+
+            List<String> existing_ids = new ArrayList<>();
+
+            try (Statement stmt2 = conn.createStatement()) {
+                ResultSet rs2 = stmt2.executeQuery("select id from steam.skinbaron_sold_items");
+                while (rs2.next()) {
+                    existing_ids.add(rs2.getString("id"));
+                }
+            }
+
+            String sqlIinsert = "INSERT INTO steam.skinbaron_sold_items\n" +
+                    "(id, name, price,classid,last_updated,instanceid,list_time,assetid,txid,commission)\n" +
+                    "VALUES(?, ?, ?,?,?, ?, ?,?,?, ?);";
+
+            String itemId = null;
+            for (int i = 0; i < jArray.length(); i++) {
+                JSONObject jObject = jArray.getJSONObject(i);
+
+                String classid = jObject.get("classid").toString();
+                String last_updated = jObject.get("last_updated").toString();
+                String instanceid = jObject.get("instanceid").toString();
+                String list_time = jObject.get("list_time").toString();
+                String price = jObject.get("price").toString();
+                String assetid = jObject.get("assetid").toString();
+                String name = jObject.get("name").toString();
+                String txid = jObject.get("txid").toString();
+                String commission = jObject.get("commission").toString();
+                itemId = jObject.get("id").toString();
+
+
+                if (existing_ids.contains(itemId)) { //if exists, finish
+                    return;
+                }
+
+                try (PreparedStatement pstmt = conn.prepareStatement(sqlIinsert, Statement.RETURN_GENERATED_KEYS)) {
+                    pstmt.setString(1, itemId);
+                    pstmt.setString(2, name);
+                    pstmt.setDouble(3, Double.parseDouble(price));
+                    pstmt.setString(4,classid);
+                    pstmt.setString(5,last_updated);
+                    pstmt.setString(6,instanceid);
+                    pstmt.setString(7,list_time);
+                    pstmt.setString(8,assetid);
+                    pstmt.setString(9,txid);
+                    pstmt.setDouble(10,Double.parseDouble(commission));
+                    //pstmt.setInt(11, counter * 50 + i + 1);
+
+                    pstmt.executeUpdate();
+                }
+            }
+
+            counter++;
+            queryId = itemId;
+            conn.commit();
+            if (jArray.length() < 50) {
+                break; //This means that the last 50 items were reached
+            }
+        }
     }
 }

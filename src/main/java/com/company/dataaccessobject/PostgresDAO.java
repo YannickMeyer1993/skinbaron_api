@@ -39,7 +39,8 @@ public class PostgresDAO implements ItemDAO {
         executeDDLfromPath(resourcePath + "1_steam_iteration.sql");
         executeDDLfromPath(resourcePath + "1_table_inventory.sql");
         executeDDLfromPath(resourcePath + "1_table_item_informations.sql");
-
+        executeDDLfromPath(resourcePath + "1_table_skinbaron_sold_items.sql");
+        executeDDLfromPath(resourcePath + "2_view_skinbaron_sold_items_per_name.sql");
 
         if (checkIfResultsetIsEmpty("select * from steam.item_informations")) {
             crawlItemInformations();
