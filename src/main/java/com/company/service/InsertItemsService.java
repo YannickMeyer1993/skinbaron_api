@@ -34,4 +34,8 @@ public class InsertItemsService {
     public void deleteInventoryItems() throws Exception {
         itemdao.deleteInventoryItems();
     }
+
+    public String getLastSkinbaronId() throws Exception {
+        return itemdao.getLastSkinbaronId();
+    }
 }

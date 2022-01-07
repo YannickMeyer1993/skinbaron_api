@@ -380,6 +380,19 @@ public class PostgresDAO implements ItemDAO {
     }
 
     @Override
+    public String getLastSkinbaronId() throws Exception {
+        String result;
+        String sql = "with maxtimestamp as\n" +
+                "(select Max(timestamp) t from steam.skinbaron_items si)\n" +
+                "select id from steam.skinbaron_items\n" +
+                "inner join maxtimestamp on \"timestamp\" = maxtimestamp.t";
+        try(Connection connection = getConnection();Statement st = connection.createStatement();ResultSet rs = st.executeQuery(sql)) {
+            result = rs.getString("id");
+        }
+        return result;
+    }
+
+    @Override
     public void crawlWearValues() throws Exception {
 
         Map<String,  String[]> mapWears = new HashMap<>();

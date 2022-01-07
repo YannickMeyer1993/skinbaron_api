@@ -49,10 +49,7 @@ public class SkinbaronCrawler {
 
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 
-        Scanner sc = new Scanner(System.in);
-        logger.info("Enter last Id: ");
-        String id = sc.nextLine();
-        //TODO get last inserted id
+        String id = getLastSkinbaronId();
 
         //noinspection InfiniteLoopStatement
         while (true) { //infinite times
@@ -334,5 +331,22 @@ public class SkinbaronCrawler {
                 break; //This means that the last 50 items were reached
             }
         }
+    }
+
+    //TODO testen ob das richtig ist
+    public static String getLastSkinbaronId() {
+
+        String url = "http://localhost:8080/api/v1/lastSkinbaronId";
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        JSONObject JsonObject = new JSONObject();
+
+        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(JsonObject.toString(), headers);
+
+        ResponseEntity<String> responseEntityStr = restTemplate.postForEntity(url, request, String.class);
+
+        return (responseEntityStr.getBody());
     }
 }

@@ -51,4 +51,9 @@ public class ItemController {
     public void DeleteInventoryItems() throws Exception {
         insertItemsService.deleteInventoryItems();
     }
+
+    @GetMapping("/lastSkinbaronId")
+    public String getLastSkinbaronId() throws Exception {
+        return insertItemsService.getLastSkinbaronId();
+    }
 }

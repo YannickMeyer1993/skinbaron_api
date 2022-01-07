@@ -33,5 +33,7 @@ public interface ItemDAO {
 
    void crawlItemInformations() throws Exception;
 
+   String getLastSkinbaronId() throws Exception;
+
 
 }
