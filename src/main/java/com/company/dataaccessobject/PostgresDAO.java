@@ -399,6 +399,30 @@ public class PostgresDAO implements ItemDAO {
     }
 
     @Override
+    public void insertSoldSkinbaronItem(String itemId, String name, double price, String classid, String last_updated, String instanceid, String list_time, String assetid, String txid, double commission) throws Exception {
+
+        String sqlIinsert = "INSERT INTO steam.skinbaron_sold_items\n" +
+                "(id, name, price,classid,last_updated,instanceid,list_time,assetid,txid,commission)\n" +
+                "VALUES(?, ?, ?,?,?, ?, ?,?,?, ?);";
+
+        try (Connection connection = getConnection();PreparedStatement pstmt = connection.prepareStatement(sqlIinsert, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setString(1, itemId);
+            pstmt.setString(2, name);
+            pstmt.setDouble(3, price);
+            pstmt.setString(4,classid);
+            pstmt.setString(5,last_updated);
+            pstmt.setString(6,instanceid);
+            pstmt.setString(7,list_time);
+            pstmt.setString(8,assetid);
+            pstmt.setString(9,txid);
+            pstmt.setDouble(10,commission);
+
+            pstmt.executeUpdate();
+            connection.commit();
+        }
+    }
+
+    @Override
     public void crawlWearValues() throws Exception {
 
         Map<String,  String[]> mapWears = new HashMap<>();

@@ -247,10 +247,9 @@ public class SkinbaronCrawler {
 
         String queryId = "";
 
-        int counter = 0;
         while (true) {
 
-            logger.info("Skinbaron API getSales has been called. (" + counter + ")");
+            logger.info("Skinbaron API getSales has been called.");
             String jsonInputString = "{\"apikey\": \"" + secret + "\",\"type\":4,\"appid\": 730,\"items_per_page\": 50" + (queryId == null ? "" : ",\"after_saleid\":\"" + queryId + "\"") + ",sort_order:2}";
 
             HttpPost httpPost = new HttpPost("https://api.skinbaron.de/GetSales");
@@ -315,13 +314,11 @@ public class SkinbaronCrawler {
                     pstmt.setString(8,assetid);
                     pstmt.setString(9,txid);
                     pstmt.setDouble(10,Double.parseDouble(commission));
-                    //pstmt.setInt(11, counter * 50 + i + 1);
 
                     pstmt.executeUpdate();
                 }
             }
 
-            counter++;
             queryId = itemId;
             conn.commit();
             if (jArray.length() < 50) {
@@ -340,5 +337,29 @@ public class SkinbaronCrawler {
         ResponseEntity<String> responseEntityStr = restTemplate.getForEntity( url,String.class);
 
         return (responseEntityStr.getBody());
+    }
+
+    public static void requestInsertSoldSkinbaronItem(String itemId, String name, double price, String classid, String last_updated, String instanceid, String list_time, String assetid, String txid, double commission) {
+        String url = "http://localhost:8080/api/v1/InsertSoldSkinbaronItem";
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        JSONObject JsonObject = new JSONObject();
+
+        JsonObject.put("itemId",itemId);
+        JsonObject.put("name",name);
+        JsonObject.put("price",price);
+        JsonObject.put("classid",classid);
+        JsonObject.put("last_updated",last_updated);
+        JsonObject.put("instanceid",instanceid);
+        JsonObject.put("list_time",list_time);
+        JsonObject.put("assetid",assetid);
+        JsonObject.put("txid",txid);
+        JsonObject.put("commission",commission);
+
+        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(JsonObject.toString(), headers);
+
+        restTemplate.postForObject(url, request, String.class);
     }
 }

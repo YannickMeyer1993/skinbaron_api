@@ -37,5 +37,6 @@ public interface ItemDAO {
 
    void deleteNonExistingSkinbaronItems(String ItemName, double price) throws Exception;
 
+   void insertSoldSkinbaronItem(String itemId, String name, double price, String classid, String last_updated, String instanceid, String list_time, String assetid, String txid, double commission) throws Exception;
 
 }

@@ -52,11 +52,29 @@ public class ItemController {
     @RequestMapping("DeleteNonExistingSkinbaronItems")
     @PostMapping
     public void deleteNonExistingSkinbaronItems(@RequestBody com.fasterxml.jackson.databind.JsonNode payload) throws Exception {
-        System.out.println(payload.toString());
+
         String ItemName = payload.get("ItemName").textValue();
-        double price = Double.parseDouble(payload.get("price").toString());
+        double price = Double.parseDouble(payload.get("price").textValue());
 
         insertItemsService.deleteNonExistingSkinbaronItems(ItemName,price);
+    }
+
+    @RequestMapping("InsertSoldSkinbaronItem")
+    @PostMapping
+    public void insertSoldSkinbaronItem(@RequestBody com.fasterxml.jackson.databind.JsonNode payload) throws Exception {
+
+        double price = Double.parseDouble(payload.get("price").asText());
+        String itemId = payload.get("itemId").textValue();
+        String name = payload.get("name").textValue();
+        String classid = payload.get("classid").textValue();
+        String last_updated = payload.get("last_updated").textValue();
+        String instanceid = payload.get("instanceid").textValue();
+        String list_time = payload.get("list_time").textValue();
+        String assetid = payload.get("assetid").textValue();
+        String txid = payload.get("txid").textValue();
+        double commission = Double.parseDouble(payload.get("commission").asText());
+
+        insertItemsService.insertSoldSkinbaronItem(itemId,name, price, classid, last_updated, instanceid, list_time, assetid, txid, commission);
     }
 
     @RequestMapping("DeleteInventoryItems")

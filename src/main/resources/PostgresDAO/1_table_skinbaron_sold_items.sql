@@ -2,7 +2,6 @@ CREATE TABLE if not exists steam.skinbaron_sold_items (
   id varchar(100) NOT NULL,
   name varchar(100) DEFAULT NULL,
   price double precision DEFAULT NULL,
-  load_counter int4 DEFAULT NULL,
   classid varchar(500),
   last_updated varchar(500),
   instanceid varchar(500),

@@ -40,7 +40,11 @@ public class InsertItemsService {
         return itemdao.getLastSkinbaronId();
     }
 
-    public void deleteNonExistingSkinbaronItems(@RequestParam String ItemName, @RequestParam double price) throws Exception {
+    public void deleteNonExistingSkinbaronItems(String ItemName, double price) throws Exception {
         itemdao.deleteNonExistingSkinbaronItems(ItemName,price);
+    }
+
+    public void insertSoldSkinbaronItem(String itemId, String name, double price, String classid, String last_updated, String instanceid, String list_time, String assetid, String txid, double commission) throws Exception {
+        itemdao.insertSoldSkinbaronItem(itemId,name, price, classid, last_updated, instanceid, list_time, assetid, txid, commission);
     }
 }

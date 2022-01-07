@@ -7,6 +7,7 @@ import java.util.UUID;
 import static com.company.common.PasswordHelper.readPasswordFromFile;
 import static com.company.common.PostgresHelper.checkIfResultsetIsEmpty;
 import static com.company.common.PostgresHelper.executeDDL;
+import static com.company.entrypoints.Bot.deleteNonExistingSkinbaronItems;
 import static com.company.entrypoints.SkinbaronCrawler.*;
 
 public class SkinbaronCrawlerTest extends TestCase {
@@ -46,6 +47,9 @@ public class SkinbaronCrawlerTest extends TestCase {
 
     }
 
-    public void testCheckIfExists() {
+    public void testRequestInsertSoldSkinbaronItem() throws Exception {
+        requestInsertSoldSkinbaronItem("testRequestInsertSoldSkinbaronItem","Operation Riptide Case",0,"4578724859","1641446620","519977179","1640260702","24258366051","PZZWWTZFS9FT",0);
+        assertFalse(checkIfResultsetIsEmpty("select * from steam.skinbaron_sold_items where id='testRequestInsertSoldSkinbaronItem'"));
+        executeDDL("delete from steam.skinbaron_sold_items where id='testRequestInsertSoldSkinbaronItem'");
     }
 }
