@@ -387,6 +387,7 @@ public class PostgresDAO implements ItemDAO {
                 "select id from steam.skinbaron_items\n" +
                 "inner join maxtimestamp on \"timestamp\" = maxtimestamp.t";
         try(Connection connection = getConnection();Statement st = connection.createStatement();ResultSet rs = st.executeQuery(sql)) {
+            rs.next();
             result = rs.getString("id");
         }
         return result;

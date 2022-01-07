@@ -333,19 +333,14 @@ public class SkinbaronCrawler {
         }
     }
 
-    //TODO testen ob das richtig ist
     public static String getLastSkinbaronId() {
 
         String url = "http://localhost:8080/api/v1/lastSkinbaronId";
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        JSONObject JsonObject = new JSONObject();
-
-        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(JsonObject.toString(), headers);
-
-        ResponseEntity<String> responseEntityStr = restTemplate.postForEntity(url, request, String.class);
+        headers.setContentType(MediaType.TEXT_PLAIN);
+        ResponseEntity<String> responseEntityStr = restTemplate.getForEntity( url,String.class);
 
         return (responseEntityStr.getBody());
     }
