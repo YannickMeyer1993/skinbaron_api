@@ -23,7 +23,7 @@ public class ToBeTested {
 
     private final static Logger logger = LoggerFactory.getLogger(ToBeTested.class);
 
-    //TODO
+    //TODO API does not work yet?
     public static void getNewestSales30Days(String secret, Connection conn, String itemName) throws Exception {
 
         String ItemName = "Aufkleber | device | Atlanta 2017";
@@ -52,9 +52,6 @@ public class ToBeTested {
             System.out.println("Result: " + resultJson.get("message"));
             throw new Exception((String) resultJson.get("message"));
         }
-
-        //TODO API does not work yet?
-
     }
 
 }

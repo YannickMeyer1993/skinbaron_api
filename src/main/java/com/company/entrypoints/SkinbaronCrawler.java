@@ -76,6 +76,7 @@ public class SkinbaronCrawler {
     }
 
     private static void requestCleanUp() {
+        logger.info("Skinbaron Items Clean Up...");
         String url = "http://localhost:8080/api/v1/cleanup";
 
         RestTemplate restTemplate = new RestTemplate();
@@ -185,7 +186,8 @@ public class SkinbaronCrawler {
 
     public static void checkLiveSkinbaron() throws Exception {
 
-        int wait_counter = 3;
+        logger.info("Checking that Skinbaron is live...");
+        int wait_counter = 0;
 
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 
@@ -240,7 +242,6 @@ public class SkinbaronCrawler {
         return resultArray.length() != 0;
     }
 
-    //TODO
     public static void getSoldItems() throws Exception {
         Connection conn = getConnection();
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
@@ -272,16 +273,13 @@ public class SkinbaronCrawler {
 
             List<String> existing_ids = new ArrayList<>();
 
+            //TODO with last inserted id
             try (Statement stmt2 = conn.createStatement()) {
                 ResultSet rs2 = stmt2.executeQuery("select id from steam.skinbaron_sold_items");
                 while (rs2.next()) {
                     existing_ids.add(rs2.getString("id"));
                 }
             }
-
-            String sqlIinsert = "INSERT INTO steam.skinbaron_sold_items\n" +
-                    "(id, name, price,classid,last_updated,instanceid,list_time,assetid,txid,commission)\n" +
-                    "VALUES(?, ?, ?,?,?, ?, ?,?,?, ?);";
 
             String itemId = null;
             for (int i = 0; i < jArray.length(); i++) {
@@ -291,32 +289,18 @@ public class SkinbaronCrawler {
                 String last_updated = jObject.get("last_updated").toString();
                 String instanceid = jObject.get("instanceid").toString();
                 String list_time = jObject.get("list_time").toString();
-                String price = jObject.get("price").toString();
+                double price = Double.parseDouble(jObject.get("price").toString());
                 String assetid = jObject.get("assetid").toString();
                 String name = jObject.get("name").toString();
                 String txid = jObject.get("txid").toString();
-                String commission = jObject.get("commission").toString();
+                double commission = Double.parseDouble(jObject.get("commission").toString());
                 itemId = jObject.get("id").toString();
-
 
                 if (existing_ids.contains(itemId)) { //if exists, finish
                     return;
                 }
 
-                try (PreparedStatement pstmt = conn.prepareStatement(sqlIinsert, Statement.RETURN_GENERATED_KEYS)) {
-                    pstmt.setString(1, itemId);
-                    pstmt.setString(2, name);
-                    pstmt.setDouble(3, Double.parseDouble(price));
-                    pstmt.setString(4,classid);
-                    pstmt.setString(5,last_updated);
-                    pstmt.setString(6,instanceid);
-                    pstmt.setString(7,list_time);
-                    pstmt.setString(8,assetid);
-                    pstmt.setString(9,txid);
-                    pstmt.setDouble(10,Double.parseDouble(commission));
-
-                    pstmt.executeUpdate();
-                }
+                requestInsertSoldSkinbaronItem(itemId,name,price,classid,last_updated,instanceid,list_time,assetid,txid,commission);
             }
 
             queryId = itemId;

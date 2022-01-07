@@ -9,5 +9,6 @@ CREATE TABLE if not exists steam.skinbaron_sold_items (
   assetid varchar(500),
   txid varchar(500),
   commission double precision DEFAULT NULL,
+  "timestamp" timestamp NOT NULL DEFAULT now(),
   PRIMARY KEY (id)
 ) ;
