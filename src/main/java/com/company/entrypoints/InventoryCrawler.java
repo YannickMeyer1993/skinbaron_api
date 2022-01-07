@@ -29,7 +29,7 @@ public class InventoryCrawler {
 
     private static org.slf4j.Logger logger = LoggerFactory.getLogger(InventoryCrawler.class);
 
-    public static void main(String[] args) throws Exception {
+    public InventoryCrawler() throws Exception {
         setUpClass();
 
         InventoryCrawler crawler = new InventoryCrawler();

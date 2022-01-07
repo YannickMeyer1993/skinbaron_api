@@ -394,6 +394,11 @@ public class PostgresDAO implements ItemDAO {
     }
 
     @Override
+    public void deleteNonExistingSkinbaronItems(String ItemName, double price) throws Exception {
+        executeDDL("DELETE FROM steam.skinbaron_items where name='"+ItemName+"' and price <= "+price);
+    }
+
+    @Override
     public void crawlWearValues() throws Exception {
 
         Map<String,  String[]> mapWears = new HashMap<>();

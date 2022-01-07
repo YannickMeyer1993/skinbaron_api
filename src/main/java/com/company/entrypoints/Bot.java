@@ -14,6 +14,9 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
@@ -76,7 +79,10 @@ public class Bot {
                                     if (buy_item) {
                                         buyItem( secret, rs2.getString("id"), rs2.getDouble("price"));
                                     } else {
-                                        checkIfExists( secret, rs2.getString("name"), rs2.getDouble("price"));
+                                        boolean exists = checkIfExists( secret, rs2.getString("name"), rs2.getDouble("price"));
+                                        if (!exists) {
+                                            deleteNonExistingSkinbaronItems(rs2.getString("name"),rs2.getDouble("price"));
+                                        }
                                     }
                                 } catch (Exception e) {
                                     logger.info("Item isn't there anymore.");
@@ -174,4 +180,19 @@ public class Bot {
         }
     }
 
+    public static void deleteNonExistingSkinbaronItems(String ItemName,double price) {
+        String url = "http://localhost:8080/api/v1/DeleteNonExistingSkinbaronItems";
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        JSONObject JsonObject = new JSONObject();
+
+        JsonObject.put("ItemName", ItemName);
+        JsonObject.put("price", price);
+
+        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(JsonObject.toString(), headers);
+
+        restTemplate.postForObject(url, request, String.class);
+    }
 }

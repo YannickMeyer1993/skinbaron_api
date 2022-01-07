@@ -35,5 +35,7 @@ public interface ItemDAO {
 
    String getLastSkinbaronId() throws Exception;
 
+   void deleteNonExistingSkinbaronItems(String ItemName, double price) throws Exception;
+
 
 }

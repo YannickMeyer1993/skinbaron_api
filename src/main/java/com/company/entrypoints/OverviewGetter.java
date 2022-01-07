@@ -61,7 +61,9 @@ public class OverviewGetter {
             st.execute("UPDATE steam_item_sale.inventory set still_there = false;");
         }
 
-        //TODO trigger InventoryCrawler
+        //get Inventory Items
+        InventoryCrawler crawler = new InventoryCrawler();
+
         getItemPricesInventory(conn);
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
         getBalance(secret,true);

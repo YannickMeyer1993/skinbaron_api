@@ -45,4 +45,7 @@ public class SkinbaronCrawlerTest extends TestCase {
 
 
     }
+
+    public void testCheckIfExists() {
+    }
 }

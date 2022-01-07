@@ -27,7 +27,6 @@ import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 import static com.company.common.LoggingHelper.setUpClass;
 import static com.company.common.PasswordHelper.readPasswordFromFile;
@@ -237,8 +236,6 @@ public class SkinbaronCrawler {
         System.out.println(result);
         JSONObject resultJson = (JSONObject) new JSONTokener(result).nextValue();
         JSONArray resultArray = ((JSONArray) resultJson.get("sales"));
-
-        //TODO delete from dao
 
         return resultArray.length() != 0;
     }

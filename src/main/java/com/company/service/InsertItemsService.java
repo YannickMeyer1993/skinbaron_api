@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Service
 public class InsertItemsService {
@@ -37,5 +38,9 @@ public class InsertItemsService {
 
     public String getLastSkinbaronId() throws Exception {
         return itemdao.getLastSkinbaronId();
+    }
+
+    public void deleteNonExistingSkinbaronItems(@RequestParam String ItemName, @RequestParam double price) throws Exception {
+        itemdao.deleteNonExistingSkinbaronItems(ItemName,price);
     }
 }

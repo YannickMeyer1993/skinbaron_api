@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/v1")
 public class ItemController {
@@ -47,9 +49,19 @@ public class ItemController {
         insertItemsService.addInventoryItem(item);
     }
 
+    @RequestMapping("DeleteNonExistingSkinbaronItems")
+    @PostMapping
+    public void deleteNonExistingSkinbaronItems(@RequestBody com.fasterxml.jackson.databind.JsonNode payload) throws Exception {
+        System.out.println(payload.toString());
+        String ItemName = payload.get("ItemName").textValue();
+        double price = Double.parseDouble(payload.get("price").toString());
+
+        insertItemsService.deleteNonExistingSkinbaronItems(ItemName,price);
+    }
+
     @RequestMapping("DeleteInventoryItems")
     @PostMapping
-    public void DeleteInventoryItems() throws Exception {
+    public void deleteInventoryItems() throws Exception {
         insertItemsService.deleteInventoryItems();
     }
 
