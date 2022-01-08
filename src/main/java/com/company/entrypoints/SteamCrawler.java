@@ -253,9 +253,8 @@ public class SteamCrawler {
     }
 
     public static void getItemPricesInventory() throws Exception {
-        try(Connection conn = getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select \n" +
-                "distinct name from steam_item_sale.inventory_with_prices s\n" +
-                "where (round((date_part('epoch'::text, now() - s.\"timestamp\" ::timestamp with time zone) / (60 * 60 * 24)::double precision)::numeric, 1) > 1)  order by name")) {
+        try(Connection conn = getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select distinct name from steam.inventory_with_prices s\n" +
+                " where \"date\" != current_date  order by name;")) {
             String name;
             while (rs.next()) {
                 name = rs.getString("name");

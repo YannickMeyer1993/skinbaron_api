@@ -102,7 +102,7 @@ public class PostgresDAOTest extends TestCase {
         //executeDDL("delete from steam.overview where \"DATE\"=current_date");
     }
 
-    public void testInventoryPricesAndCurrentPrices() throws Exception {
+    public void testInventoryWithPricesAndCurrentSteamPrices() throws Exception {
         //TODO
     }
 }
