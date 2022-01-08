@@ -40,7 +40,12 @@ public class PostgresDAO implements ItemDAO {
         executeDDLfromPath(resourcePath + "1_table_inventory.sql");
         executeDDLfromPath(resourcePath + "1_table_item_informations.sql");
         executeDDLfromPath(resourcePath + "1_table_skinbaron_sold_items.sql");
+        executeDDLfromPath(resourcePath + "1_table_overview.sql");
+        executeDDLfromPath(resourcePath + "1_table_rare_skins.sql");
+
         executeDDLfromPath(resourcePath + "2_view_skinbaron_sold_items_per_name.sql");
+        executeDDLfromPath(resourcePath + "2_view_steam_current_prices.sql");
+        executeDDLfromPath(resourcePath + "3_view_inventory_with_prices.sql");
 
         if (checkIfResultsetIsEmpty("select * from steam.item_informations")) {
             crawlItemInformations();
@@ -198,7 +203,7 @@ public class PostgresDAO implements ItemDAO {
     @Override
     public void addInventoryItem(InventoryItem item) throws Exception {
 
-        String sql = "select name from steam_item_sale.item_informations where name =?;";
+        String sql = "select name from steam.item_informations where name =?;";
         String SQLInsert = "INSERT INTO steam.inventory(inv_type,name,still_there) "
                 + "VALUES(?,?,true)";
 
@@ -242,7 +247,7 @@ public class PostgresDAO implements ItemDAO {
 
         Map<String,  String[]> map = new HashMap<>();
 
-        executeDDL("TRUNCATE TABLE steam_item_sale.item_informations;");
+        executeDDL("TRUNCATE TABLE steam.item_informations;");
 
         String url = "https://csgo.exchange/prices/";
 
@@ -439,11 +444,13 @@ public class PostgresDAO implements ItemDAO {
     @Override
     public void crawlWearValues() throws Exception {
 
+        logger.info("Crawler WEAR values. This takes long!");
+
         Map<String,  String[]> mapWears = new HashMap<>();
 
         int max_iteration = 20000;
 
-        String SQLinsert = "INSERT INTO steam_item_sale.item_wears(name,id,min_wear,max_wear) "
+        String SQLinsert = "INSERT INTO steam.item_wears(name,id,min_wear,max_wear) "
                 + "VALUES(?,?,?,?)";
 
         try(Connection conn = getConnection()) {
@@ -456,7 +463,7 @@ public class PostgresDAO implements ItemDAO {
             iterators.add(Integer.MAX_VALUE);
 
             //select all ids and excute the complement
-            try(Statement stmt = conn.createStatement();ResultSet rs = stmt.executeQuery("select id from steam_item_sale.item_wears")) {
+            try(Statement stmt = conn.createStatement();ResultSet rs = stmt.executeQuery("select id from steam.item_wears")) {
 
                 while (rs.next()) {
                     iterators.remove(rs.getInt("id"));
@@ -540,5 +547,75 @@ public class PostgresDAO implements ItemDAO {
             }
         }
 
+    }
+
+    @Override
+    public void insertOverviewRow(double steam_balance,double steam_sales_value, double skinbaron_balance) throws Exception {
+
+        double smurf_inv_value;
+        double skinbaron_open_sale_wert;
+        double steam_inv_value;
+        double skinbaron_inv_value;
+
+        try(Connection conn = getConnection();Statement stmt2 = conn.createStatement();ResultSet rs2 = stmt2.executeQuery("with smurf as \n" +
+                "(select round(cast(x.smurf_inv_wert as numeric),2) as smurf_inv_value from (select t.smurf_inv_wert \n" +
+                "\tfrom ( select sum(si.amount*si.price_per_unit) as smurf_inv_wert\n" +
+                "\tfrom steam.inventory_with_prices si where inv_type = 'smurf' ) t) x),\n" +
+                "skinbaron_inv as \n" +
+                "(select ROUND(cast(w.skinbaron_wert as numeric),2) as skinbaron_inv_value from ( select t.skinbaron_wert \n" +
+                "\tfrom ( select sum(si.amount*si.price_per_unit) as skinbaron_wert\n" +
+                "\tfrom steam.inventory_with_prices si where inv_type = 'skinbaron' ) t) w),\n" +
+                "steam_inv as \n" +
+                "(select ROUND(cast(w.skinbaron_wert as numeric),2) as steam_inv_value from ( select t.skinbaron_wert \n" +
+                "\tfrom ( select sum(si.amount*si.price_per_unit) as skinbaron_wert\n" +
+                "\tfrom steam.inventory_with_prices si where inv_type = 'steam' or inv_type like 'storage%' ) t) w),\n" +
+                "skinbaron_open_sales as \n" +
+                "(select ROUND(cast(w.skinbaron_wert as numeric),2) as skinbaron_open_sales_value from ( select t.skinbaron_wert \n" +
+                "\tfrom ( select sum(si.amount*si.price_per_unit) as skinbaron_wert\n" +
+                "\tfrom steam.inventory_with_prices si where inv_type = 'skinbaron_sales' ) t) w)\n" +
+                "select smurf.*,skinbaron_open_sales.*,steam_inv.*,skinbaron_inv.* from smurf\n" +
+                "inner join skinbaron_inv on 1=1\n" +
+                "inner join steam_inv on 1=1\n" +
+                "inner join skinbaron_open_sales on 1=1")) {
+
+            rs2.next();
+
+            smurf_inv_value = rs2.getDouble("smurf_inv_value");
+            logger.info("Smurf Inventory Value: "+smurf_inv_value);
+            skinbaron_open_sale_wert = rs2.getDouble("skinbaron_open_sales_value");
+            logger.info("Skinbaron open Sales Value: "+skinbaron_open_sale_wert);
+            steam_inv_value = rs2.getDouble("steam_inv_value");
+            logger.info("Steam Inventory Value: "+steam_inv_value);
+            skinbaron_inv_value = rs2.getDouble("skinbaron_inv_value");
+            logger.info("Skinbaron Inventory Value: "+skinbaron_inv_value);
+        }
+
+        double sum_rare_items;
+
+        try(Connection conn = getConnection();Statement stmt3 = conn.createStatement();ResultSet rs3 = stmt3.executeQuery("select sum(zusatz_wert) as sum_rare_items from steam.rare_skins;")){
+            rs3.next();
+            sum_rare_items = rs3.getDouble("sum_rare_items");
+        }
+
+        executeDDL("delete from steam.overview where \"DATE\"=current_date");
+
+
+        //TODO Reihenfolge stimmt nicht
+        String sql = "INSERT INTO steam.overview(steam_balance,steam_open_sales,skinbaron_balance,smurf_inv_value,skinbaron_open_sales_wert,steam_inv_value,skinbaron_inv_value,kommentar) "
+                + "VALUES(?,?,?,?,?,?,?,?)";
+
+        try (Connection conn = getConnection();PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setDouble(1, smurf_inv_value);
+            pstmt.setDouble(2, skinbaron_open_sale_wert);
+            pstmt.setDouble(3, steam_inv_value);
+            pstmt.setDouble(4, skinbaron_inv_value);
+            pstmt.setDouble(5, sum_rare_items);
+            pstmt.setDouble(6, steam_balance);
+            pstmt.setDouble(7, steam_sales_value);
+            pstmt.setDouble(8, skinbaron_balance);
+
+            pstmt.execute();
+            conn.commit();
+        }
     }
 }

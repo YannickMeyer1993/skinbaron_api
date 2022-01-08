@@ -16,11 +16,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.StringReader;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.List;
 import org.slf4j.Logger;
 
 import static com.company.common.CurrencyHelper.getConversionRateToEuro;
 import static com.company.common.LoggingHelper.setUpClass;
+import static com.company.common.PostgresHelper.getConnection;
 
 public class SteamCrawler {
 
@@ -37,6 +41,9 @@ public class SteamCrawler {
         conversionRateUSDinEUR = getConversionRateToEuro("USD");
 
         int iteration = getHighestSteamIteration()+1;
+
+        InventoryCrawler invcrawler = new InventoryCrawler();
+        OverviewGetter overviewGetter = new OverviewGetter();
 
         logger.info("Starting with iteration: " + iteration);
 
@@ -228,6 +235,18 @@ public class SteamCrawler {
             throw new Exception("Response from "+url+" is null.");
         }
         return Integer.parseInt((responseEntityStr.getBody()));
+    }
+
+    public static void getItemPricesInventory() throws Exception {
+        try(Connection conn = getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select \n" +
+                "distinct name from steam_item_sale.inventory_with_prices s\n" +
+                "where (round((date_part('epoch'::text, now() - s.\"timestamp\" ::timestamp with time zone) / (60 * 60 * 24)::double precision)::numeric, 1) > 1)  order by name")) {
+            String name;
+            while (rs.next()) {
+                name = rs.getString("name");
+                getSteamPriceForGivenName(name);
+            }
+        }
     }
 }
 

@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.IOException;
+import java.sql.SQLException;
+
 @Service
 public class InsertItemsService {
 
@@ -50,5 +53,9 @@ public class InsertItemsService {
 
     public String getLastSoldSkinbaronId() throws Exception {
         return itemdao.getLastSoldSkinbaronId();
+    }
+
+    public void insertOverviewRow(double steam_balance, double steam_sales_value, double skinbaron_balance) throws Exception {
+        itemdao.insertOverviewRow(steam_balance,steam_sales_value,skinbaron_balance);
     }
 }

@@ -1,12 +1,5 @@
--- steam_item_sale.overview definition
-
--- Drop table
-
--- DROP TABLE steam_item_sale.overview;
-
-CREATE TABLE if not exists steam_item_sale.overview (
+CREATE TABLE if not exists steam.overview (
 	"DATE" date NOT NULL DEFAULT now(),
-	highest_iteration_steam int4 NOT NULL DEFAULT 0,
 	steam_balance float8 NOT NULL,
 	steam_open_sales float8 NOT NULL,
 	skinbaron_balance float8 NOT NULL,

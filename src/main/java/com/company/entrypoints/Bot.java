@@ -28,8 +28,8 @@ import java.util.Scanner;
 
 import static com.company.common.PasswordHelper.readPasswordFromFile;
 import static com.company.common.PostgresHelper.getConnection;
-import static com.company.entrypoints.OverviewGetter.getBalance;
 import static com.company.entrypoints.SkinbaronCrawler.checkIfExists;
+import static com.company.entrypoints.SkinbaronCrawler.getBalance;
 import static com.company.entrypoints.SteamCrawler.getSteamPriceForGivenName;
 import static java.lang.Math.min;
 
@@ -47,7 +47,7 @@ public class Bot {
         boolean buy_item =sc.nextBoolean();
 
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
-        double balance = getBalance(secret, false);
+        double balance = getBalance();
 
         logger.info("Enter max price: ");
         max_price = min(sc.nextDouble(), balance);

@@ -95,4 +95,14 @@ public class PostgresDAOTest extends TestCase {
         int result = dao.getHighestSteamIteration();
         assertEquals(result,0);
     }
+
+    public void testInsertOverviewRow() throws Exception {
+        PostgresDAO dao = new PostgresDAO();
+        dao.insertOverviewRow(3232d,2332d,323d);
+        //executeDDL("delete from steam.overview where \"DATE\"=current_date");
+    }
+
+    public void testInventoryPricesAndCurrentPrices() throws Exception {
+        //TODO
+    }
 }

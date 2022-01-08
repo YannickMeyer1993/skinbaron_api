@@ -354,4 +354,39 @@ public class SkinbaronCrawler {
         }
         return true;
     }
+
+    public static Double getBalance() throws Exception {
+
+        String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
+
+        logger.info("Skinbaron API GetBalance has been called.");
+        String jsonInputString = "{\"apikey\": \"" + secret + "\"}";
+
+        HttpPost httpPost = new HttpPost("https://api.skinbaron.de/GetBalance");
+        httpPost.setHeader("Content.Type", "application/json");
+        httpPost.setHeader("x-requested-with", "XMLHttpRequest");
+        httpPost.setHeader("Accept", "application/json");
+
+        HttpClient client = HttpClients.custom()
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setCookieSpec(CookieSpecs.STANDARD).build())
+                .build();
+
+        HttpEntity entity = new ByteArrayEntity(jsonInputString.getBytes(StandardCharsets.UTF_8));
+        httpPost.setEntity(entity);
+        HttpResponse response = client.execute(httpPost);
+        String result = EntityUtils.toString(response.getEntity());
+
+        JSONObject resultJson = (JSONObject) new JSONTokener(result).nextValue();
+
+        if (resultJson.has("message")) {
+            System.out.println("Result: " + resultJson.get("message"));
+            throw new Exception((String) resultJson.get("message"));
+        }
+
+        double skinbaronBalance = resultJson.getDouble("balance");
+
+        logger.info("Skinbaron Balance: " + skinbaronBalance + " euro.");
+        return skinbaronBalance;
+    }
 }

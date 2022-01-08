@@ -6,6 +6,9 @@ import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
 import org.apache.xpath.operations.Bool;
 
+import java.io.IOException;
+import java.sql.SQLException;
+
 public interface ItemDAO {
     void init() throws Exception;
 
@@ -40,4 +43,7 @@ public interface ItemDAO {
    void insertSoldSkinbaronItem(String itemId, String name, double price, String classid, String last_updated, String instanceid, String list_time, String assetid, String txid, double commission) throws Exception;
 
    String getLastSoldSkinbaronId() throws Exception;
-}
+
+   void insertOverviewRow(double steam_balance,double steam_sales_value, double skinbaron_balance) throws Exception;
+
+   }

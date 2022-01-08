@@ -92,4 +92,17 @@ public class ItemController {
     public String getLastSoldSkinbaronId() throws Exception {
         return insertItemsService.getLastSoldSkinbaronId();
     }
+
+    @RequestMapping("InsertOverviewRow")
+    @PostMapping
+    public void insertOverviewRow(@RequestBody com.fasterxml.jackson.databind.JsonNode payload) throws Exception {
+
+        double price = Double.parseDouble(payload.get("price").asText());
+
+        double steam_balance = Double.parseDouble(payload.get("steam_balance").asText());
+        double steam_sales_value = Double.parseDouble(payload.get("steam_sales_value").asText());
+        double skinbaron_balance = Double.parseDouble(payload.get("price").asText());
+
+        insertItemsService.insertOverviewRow(steam_balance,steam_sales_value,skinbaron_balance);
+    }
 }
