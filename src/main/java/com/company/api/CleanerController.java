@@ -21,7 +21,7 @@ public class CleanerController {
 
     @RequestMapping("api/v1/cleanup")
     @PostMapping
-    public void DeleteInventoryItems() throws Exception {
+    public void cleanUp() throws Exception {
         cleanUpService.cleanUp();
     }
 }

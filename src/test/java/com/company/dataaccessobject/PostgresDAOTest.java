@@ -6,6 +6,9 @@ import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
 import junit.framework.TestCase;
 
+import java.io.IOException;
+import java.sql.SQLException;
+
 import static com.company.common.PostgresHelper.*;
 
 public class PostgresDAOTest extends TestCase {
@@ -83,5 +86,13 @@ public class PostgresDAOTest extends TestCase {
         SkinbaronItem item = new SkinbaronItem("FakeID",3d,"AWP Drachlore","Keine",0.12345d);
         assertFalse(checkIfResultsetIsEmpty("select * from steam.skinbaron_items where id='FakeID' and name='AWP Drachlore'"));
         executeDDL("delete from steam.skinbaron_items where id='FakeID' and name='AWP Drachlore'");
+    }
+
+    public void testGetHighestSteamIteration() throws Exception {
+        executeDDL("delete from steam.steam_iteration where \"date\" = CURRENT_DATE;");
+        //new day
+        PostgresDAO dao = new PostgresDAO();
+        int result = dao.getHighestSteamIteration();
+        assertEquals(result,0);
     }
 }

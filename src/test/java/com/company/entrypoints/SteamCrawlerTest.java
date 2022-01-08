@@ -1,5 +1,6 @@
 package com.company.entrypoints;
 
+import com.company.dataaccessobject.PostgresDAO;
 import junit.framework.TestCase;
 
 import java.io.File;
@@ -10,6 +11,7 @@ import java.util.UUID;
 import static com.company.common.PostgresHelper.checkIfResultsetIsEmpty;
 import static com.company.common.PostgresHelper.executeDDL;
 import static com.company.entrypoints.InventoryCrawler.getItemsFromSteamHTTP;
+import static com.company.entrypoints.SteamCrawler.getHighestSteamIteration;
 import static com.company.entrypoints.SteamCrawler.requestInsertNewSteamprice;
 
 public class SteamCrawlerTest extends TestCase {
@@ -41,5 +43,10 @@ public class SteamCrawlerTest extends TestCase {
 
         assertEquals((int)map.get("Sticker | Fnatic (Holo) | Cologne 2014"),4);
 
+    }
+
+    public void testGetHighestSteamIteration() throws Exception {
+        executeDDL("delete from steam.steam_iteration where \"date\" = CURRENT_DATE;");
+        assertEquals(getHighestSteamIteration(),0);
     }
 }

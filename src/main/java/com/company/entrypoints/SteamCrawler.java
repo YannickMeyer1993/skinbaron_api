@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.StringReader;
@@ -37,11 +38,9 @@ public class SteamCrawler {
 
         setUpClass(); //disable Logging
 
-        PostgresDAO dao = new PostgresDAO();
-
         conversionRateUSDinEUR = getConversionRateToEuro("USD");
 
-        int iteration = dao.getHighestSteamIteration()+1;
+        int iteration = getHighestSteamIteration()+1;
 
         logger.info("Starting with iteration: " + iteration);
 
@@ -54,7 +53,7 @@ public class SteamCrawler {
 
                 iteration_successfull = getItemsforSteamPageNumber(iteration);
                 if (iteration_successfull) {
-                    dao.setHighestSteamIteration(iteration);
+                    //dao.setHighestSteamIteration(iteration);
                     iteration++;
                 }
 
@@ -208,6 +207,20 @@ public class SteamCrawler {
         logger.info("Item \""+hash_name+"\" costs "+return_price+" Euro.");
         Thread.sleep((long) 20*1000);
         return return_price;
+    }
+
+    public static int getHighestSteamIteration() throws Exception {
+        String url = "http://localhost:8080/api/v1/GetHightestSteamIteration";
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.TEXT_PLAIN);
+        ResponseEntity<String> responseEntityStr = restTemplate.getForEntity( url,String.class);
+
+        if (responseEntityStr.getBody() == null) {
+            throw new Exception("Response from "+url+" is null.");
+        }
+        return Integer.parseInt((responseEntityStr.getBody()));
     }
 }
 
