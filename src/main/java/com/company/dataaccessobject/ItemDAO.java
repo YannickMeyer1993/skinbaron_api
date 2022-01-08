@@ -39,4 +39,5 @@ public interface ItemDAO {
 
    void insertSoldSkinbaronItem(String itemId, String name, double price, String classid, String last_updated, String instanceid, String list_time, String assetid, String txid, double commission) throws Exception;
 
+   String getLastSoldSkinbaronId() throws Exception;
 }

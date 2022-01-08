@@ -52,4 +52,11 @@ public class SkinbaronCrawlerTest extends TestCase {
         assertFalse(checkIfResultsetIsEmpty("select * from steam.skinbaron_sold_items where id='testRequestInsertSoldSkinbaronItem'"));
         executeDDL("delete from steam.skinbaron_sold_items where id='testRequestInsertSoldSkinbaronItem'");
     }
+
+    public void testGetLastSoldSkinbaronId() throws Exception {
+        requestInsertSoldSkinbaronItem("testGetLastSoldSkinbaronId","Operation Case",0,"4578724859","1641446620","519977179","1640260702","24258366051","PZZWWTZFS9FT",0);
+
+        assertEquals(getLastSoldSkinbaronId(), "testGetLastSoldSkinbaronId");
+        executeDDL("delete from steam.skinbaron_items where id='testGetLastSoldSkinbaronId'");
+    }
 }

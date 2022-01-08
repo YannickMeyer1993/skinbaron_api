@@ -271,15 +271,7 @@ public class SkinbaronCrawler {
             JSONObject resultJson = new JSONObject(result);
             JSONArray jArray = new JSONArray(resultJson.get("response").toString());
 
-            List<String> existing_ids = new ArrayList<>();
-
-            //TODO with last inserted id
-            try (Statement stmt2 = conn.createStatement()) {
-                ResultSet rs2 = stmt2.executeQuery("select id from steam.skinbaron_sold_items");
-                while (rs2.next()) {
-                    existing_ids.add(rs2.getString("id"));
-                }
-            }
+            String lastSoldId = getLastSoldSkinbaronId();
 
             String itemId = null;
             for (int i = 0; i < jArray.length(); i++) {
@@ -296,11 +288,11 @@ public class SkinbaronCrawler {
                 double commission = Double.parseDouble(jObject.get("commission").toString());
                 itemId = jObject.get("id").toString();
 
-                if (existing_ids.contains(itemId)) { //if exists, finish
+                boolean was_inserted = requestInsertSoldSkinbaronItem(itemId,name,price,classid,last_updated,instanceid,list_time,assetid,txid,commission);
+
+                if (lastSoldId.equals(itemId) || !was_inserted) { //if not inserted, then is was already present => end loop
                     return;
                 }
-
-                requestInsertSoldSkinbaronItem(itemId,name,price,classid,last_updated,instanceid,list_time,assetid,txid,commission);
             }
 
             queryId = itemId;
@@ -320,10 +312,23 @@ public class SkinbaronCrawler {
         headers.setContentType(MediaType.TEXT_PLAIN);
         ResponseEntity<String> responseEntityStr = restTemplate.getForEntity( url,String.class);
 
+        logger.info("last inserted Skinbaron Id: "+responseEntityStr.getBody());
         return (responseEntityStr.getBody());
     }
 
-    public static void requestInsertSoldSkinbaronItem(String itemId, String name, double price, String classid, String last_updated, String instanceid, String list_time, String assetid, String txid, double commission) {
+    public static String getLastSoldSkinbaronId() {
+
+        String url = "http://localhost:8080/api/v1/lastSoldSkinbaronId";
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.TEXT_PLAIN);
+        ResponseEntity<String> responseEntityStr = restTemplate.getForEntity( url,String.class);
+
+        return (responseEntityStr.getBody());
+    }
+
+    public static boolean requestInsertSoldSkinbaronItem(String itemId, String name, double price, String classid, String last_updated, String instanceid, String list_time, String assetid, String txid, double commission) {
         String url = "http://localhost:8080/api/v1/InsertSoldSkinbaronItem";
 
         RestTemplate restTemplate = new RestTemplate();
@@ -344,6 +349,11 @@ public class SkinbaronCrawler {
 
         org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(JsonObject.toString(), headers);
 
-        restTemplate.postForObject(url, request, String.class);
+        try {
+            restTemplate.postForObject(url, request, String.class);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
     }
 }

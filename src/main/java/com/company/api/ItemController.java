@@ -87,4 +87,9 @@ public class ItemController {
     public String getLastSkinbaronId() throws Exception {
         return insertItemsService.getLastSkinbaronId();
     }
+
+    @GetMapping(value="lastSoldSkinbaronId", produces = MediaType.TEXT_PLAIN_VALUE)
+    public String getLastSoldSkinbaronId() throws Exception {
+        return insertItemsService.getLastSoldSkinbaronId();
+    }
 }
