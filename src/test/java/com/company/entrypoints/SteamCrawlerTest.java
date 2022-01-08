@@ -11,8 +11,7 @@ import java.util.UUID;
 import static com.company.common.PostgresHelper.checkIfResultsetIsEmpty;
 import static com.company.common.PostgresHelper.executeDDL;
 import static com.company.entrypoints.InventoryCrawler.getItemsFromSteamHTTP;
-import static com.company.entrypoints.SteamCrawler.getHighestSteamIteration;
-import static com.company.entrypoints.SteamCrawler.requestInsertNewSteamprice;
+import static com.company.entrypoints.SteamCrawler.*;
 
 public class SteamCrawlerTest extends TestCase {
 
@@ -48,5 +47,11 @@ public class SteamCrawlerTest extends TestCase {
     public void testGetHighestSteamIteration() throws Exception {
         executeDDL("delete from steam.steam_iteration where \"date\" = CURRENT_DATE;");
         assertEquals(getHighestSteamIteration(),0);
+    }
+
+    public void testSetHighestSteamIteration() throws Exception {
+        setHighestSteamIteration(10);
+        assertEquals(getHighestSteamIteration(),10);
+        setHighestSteamIteration(0);
     }
 }

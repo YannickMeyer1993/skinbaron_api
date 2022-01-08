@@ -18,4 +18,8 @@ public class SteamService {
     public int getHighestSteamIteration() throws Exception {
         return itemdao.getHighestSteamIteration();
     }
+
+    public void setHighestSteamIteration(String i) throws Exception {
+        itemdao.setHighestSteamIteration(Integer.parseInt(i));
+    }
 }

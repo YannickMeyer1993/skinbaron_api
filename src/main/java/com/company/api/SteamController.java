@@ -5,10 +5,7 @@ import com.company.service.SteamService;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class SteamController {
@@ -25,6 +22,15 @@ public class SteamController {
     @GetMapping(value="api/v1/GetHightestSteamIteration",produces = MediaType.TEXT_PLAIN_VALUE)
     public String getHighestSteamIteration() throws Exception {
        return ""+steamService.getHighestSteamIteration();
+    }
+
+    @RequestMapping("api/v1/SetHightestSteamIteration")
+    @PostMapping
+    public void setHightestSteamIteration(@RequestBody com.fasterxml.jackson.databind.JsonNode payload) throws Exception {
+
+        String i = payload.get("iteration").toString();
+
+        steamService.setHighestSteamIteration(i);
     }
 
 }

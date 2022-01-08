@@ -53,7 +53,7 @@ public class SteamCrawler {
 
                 iteration_successfull = getItemsforSteamPageNumber(iteration);
                 if (iteration_successfull) {
-                    //dao.setHighestSteamIteration(iteration);
+                    setHighestSteamIteration(iteration);
                     iteration++;
                 }
 
@@ -65,6 +65,20 @@ public class SteamCrawler {
             }
         }
         logger.info("Reached maximum iteration.");
+    }
+
+    static void setHighestSteamIteration(int iteration) {
+        String url = "http://localhost:8080/api/v1/SetHightestSteamIteration";
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        JSONObject JsonObject = new JSONObject();
+
+        JsonObject.put("iteration", iteration);
+
+        HttpEntity<String> request = new HttpEntity<>(JsonObject.toString(), headers);
+
+        restTemplate.postForObject(url, request, String.class);
     }
 
     public static @NotNull Boolean getItemsforSteamPageNumber(int pageNumber) throws Exception {

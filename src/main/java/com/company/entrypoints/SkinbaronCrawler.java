@@ -25,8 +25,6 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.company.common.LoggingHelper.setUpClass;
 import static com.company.common.PasswordHelper.readPasswordFromFile;
