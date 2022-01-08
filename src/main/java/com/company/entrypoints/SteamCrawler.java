@@ -20,11 +20,14 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Scanner;
+
 import org.slf4j.Logger;
 
 import static com.company.common.CurrencyHelper.getConversionRateToEuro;
 import static com.company.common.LoggingHelper.setUpClass;
 import static com.company.common.PostgresHelper.getConnection;
+import static com.company.entrypoints.SkinbaronCrawler.getBalance;
 
 public class SteamCrawler {
 
@@ -43,7 +46,19 @@ public class SteamCrawler {
         int iteration = getHighestSteamIteration()+1;
 
         InventoryCrawler invcrawler = new InventoryCrawler();
-        OverviewGetter overviewGetter = new OverviewGetter();
+
+        System.out.println("Decimal separator is comma!");
+        Scanner sc= new Scanner(System.in);
+        System.out.println("Enter current steam balance: ");
+        double steam_balance = sc.nextDouble();
+        System.out.println("Enter current steam sales value: ");
+        double steam_sales_value = sc.nextDouble();
+
+        getItemPricesInventory();
+
+        double skinbaron_balance = getBalance();
+
+        insertOverviewRow(steam_balance, steam_sales_value, skinbaron_balance );
 
         logger.info("Starting with iteration: " + iteration);
 
@@ -247,6 +262,10 @@ public class SteamCrawler {
                 getSteamPriceForGivenName(name);
             }
         }
+    }
+
+    public static void insertOverviewRow(double steam_balance, double steam_sales_value, double skinbaron_balance) throws Exception {
+        //TODO request + test
     }
 }
 
