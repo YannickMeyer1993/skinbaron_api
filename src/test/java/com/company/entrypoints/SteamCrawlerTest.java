@@ -50,8 +50,9 @@ public class SteamCrawlerTest extends TestCase {
     }
 
     public void testSetHighestSteamIteration() throws Exception {
+        int old = getHighestSteamIteration();
         setHighestSteamIteration(10);
         assertEquals(getHighestSteamIteration(),10);
-        setHighestSteamIteration(0);
+        setHighestSteamIteration(old);
     }
 }
