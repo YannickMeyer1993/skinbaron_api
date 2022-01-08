@@ -41,9 +41,9 @@ public class OverviewGetter {
 
         System.out.println("Decimal separator is comma!");
         Scanner sc= new Scanner(System.in);    //System.in is a standard input stream
-        System.out.println("Enter Steam Balance: ");
+        System.out.println("Enter current steam balance: ");
         steam_balance = sc.nextDouble();
-        System.out.println("Enter Steam Sales Value: ");
+        System.out.println("Enter current steam sales value: ");
         steam_sales_value = sc.nextDouble();
 
         Connection conn = getConnection();

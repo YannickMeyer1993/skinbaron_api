@@ -1,14 +1,12 @@
-package com.company.postgres.buff;
-
-import com.company.entrypoints.SteamCrawler;
+package com.company.entrypoints;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
 import static com.company.common.PostgresHelper.getConnection;
-import static com.company.postgres.buff.BuffCrawler.getBuffItem;
-import static com.company.postgres.buff.BuffCrawler.getBuffItemNoExterior;
+import static com.company.entrypoints.BuffCrawler.getBuffItem;
+import static com.company.entrypoints.BuffCrawler.getBuffItemNoExterior;
 
 //TODO
 public class BuffBot {

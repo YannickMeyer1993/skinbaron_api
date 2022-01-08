@@ -1,5 +1,6 @@
 package com.company.postgres.buff;
 
+import com.company.entrypoints.BuffCrawler;
 import junit.framework.TestCase;
 
 import java.sql.Connection;

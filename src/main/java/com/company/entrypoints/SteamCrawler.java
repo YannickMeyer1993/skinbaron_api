@@ -1,6 +1,5 @@
 package com.company.entrypoints;
 
-import com.company.dataaccessobject.PostgresDAO;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
@@ -17,19 +16,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.StringReader;
-import java.sql.*;
 import java.util.List;
 import org.slf4j.Logger;
 
 import static com.company.common.CurrencyHelper.getConversionRateToEuro;
 import static com.company.common.LoggingHelper.setUpClass;
-import static com.company.common.PostgresHelper.getConnection;
-
 
 public class SteamCrawler {
 
     private static Double conversionRateUSDinEUR;
-    private static Logger logger = LoggerFactory.getLogger(SteamCrawler.class);
+    private static final Logger logger = LoggerFactory.getLogger(SteamCrawler.class);
 
     private final static int MAX_ITERATION = 1600;
     private static final String UrlPost = "http://localhost:8080/api/v1/AddSteamPrice";
@@ -82,7 +78,6 @@ public class SteamCrawler {
     }
 
     public static @NotNull Boolean getItemsforSteamPageNumber(int pageNumber) throws Exception {
-        Connection conn = getConnection();
 
        logger.info("Iteration: " + pageNumber);
 
@@ -112,8 +107,6 @@ public class SteamCrawler {
 
         for (DomElement item : Items) {
             String item_xml = item.asXml();
-
-            //System.out.println(item_xml);
 
             Document document = new SAXReader().read(new StringReader(item_xml));
             String name = document.valueOf("/div/@data-hash-name");

@@ -1,4 +1,4 @@
-package com.company.postgres.buff;
+package com.company.entrypoints;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -143,7 +143,7 @@ public class BuffCrawler {
         conn.commit();
     }
 
-    static void getBuffItem(Connection conn, int id) throws IOException, InterruptedException, DocumentException, SQLException, IndexOutOfBoundsException {
+    public static void getBuffItem(Connection conn, int id) throws IOException, InterruptedException, DocumentException, SQLException, IndexOutOfBoundsException {
 
         String SQLUpsert = "WITH\n" +
                 "    to_be_upserted (id,price_euro,timestamp,has_enterior,name) AS (\n" +
