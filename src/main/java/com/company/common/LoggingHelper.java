@@ -10,6 +10,8 @@ public class LoggingHelper {
         root3.setLevel(ch.qos.logback.classic.Level.INFO);
         ch.qos.logback.classic.Logger root4 = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger("com.gargoylesoftware.htmlunit.javascript");
         root4.setLevel(ch.qos.logback.classic.Level.OFF);
+        ch.qos.logback.classic.Logger root5 = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger("com.company.common");
+        root5.setLevel(ch.qos.logback.classic.Level.WARN);
         //...
     }
 }

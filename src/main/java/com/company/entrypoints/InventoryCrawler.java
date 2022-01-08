@@ -32,13 +32,12 @@ public class InventoryCrawler {
     public InventoryCrawler() throws Exception {
         setUpClass();
 
-        InventoryCrawler crawler = new InventoryCrawler();
-        crawler.clearInventory();
-        crawler.getSkinbaronInventory();
-        crawler.getItemsfromInventory("https://steamcommunity.com/inventory/76561198286004569/730/2?count=2000", "steam");
-        crawler.getItemsfromInventory("https://steamcommunity.com/inventory/76561198331678576/730/2?count=2000", "smurf");
-        crawler.getSkinbaronSales();
-        crawler.getStorageItems();
+        clearInventory();
+        getSkinbaronInventory();
+        getItemsfromInventory("https://steamcommunity.com/inventory/76561198286004569/730/2?count=2000", "steam");
+        getItemsfromInventory("https://steamcommunity.com/inventory/76561198331678576/730/2?count=2000", "smurf");
+        getSkinbaronSales();
+        getStorageItems();
     }
 
     public void clearInventory() {
