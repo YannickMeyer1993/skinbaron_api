@@ -7,9 +7,14 @@ import com.company.model.SteamPrice;
 import junit.framework.TestCase;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
+import static com.company.common.LoggingHelper.setUpClass;
 import static com.company.common.PostgresHelper.*;
+import static com.company.entrypoints.SteamCrawler.getSteamPriceForGivenName;
 
 public class PostgresDAOTest extends TestCase {
 
@@ -102,7 +107,38 @@ public class PostgresDAOTest extends TestCase {
         //executeDDL("delete from steam.overview where \"DATE\"=current_date");
     }
 
-    public void testInventoryWithPricesAndCurrentSteamPrices() throws Exception {
-        //TODO
+    public void testViewCurrentSteamPrices() throws Exception {
+        setUpClass();
+        double result = getSteamPriceForGivenName("Sticker Capsule");
+        assertFalse(checkIfResultsetIsEmpty("select * from steam.steam_current_prices where name = 'Sticker Capsule' and \"date\"= CURRENT_DATE and price_euro="+result));
+
+        try (Connection connection = getConnection(); Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery("select count(*) from steam.item_informations");
+             Statement st2 = connection.createStatement();
+             ResultSet rs2 = st2.executeQuery("select count(*) from steam.steam_current_prices")) {
+            rs.next();
+            rs2.next();
+            int count = rs.getInt("count");
+            int count2 = rs2.getInt("count");
+            assertTrue(count <= count2);
+        }
+
+        try (Connection connection = getConnection(); Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery("select count(*),name from steam.steam_current_prices group by name having count(*) > 1")) {
+            assertFalse(rs.next());
+        }
+    }
+
+    public void testViewInventoryWithPrices() throws Exception {
+        try (Connection connection = getConnection(); Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery("select count(*) from steam.inventory where still_there = true");
+             Statement st2 = connection.createStatement();
+             ResultSet rs2 = st2.executeQuery("select sum(amount) from steam.inventory_with_prices")) {
+            rs.next();
+            rs2.next();
+            int count = rs.getInt("count");
+            int count2 = rs2.getInt("sum");
+            assertEquals(count, count2);
+        }
     }
 }

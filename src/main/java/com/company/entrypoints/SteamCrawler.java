@@ -47,11 +47,11 @@ public class SteamCrawler {
 
         InventoryCrawler invcrawler = new InventoryCrawler();
 
-        System.out.println("Decimal separator is comma!");
+        logger.warn("Decimal separator is comma!");
         Scanner sc= new Scanner(System.in);
-        System.out.println("Enter current steam balance: ");
+        logger.warn("Enter current steam balance: ");
         double steam_balance = sc.nextDouble();
-        System.out.println("Enter current steam sales value: ");
+        logger.warn("Enter current steam sales value: ");
         double steam_sales_value = sc.nextDouble();
 
         getItemPricesInventory();
