@@ -1,15 +1,11 @@
 package com.company.dataaccessobject;
 
-import com.company.model.InventoryItem;
-import com.company.model.Price;
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
 import junit.framework.TestCase;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 
 import static com.company.common.LoggingHelper.setUpClass;
@@ -63,15 +59,14 @@ public class PostgresDAOTest extends TestCase {
 
     public void testAddInventoryItem() throws Exception {
         PostgresDAO dao = new PostgresDAO();
-        InventoryItem item = new InventoryItem("AWP | Dragon Lore (Factory New)","Test Inv");
-        dao.addInventoryItem(item);
+        dao.addInventoryItem("AWP | Dragon Lore (Factory New)",1,"Test Inv");
         assertFalse(checkIfResultsetIsEmpty("select * from steam.inventory where name = 'AWP | Dragon Lore (Factory New)' and inv_type='Test Inv'"));
         executeDDL("DELETE FROM steam.inventory where name = 'AWP | Dragon Lore (Factory New)'");
     }
 
     public void testAddInventoryItemNegative() throws Exception {
         PostgresDAO dao = new PostgresDAO();
-        InventoryItem item = new InventoryItem("Wrong Name","Test Inv");
+        dao.addInventoryItem("Wrong Name",1,"Test Inv");
         assertTrue(checkIfResultsetIsEmpty("select * from steam.inventory where name = 'Wrong Name'"));
     }
 
@@ -104,12 +99,15 @@ public class PostgresDAOTest extends TestCase {
     public void testInsertOverviewRow() throws Exception {
         PostgresDAO dao = new PostgresDAO();
         dao.insertOverviewRow(3232d,2332d,323d);
-        //executeDDL("delete from steam.overview where \"DATE\"=current_date");
+        assertFalse(checkIfResultsetIsEmpty("select * from steam.overview where steam_balance=3232 and steam_open_sales=2332 and skinbaron_balance=323;"));
+        executeDDL("delete from steam.overview where \"DATE\"=current_date");
     }
 
     public void testViewCurrentSteamPrices() throws Exception {
         setUpClass();
         double result = getSteamPriceForGivenName("Sticker Capsule");
+
+        //Could be wrong if price changes within a day and after the second run because minimum
         assertFalse(checkIfResultsetIsEmpty("select * from steam.steam_current_prices where name = 'Sticker Capsule' and \"date\"= CURRENT_DATE and price_euro="+result));
 
         try (Connection connection = getConnection(); Statement st = connection.createStatement();
@@ -131,12 +129,12 @@ public class PostgresDAOTest extends TestCase {
 
     public void testViewInventoryWithPrices() throws Exception {
         try (Connection connection = getConnection(); Statement st = connection.createStatement();
-             ResultSet rs = st.executeQuery("select count(*) from steam.inventory where still_there = true");
+             ResultSet rs = st.executeQuery("select sum(amount) from steam.inventory where still_there = true");
              Statement st2 = connection.createStatement();
              ResultSet rs2 = st2.executeQuery("select sum(amount) from steam.inventory_with_prices")) {
             rs.next();
             rs2.next();
-            int count = rs.getInt("count");
+            int count = rs.getInt("sum");
             int count2 = rs2.getInt("sum");
             assertEquals(count, count2);
         }

@@ -201,29 +201,30 @@ public class PostgresDAO implements ItemDAO {
     }
 
     @Override
-    public void addInventoryItem(InventoryItem item) throws Exception {
+    public void addInventoryItem(String itemname,int amount,String inventorytype) throws Exception {
 
         String sql = "select name from steam.item_informations where name =?;";
-        String SQLInsert = "INSERT INTO steam.inventory(inv_type,name,still_there) "
-                + "VALUES(?,?,true)";
+        String SQLInsert = "INSERT INTO steam.inventory(inv_type,name,amount,still_there) "
+                + "VALUES(?,?,?,true)";
 
         try (Connection connection = getConnection();
              PreparedStatement pstmt1 = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
              PreparedStatement pstmt2 = connection.prepareStatement(SQLInsert, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt1.setString(1, item.getItemName());
+            pstmt1.setString(1, itemname);
 
             ResultSet rs = pstmt1.executeQuery();
             if (!rs.next()) {
                 return;
             }
 
-            pstmt2.setString(1, item.getInventoryType());
-            pstmt2.setString(2, item.getItemName());
+            pstmt2.setString(1, inventorytype);
+            pstmt2.setString(2, itemname);
+            pstmt2.setInt(3,amount);
             pstmt2.execute();
             connection.commit();
         }
 
-        logger.info("Item \""+ item.getItemName() +"\" was inserted to inventory.");
+        logger.info("Item \""+ itemname+"\" was inserted to inventory.");
     }
 
     @Override
@@ -599,9 +600,7 @@ public class PostgresDAO implements ItemDAO {
 
         executeDDL("delete from steam.overview where \"DATE\"=current_date");
 
-
-        //TODO Reihenfolge stimmt nicht
-        String sql = "INSERT INTO steam.overview(steam_balance,steam_open_sales,skinbaron_balance,smurf_inv_value,skinbaron_open_sales_wert,steam_inv_value,skinbaron_inv_value,kommentar) "
+        String sql = "INSERT INTO steam.overview(smurf_inv_value,skinbaron_open_sales,steam_inv_value,skinbaron_inv_value,rare_items_value,steam_balance,steam_open_sales,skinbaron_balance) "
                 + "VALUES(?,?,?,?,?,?,?,?)";
 
         try (Connection conn = getConnection();PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {

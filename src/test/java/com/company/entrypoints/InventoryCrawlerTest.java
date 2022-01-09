@@ -9,7 +9,7 @@ public class InventoryCrawlerTest extends TestCase {
 
     public void testTestSendRequestInsertInventoryItem() throws Exception {
         InventoryCrawler crawler = new InventoryCrawler();
-        crawler.sendRequestInsertInventoryItem("AWP | Dragon Lore (Factory New)","Test Inv");
+        crawler.sendRequestInsertInventoryItem("AWP | Dragon Lore (Factory New)",1,"Test Inv");
         assertFalse(checkIfResultsetIsEmpty("select * from steam.inventory where name = 'AWP | Dragon Lore (Factory New)' and inv_type='Test Inv'"));
         executeDDL("DELETE FROM steam.inventory where name = 'AWP | Dragon Lore (Factory New)'");
     }

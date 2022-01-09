@@ -69,7 +69,7 @@ public class InventoryCrawler {
         HashMap<String, Integer> map = getItemsFromSteamHTTP(resultJSON);
 
         for (String key : map.keySet()) {
-            sendRequestInsertInventoryItem(key,type);
+            sendRequestInsertInventoryItem(key,map.get(key),type);
         }
     }
 
@@ -120,7 +120,7 @@ public class InventoryCrawler {
                     case "Vanguard Case":item_name = "Operation Vanguard Weapon Case";
                         break;
                 }
-                sendRequestInsertInventoryItem(item_name,"storage");
+                sendRequestInsertInventoryItem(item_name,amount,"storage");
             }
         }
     }
@@ -200,7 +200,7 @@ public class InventoryCrawler {
         for (Object o : resultArray) {
             if (o instanceof JSONObject) {
                 String name = ((JSONObject) o).getString("marketHashName");
-                sendRequestInsertInventoryItem(name,"skinbaron");
+                sendRequestInsertInventoryItem(name,1,"skinbaron");
             }
         }
     }
@@ -241,13 +241,13 @@ public class InventoryCrawler {
                     String name = ((JSONObject) o).getString("name");
                     id = ((JSONObject) o).getString("id");
 
-                    sendRequestInsertInventoryItem(name,"skinbaron sales");
+                    sendRequestInsertInventoryItem(name,1,"skinbaron sales");
                 }
             }
         }
     }
 
-    public void sendRequestInsertInventoryItem(String ItemName, String InventoryType) {
+    public void sendRequestInsertInventoryItem(String ItemName, int amount,String InventoryType) {
         String url = "http://localhost:8080/api/v1/AddInventoryItem";
 
         RestTemplate restTemplate = new RestTemplate();
@@ -256,6 +256,7 @@ public class InventoryCrawler {
         JSONObject JsonObject = new JSONObject();
 
         JsonObject.put("itemname", ItemName);
+        JsonObject.put("amount", amount);
         JsonObject.put("inventorytype", InventoryType);
 
         org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(JsonObject.toString(), headers);

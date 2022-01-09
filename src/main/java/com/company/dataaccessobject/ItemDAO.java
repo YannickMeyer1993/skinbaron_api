@@ -1,13 +1,8 @@
 package com.company.dataaccessobject;
 
-import com.company.model.InventoryItem;
 import com.company.model.Item;
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
-import org.apache.xpath.operations.Bool;
-
-import java.io.IOException;
-import java.sql.SQLException;
 
 public interface ItemDAO {
     void init() throws Exception;
@@ -24,7 +19,7 @@ public interface ItemDAO {
 
    void setHighestSteamIteration(int iteration) throws Exception;
 
-   void addInventoryItem(InventoryItem item) throws Exception;
+   void addInventoryItem(String itemname,int amount,String inventorytype) throws Exception;
 
    Item getItem(String ItemName);
 

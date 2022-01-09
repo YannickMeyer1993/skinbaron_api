@@ -1,17 +1,12 @@
 package com.company.service;
 
 import com.company.dataaccessobject.ItemDAO;
-import com.company.model.InventoryItem;
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import java.io.IOException;
-import java.sql.SQLException;
 
 @Service
 public class InsertItemsService {
@@ -31,8 +26,8 @@ public class InsertItemsService {
         return itemdao.addSkinbaronItem(skinbaronitem);
     }
 
-    public void addInventoryItem(@RequestBody InventoryItem item) throws Exception {
-        itemdao.addInventoryItem(item);
+    public void addInventoryItem(String itemname,int amount,String inventorytype) throws Exception {
+        itemdao.addInventoryItem(itemname,amount,inventorytype);
     }
 
     public void deleteInventoryItems() throws Exception {

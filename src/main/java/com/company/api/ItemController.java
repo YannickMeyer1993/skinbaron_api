@@ -1,17 +1,12 @@
 package com.company.api;
 
-import com.company.model.InventoryItem;
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
 import com.company.service.InsertItemsService;
-import org.eclipse.jetty.http.MetaData;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -45,8 +40,13 @@ public class ItemController {
 
     @RequestMapping("AddInventoryItem")
     @PostMapping
-    public void addInventoryItem(@RequestBody InventoryItem item) throws Exception {
-        insertItemsService.addInventoryItem(item);
+    public void addInventoryItem(@RequestBody com.fasterxml.jackson.databind.JsonNode payload) throws Exception {
+
+
+        String itemname = payload.get("itemname").textValue();
+        int amount = Integer.parseInt(payload.get("amount").toPrettyString());
+        String inventorytype = payload.get("inventorytype").textValue();
+        insertItemsService.addInventoryItem(itemname,amount,inventorytype);
     }
 
     @RequestMapping("DeleteNonExistingSkinbaronItems")
