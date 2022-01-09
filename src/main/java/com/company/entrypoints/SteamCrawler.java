@@ -264,7 +264,7 @@ public class SteamCrawler {
     }
 
     public static void insertOverviewRow(double steam_balance, double steam_sales_value, double skinbaron_balance) {
-        //TODO request + test
+
         String url = "http://localhost:8080/api/v1/SetOverview";
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
