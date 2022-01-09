@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
+import static com.company.common.Constants.*;
 import static com.company.common.LoggingHelper.setUpClass;
 import static com.company.common.PasswordHelper.readPasswordFromFile;
 
@@ -34,8 +35,8 @@ public class InventoryCrawler {
 
         clearInventory();
         getSkinbaronInventory();
-        getItemsfromInventory("https://steamcommunity.com/inventory/76561198286004569/730/2?count=2000", "steam");
-        getItemsfromInventory("https://steamcommunity.com/inventory/76561198331678576/730/2?count=2000", "smurf");
+        getItemsfromInventory("https://steamcommunity.com/inventory/76561198286004569/730/2?count=2000", INV_TYPE_steam);
+        getItemsfromInventory("https://steamcommunity.com/inventory/76561198331678576/730/2?count=2000", INV_TYPE_smurf);
         getSkinbaronSales();
         getStorageItems();
     }
@@ -120,7 +121,7 @@ public class InventoryCrawler {
                     case "Vanguard Case":item_name = "Operation Vanguard Weapon Case";
                         break;
                 }
-                sendRequestInsertInventoryItem(item_name,amount,"storage");
+                sendRequestInsertInventoryItem(item_name,amount,INV_TYPE_storage);
             }
         }
     }
@@ -200,7 +201,7 @@ public class InventoryCrawler {
         for (Object o : resultArray) {
             if (o instanceof JSONObject) {
                 String name = ((JSONObject) o).getString("marketHashName");
-                sendRequestInsertInventoryItem(name,1,"skinbaron");
+                sendRequestInsertInventoryItem(name,1,INV_TYPE_skinbaron);
             }
         }
     }
@@ -241,7 +242,7 @@ public class InventoryCrawler {
                     String name = ((JSONObject) o).getString("name");
                     id = ((JSONObject) o).getString("id");
 
-                    sendRequestInsertInventoryItem(name,1,"skinbaron sales");
+                    sendRequestInsertInventoryItem(name,1,INV_TYPE_SKINBARON_SALES);
                 }
             }
         }

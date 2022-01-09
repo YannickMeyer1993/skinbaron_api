@@ -3,6 +3,8 @@ package com.company.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.company.common.Constants.*;
+
 public class Item {
     private final String name;
 
@@ -76,11 +78,11 @@ public class Item {
      */
     public void addToInventory(String InventoryType){
         List<String> AllowedInventoryTypes = new ArrayList<>();
-        AllowedInventoryTypes.add("steam");
-        AllowedInventoryTypes.add("storage");
-        AllowedInventoryTypes.add("skinbaron");
-        AllowedInventoryTypes.add("skinbaron sales");
-        AllowedInventoryTypes.add("smurf");
+        AllowedInventoryTypes.add(INV_TYPE_skinbaron);
+        AllowedInventoryTypes.add(INV_TYPE_steam);
+        AllowedInventoryTypes.add(INV_TYPE_storage);
+        AllowedInventoryTypes.add(INV_TYPE_SKINBARON_SALES);
+        AllowedInventoryTypes.add(INV_TYPE_smurf);
         if (AllowedInventoryTypes.contains(InventoryType)) {
             throw new IllegalArgumentException("Unknown Inventory Type");
         }
