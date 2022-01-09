@@ -52,6 +52,8 @@ public class Bot {
         max_price = min(sc.nextDouble(), balance);
 
         String query = "select steam_preis_aktuell,skinbaron_preis,steam_preis, name from steam_item_sale.auf_skinbaron_kaufbare_skins where skinbaron_preis<=" + max_price + " order by rati desc";
+
+        //to get id
         String query2 = "select s.name,s.id, s.price from steam_item_sale.skinbaron_market_search_results s where s.name = ? and  s.price <= ?";
 
         while (true) {

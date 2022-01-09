@@ -16,13 +16,13 @@ public class PostgresDAOTest extends TestCase {
 
     public void testInit() throws Exception {
         PostgresDAO dao = new PostgresDAO();
-        dao.init();
         assertFalse(checkIfResultsetIsEmpty("select * from information_schema.schemata s where schema_name = 'steam';"));
         assertFalse(checkIfResultsetIsEmpty("select * from information_schema.\"tables\" t \n" +
                 "where table_name = 'steam_prices' and table_schema = 'steam';"));
         assertFalse(checkIfResultsetIsEmpty("select * from information_schema.\"tables\" t \n" +
                 "where table_name = 'skinbaron_items' and table_schema = 'steam';"));
-
+        assertTrue(checkIfResultsetIsEmpty("select name,count(*) from steam.steam_avg_prices sap\n" +
+                "        group by name having count(*) > 1;"));
     }
 
     public void testGetItemsToBuy() {

@@ -24,7 +24,7 @@ import static com.company.common.PostgresHelper.*;
 public class PostgresDAO implements ItemDAO {
     
     private static org.slf4j.Logger logger = LoggerFactory.getLogger(PostgresDAO.class);
-    String resourcePath = "src/main/resources/PostgresDAO/init";
+    String resourcePath = "src/main/resources/PostgresDAO/";
 
     public PostgresDAO() throws Exception {
         init();
@@ -33,7 +33,7 @@ public class PostgresDAO implements ItemDAO {
     @Override
     public void init() throws Exception {
 
-        executeDDLsfromDirectory(resourcePath);
+        executeDDLsfromDirectory(resourcePath+"init/");
         //executeDDLfromPath(resourcePath + "0_schema.sql");
         //executeDDLfromPath(resourcePath + "1_table_skinbaron_items.sql");
         //executeDDLfromPath(resourcePath + "1_table_steam_item_prices.sql");
