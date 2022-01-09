@@ -573,7 +573,7 @@ public class PostgresDAO implements ItemDAO {
                 "skinbaron_open_sales as \n" +
                 "(select ROUND(cast(w.skinbaron_wert as numeric),2) as skinbaron_open_sales_value from ( select t.skinbaron_wert \n" +
                 "\tfrom ( select sum(si.amount*si.price_per_unit) as skinbaron_wert\n" +
-                "\tfrom steam.inventory_with_prices si where inv_type = 'skinbaron_sales' ) t) w)\n" +
+                "\tfrom steam.inventory_with_prices si where inv_type = 'skinbaron sales' ) t) w)\n" +
                 "select smurf.*,skinbaron_open_sales.*,steam_inv.*,skinbaron_inv.* from smurf\n" +
                 "inner join skinbaron_inv on 1=1\n" +
                 "inner join steam_inv on 1=1\n" +

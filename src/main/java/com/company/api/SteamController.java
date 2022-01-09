@@ -33,4 +33,15 @@ public class SteamController {
         steamService.setHighestSteamIteration(i);
     }
 
+    @RequestMapping("api/v1/SetOverview")
+    @PostMapping
+    public void setOverview(@RequestBody com.fasterxml.jackson.databind.JsonNode payload) throws Exception {
+
+        double steambalance = Double.parseDouble(payload.get("steambalance").toPrettyString());
+        double steamopensales = Double.parseDouble(payload.get("steamopensales").toPrettyString());
+        double skinbaronbalance = Double.parseDouble(payload.get("skinbaronbalance").toPrettyString());
+
+        steamService.setOverview(steambalance,steamopensales,skinbaronbalance);
+    }
+
 }

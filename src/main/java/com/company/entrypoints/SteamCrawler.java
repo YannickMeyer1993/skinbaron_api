@@ -62,12 +62,12 @@ public class SteamCrawler {
 
         logger.info("Starting with iteration: " + iteration);
 
-        int wait_counter = 3;
+        int wait_counter = 0;
         boolean iteration_successfull = false;
         while (iteration < MAX_ITERATION || !iteration_successfull) {
             try {
-                logger.info("Waiting for " + Math.pow(2, wait_counter) + " seconds");
-                Thread.sleep((long) (Math.pow(2, wait_counter) * 1000));
+                logger.info("Waiting for " + wait_counter * 10 + " seconds");
+                Thread.sleep((long) wait_counter * 10000);
 
                 iteration_successfull = getItemsforSteamPageNumber(iteration);
                 if (iteration_successfull) {
@@ -75,7 +75,7 @@ public class SteamCrawler {
                     iteration++;
                 }
 
-                wait_counter = 3;
+                wait_counter = 2;
 
             } catch (Exception e) {
                 logger.info(e.getMessage());
@@ -263,8 +263,21 @@ public class SteamCrawler {
         }
     }
 
-    public static void insertOverviewRow(double steam_balance, double steam_sales_value, double skinbaron_balance) throws Exception {
+    public static void insertOverviewRow(double steam_balance, double steam_sales_value, double skinbaron_balance) {
         //TODO request + test
+        String url = "http://localhost:8080/api/v1/SetOverview";
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        JSONObject JsonObject = new JSONObject();
+
+        JsonObject.put("steambalance", steam_balance);
+        JsonObject.put("steamopensales", steam_sales_value);
+        JsonObject.put("skinbaronbalance",skinbaron_balance);
+
+        HttpEntity<String> request = new HttpEntity<>(JsonObject.toString(), headers);
+
+        restTemplate.postForObject(url, request, String.class);
     }
 }
 

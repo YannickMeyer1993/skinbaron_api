@@ -22,4 +22,8 @@ public class SteamService {
     public void setHighestSteamIteration(String i) throws Exception {
         itemdao.setHighestSteamIteration(Integer.parseInt(i));
     }
+
+    public void setOverview(double steambalance, double steamopensales, double skinbaronbalance) throws Exception {
+        itemdao.insertOverviewRow(steambalance,steamopensales,skinbaronbalance);
+    }
 }
