@@ -194,7 +194,7 @@ public class SkinbaronCrawler {
 
                 System.out.println("Waiting for " + Math.pow(2, wait_counter) + " seconds");
                 Thread.sleep((long) (Math.pow(2, wait_counter) * 1000));
-                buyItem( secret, "a52eca5d-6beb-4cf8-8173-a1eae90cbb14", 0.09);
+                buyItem("a52eca5d-6beb-4cf8-8173-a1eae90cbb14", 0.09,0d);
                 break;
             } catch (PSQLException e) {
                 System.out.println("Postgres is down.");
@@ -212,7 +212,9 @@ public class SkinbaronCrawler {
         }
     }
 
-    public static Boolean checkIfExists( String secret, String name, double price) throws IOException, InterruptedException {
+    public static Boolean checkIfExists(String name, double price) throws Exception {
+
+        String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 
         logger.info("Skinbaron API Search has been called.");
         Thread.sleep(1000);

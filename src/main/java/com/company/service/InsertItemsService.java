@@ -53,4 +53,8 @@ public class InsertItemsService {
     public void insertOverviewRow(double steam_balance, double steam_sales_value, double skinbaron_balance) throws Exception {
         itemdao.insertOverviewRow(steam_balance,steam_sales_value,skinbaron_balance);
     }
+
+    public void deleteSkinbaronId(String id) throws Exception {
+        itemdao.deleteSkinbaronId(id);
+    }
 }

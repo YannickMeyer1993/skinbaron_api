@@ -8,12 +8,10 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.dom4j.Document;
-import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
-import java.io.IOException;
 import java.io.StringReader;
 import java.sql.*;
 import java.util.*;
@@ -26,7 +24,7 @@ import static com.company.common.PostgresHelper.*;
 public class PostgresDAO implements ItemDAO {
     
     private static org.slf4j.Logger logger = LoggerFactory.getLogger(PostgresDAO.class);
-    String resourcePath = "src/main/resources/PostgresDAO/";
+    String resourcePath = "src/main/resources/PostgresDAO/init";
 
     public PostgresDAO() throws Exception {
         init();
@@ -34,19 +32,22 @@ public class PostgresDAO implements ItemDAO {
 
     @Override
     public void init() throws Exception {
-        executeDDLfromPath(resourcePath + "0_schema.sql");
-        executeDDLfromPath(resourcePath + "1_table_skinbaron_items.sql");
-        executeDDLfromPath(resourcePath + "1_table_steam_item_prices.sql");
-        executeDDLfromPath(resourcePath + "1_steam_iteration.sql");
-        executeDDLfromPath(resourcePath + "1_table_inventory.sql");
-        executeDDLfromPath(resourcePath + "1_table_item_informations.sql");
-        executeDDLfromPath(resourcePath + "1_table_skinbaron_sold_items.sql");
-        executeDDLfromPath(resourcePath + "1_table_overview.sql");
-        executeDDLfromPath(resourcePath + "1_table_rare_skins.sql");
 
-        executeDDLfromPath(resourcePath + "2_view_skinbaron_sold_items_per_name.sql");
-        executeDDLfromPath(resourcePath + "2_view_steam_current_prices.sql");
-        executeDDLfromPath(resourcePath + "3_view_inventory_with_prices.sql");
+        executeDDLsfromDirectory(resourcePath);
+        //executeDDLfromPath(resourcePath + "0_schema.sql");
+        //executeDDLfromPath(resourcePath + "1_table_skinbaron_items.sql");
+        //executeDDLfromPath(resourcePath + "1_table_steam_item_prices.sql");
+        //executeDDLfromPath(resourcePath + "1_steam_iteration.sql");
+        //executeDDLfromPath(resourcePath + "1_table_inventory.sql");
+        //executeDDLfromPath(resourcePath + "1_table_item_informations.sql");
+        //executeDDLfromPath(resourcePath + "1_table_skinbaron_sold_items.sql");
+        //executeDDLfromPath(resourcePath + "1_table_overview.sql");
+        //executeDDLfromPath(resourcePath + "1_table_rare_skins.sql");
+
+        //executeDDLfromPath(resourcePath + "2_view_weapons_per_grade.sql");
+        //executeDDLfromPath(resourcePath + "2_view_skinbaron_sold_items_per_name.sql");
+        //executeDDLfromPath(resourcePath + "2_view_steam_current_prices.sql");
+        //executeDDLfromPath(resourcePath + "3_view_inventory_with_prices.sql");
 
         if (checkIfResultsetIsEmpty("select * from steam.item_informations")) {
             crawlItemInformations();
@@ -617,5 +618,10 @@ public class PostgresDAO implements ItemDAO {
             pstmt.execute();
             conn.commit();
         }
+    }
+
+    @Override
+    public void deleteSkinbaronId(String id) throws Exception {
+        executeDDL("delete from steam.skinbaron_items where id='"+id+"'");
     }
 }

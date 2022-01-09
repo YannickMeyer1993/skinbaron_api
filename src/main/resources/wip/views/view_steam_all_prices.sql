@@ -1,1 +1,0 @@
--- für jeden Tag und Skin den aktuellsten Steam Preis

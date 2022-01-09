@@ -105,4 +105,13 @@ public class ItemController {
 
         insertItemsService.insertOverviewRow(steam_balance,steam_sales_value,skinbaron_balance);
     }
+
+    @RequestMapping("DeleteSkinbaronId")
+    @PostMapping
+    public void deleteSkinbaronId(@RequestBody com.fasterxml.jackson.databind.JsonNode payload) throws Exception {
+
+        String id = payload.get("id").asText();
+
+        insertItemsService.deleteSkinbaronId(id);
+    }
 }

@@ -33,13 +33,12 @@ import static com.company.entrypoints.SkinbaronCrawler.getBalance;
 import static com.company.entrypoints.SteamCrawler.getSteamPriceForGivenName;
 import static java.lang.Math.min;
 
-
-//TODO
 public class Bot {
 
     private static Double max_price;
     private static Logger logger = LoggerFactory.getLogger(Bot.class);
 
+    //TODO
     public static void main(String[] args) throws Exception {
 
         Scanner sc = new Scanner(System.in);    //System.in is a standard input stream
@@ -73,15 +72,21 @@ public class Bot {
                         pstmt.setDouble(2, rs.getDouble("skinbaron_preis"));
 
                         try (ResultSet rs2 = pstmt.executeQuery()) {
+
+                            String id = rs2.getString("id");
+                            String name = rs2.getString("name");
+                            double price = rs2.getDouble("price");
+                            double steam_price = rs.getDouble("steam_preis");
+
                             while (rs2.next()) {
-                                logger.info(rs2.getString("name") + " " + rs2.getString("id") + " " + rs2.getDouble("price"));
+                                logger.info(name + " " + id + " " + price);
                                 try {
                                     if (buy_item) {
-                                        buyItem( secret, rs2.getString("id"), rs2.getDouble("price"));
+                                        buyItem(id, price,steam_price);
                                     } else {
-                                        boolean exists = checkIfExists( secret, rs2.getString("name"), rs2.getDouble("price"));
+                                        boolean exists = checkIfExists(name, price);
                                         if (!exists) {
-                                            deleteNonExistingSkinbaronItems(rs2.getString("name"),rs2.getDouble("price"));
+                                            deleteNonExistingSkinbaronItems(name,price);
                                         }
                                     }
                                 } catch (Exception e) {
@@ -97,10 +102,9 @@ public class Bot {
         }
     }
 
-    public static void buyItem( String secret, String itemId, Double price) throws Exception {
-        
-        Connection conn = getConnection();
+    public static void buyItem( String itemId, Double price, double steamPrice) throws Exception {
 
+        String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
         String jsonInputString = "{\"apikey\": \"" + secret + "\",\"total\":" + price + ",\"saleids\":[\"" + itemId + "\"]}";
 
         HttpPost httpPost = new HttpPost("https://api.skinbaron.de/BuyItems");
@@ -122,62 +126,40 @@ public class Bot {
         try {
             resultJson = (JSONObject) new JSONTokener(result).nextValue();
         } catch (ClassCastException exp) {
-            System.out.println(result);
+            logger.error(result);
             throw new ClassCastException();
         }
 
         if (resultJson.has("generalErrors")) {
-            System.out.println(resultJson.get("generalErrors").toString());
-            if ("[\"some offer(s) are already sold\"]".equals(resultJson.get("generalErrors").toString())
-                    || "[\"count mismatch - maybe some offers have been sold or canceled or you provided wrong saleids\"]".equals(resultJson.get("generalErrors").toString())
-            ) {
-                try (Statement st = conn.createStatement()) {
-                    st.execute("DELETE FROM steam_item_sale.skinbaron_market_search_results where id='" + itemId + "'");
-                    System.out.println("Deleted one Id from Skinbaron table.");
-                }
-                conn.commit();
+            String error = resultJson.get("generalErrors").toString();
+            logger.error(error);
+            if ("[\"some offer(s) are already sold\"]".equals(result) || "[\"count mismatch - maybe some offers have been sold or canceled or you provided wrong saleids\"]".equals(error)) {
+                requestDeleteSkinbaronId(itemId);
             }
             return;
         }
 
-        if (!resultJson.has("items")) {
-            logger.info("There was no json query 'result' found.");
-            return;
-        }
+        JSONObject o = (JSONObject) resultJson.getJSONArray("items").get(0);
+        String name = o.getString("name");
+        price = o.getDouble("price");
 
-        logger.info(resultJson.toString());
+        requestDeleteSkinbaronId(itemId);
+        logger.info("Item \"" + name + "\" was bought for " + price + ". Steam: " + steamPrice);
+    }
 
-        JSONArray resultArray = resultJson.getJSONArray("items");
+    public static void requestDeleteSkinbaronId(String id) {
+        String url = "http://localhost:8080/api/v1/DeleteSkinbaronId";
 
-        String name = "";
-        String saleId = "";
-        double steamPrice;
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        JSONObject JsonObject = new JSONObject();
 
-        for (Object o : resultArray) {
-            if (o instanceof JSONObject) {
-                name = ((JSONObject) o).getString("name");
-                //saleId = ((JSONObject) o).getString("saleid");
-                price = ((JSONObject) o).getDouble("price");
-            }
+        JsonObject.put("id", id);
 
-            try (Statement stmt = conn.createStatement()) {
-                ResultSet rs = stmt.executeQuery("select price_euro from steam_item_sale.steam_most_recent_prices smrp where name ='" + name + "'");
+        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(JsonObject.toString(), headers);
 
-                if (!rs.next()) {
-                    throw new NoSuchElementException(name + " has no Steam price.");
-                }
-
-                steamPrice = rs.getDouble("price_euro");
-            }
-
-            try (Statement st = conn.createStatement()) {
-                st.execute("DELETE FROM steam_item_sale.skinbaron_market_search_results where id='" + itemId + "'");
-            }
-
-            logger.info("Item \"" + name + "\" was bought for " + price + ". Steam: " + steamPrice);
-
-            conn.commit();
-        }
+        restTemplate.postForObject(url, request, String.class);
     }
 
     public static void deleteNonExistingSkinbaronItems(String ItemName,double price) {

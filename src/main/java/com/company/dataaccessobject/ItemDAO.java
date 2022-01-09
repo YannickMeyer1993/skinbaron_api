@@ -4,6 +4,9 @@ import com.company.model.Item;
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
 
+import java.io.IOException;
+import java.sql.SQLException;
+
 public interface ItemDAO {
     void init() throws Exception;
 
@@ -41,4 +44,5 @@ public interface ItemDAO {
 
    void insertOverviewRow(double steam_balance,double steam_sales_value, double skinbaron_balance) throws Exception;
 
-   }
+    void deleteSkinbaronId(String id) throws Exception;
+}

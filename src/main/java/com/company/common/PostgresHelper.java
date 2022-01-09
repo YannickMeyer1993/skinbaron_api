@@ -1,13 +1,18 @@
 package com.company.common;
 
+import org.apache.commons.io.FileUtils;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
+import java.util.Collection;
 import java.util.Properties;
+import java.util.stream.Stream;
 
 import static com.company.common.PasswordHelper.readPasswordFromFile;
 
@@ -15,7 +20,7 @@ public class PostgresHelper {
 
     private static org.slf4j.Logger logger = LoggerFactory.getLogger(PostgresHelper.class);
 
-    public static Connection getConnection() throws SQLException, FileNotFoundException {
+    public static Connection getConnection() throws SQLException {
         String url = "jdbc:postgresql://localhost/postgres";
         Properties props = new Properties();
         props.setProperty("user", "postgres");
@@ -32,9 +37,7 @@ public class PostgresHelper {
         return conn;
     }
 
-    public static void executeDDL(String statement) throws IOException, SQLException {
-
-
+    public static void executeDDL(String statement) throws SQLException {
         logger.info(statement);
         String[] sqls = statement.split(";");
 
@@ -51,11 +54,21 @@ public class PostgresHelper {
         }
     }
 
+    public static void executeDDLsfromDirectory(String directorypath) throws Exception {
+        File file = new File(directorypath);
+        Collection<File> files = FileUtils.listFiles(file, null, true);
+        for(File file2 : files){
+            executeDDLfromPath(file2.getAbsolutePath());
+        }
+    }
+
     public static void executeDDLfromPath(String path) throws IOException, SQLException {
 
         if (!".sql".equals(path.substring(path.length()-4))) {
             throw new IllegalStateException("Only .sql Files are allowed.");
         }
+
+        logger.info(path);
 
         String fileContent = "";
         try {
@@ -66,7 +79,6 @@ public class PostgresHelper {
             return;
         }
 
-        logger.info(fileContent);
         String[] sqls = fileContent.split(";");
 
         logger.info("Amount Statements: "+sqls.length);
