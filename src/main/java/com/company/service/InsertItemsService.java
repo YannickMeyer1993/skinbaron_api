@@ -3,6 +3,7 @@ package com.company.service;
 import com.company.dataaccessobject.ItemDAO;
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
+import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -56,5 +57,9 @@ public class InsertItemsService {
 
     public void deleteSkinbaronId(String id) throws Exception {
         itemdao.deleteSkinbaronId(id);
+    }
+
+    public JSONArray getItemsToBuy() throws Exception {
+        return itemdao.getItemsToBuy();
     }
 }

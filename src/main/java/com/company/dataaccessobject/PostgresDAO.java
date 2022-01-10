@@ -9,6 +9,8 @@ import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.dom4j.Document;
 import org.dom4j.io.SAXReader;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
@@ -34,20 +36,6 @@ public class PostgresDAO implements ItemDAO {
     public void init() throws Exception {
 
         executeDDLsfromDirectory(resourcePath+"init/");
-        //executeDDLfromPath(resourcePath + "0_schema.sql");
-        //executeDDLfromPath(resourcePath + "1_table_skinbaron_items.sql");
-        //executeDDLfromPath(resourcePath + "1_table_steam_item_prices.sql");
-        //executeDDLfromPath(resourcePath + "1_steam_iteration.sql");
-        //executeDDLfromPath(resourcePath + "1_table_inventory.sql");
-        //executeDDLfromPath(resourcePath + "1_table_item_informations.sql");
-        //executeDDLfromPath(resourcePath + "1_table_skinbaron_sold_items.sql");
-        //executeDDLfromPath(resourcePath + "1_table_overview.sql");
-        //executeDDLfromPath(resourcePath + "1_table_rare_skins.sql");
-
-        //executeDDLfromPath(resourcePath + "2_view_weapons_per_grade.sql");
-        //executeDDLfromPath(resourcePath + "2_view_skinbaron_sold_items_per_name.sql");
-        //executeDDLfromPath(resourcePath + "2_view_steam_current_prices.sql");
-        //executeDDLfromPath(resourcePath + "3_view_inventory_with_prices.sql");
 
         if (checkIfResultsetIsEmpty("select * from steam.item_informations")) {
             crawlItemInformations();
@@ -147,8 +135,25 @@ public class PostgresDAO implements ItemDAO {
     }
 
     @Override
-    public String[] getItemsToBuy() {
-        return new String[0];
+    public JSONArray getItemsToBuy() throws Exception {
+        String query = "select steam_price_is_new,skinbaron_price,steam_price, name,skinbaron_ids from steam.skinbaron_buyable_items order by rati desc";
+
+        org.json.JSONArray array = new JSONArray();
+        try (Connection conn = getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
+            while(rs.next())
+            {
+                JSONObject JsonObject = new JSONObject();
+                JsonObject.put("steam_price_is_new" , rs.getBoolean("steam_price_is_new"));
+                JsonObject.put("skinbaron_ids" , rs.getString("skinbaron_ids"));
+                JsonObject.put("name" , rs.getString("name"));
+                JsonObject.put("skinbaron_price" , rs.getDouble("skinbaron_price"));
+                JsonObject.put("steam_price" , rs.getDouble("steam_price"));
+
+                array.put(JsonObject);
+            }
+            System.out.println(array);
+        }
+        return array;
     }
 
     @Override

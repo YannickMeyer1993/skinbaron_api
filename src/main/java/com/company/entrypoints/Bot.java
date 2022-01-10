@@ -16,18 +16,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.NoSuchElementException;
 import java.util.Scanner;
 
+import static com.company.common.LoggingHelper.setUpClass;
 import static com.company.common.PasswordHelper.readPasswordFromFile;
-import static com.company.common.PostgresHelper.getConnection;
 import static com.company.entrypoints.SkinbaronCrawler.checkIfExists;
 import static com.company.entrypoints.SkinbaronCrawler.getBalance;
 import static com.company.entrypoints.SteamCrawler.getSteamPriceForGivenName;
@@ -38,8 +34,9 @@ public class Bot {
     private static Double max_price;
     private static Logger logger = LoggerFactory.getLogger(Bot.class);
 
-    //TODO
     public static void main(String[] args) throws Exception {
+
+        setUpClass();
 
         Scanner sc = new Scanner(System.in);    //System.in is a standard input stream
         logger.info("Buy items (true/false)?");
@@ -50,25 +47,33 @@ public class Bot {
         logger.info("Enter max price: ");
         max_price = min(sc.nextDouble(), balance);
 
-        String query = "select steam_price_is_new,skinbaron_price,steam_price, name,skinbaron_ids from steam.skinbaron_buyable_items where skinbaron_price<=" + max_price + " order by rati desc";
-
         while (true) {
-            logger.info("Bot is started...");
-            try (Connection conn = getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
 
-                while (rs.next()) {
-                    if (!rs.getBoolean("steam_price_is_new")) {
-                        double recent_price = getSteamPriceForGivenName(rs.getString("name"));
-                        if (recent_price < rs.getDouble("steam_price")) {
-                            logger.info("steam price is now lower for item " + rs.getString("name") + ".");
+            logger.info("Bot is started...");
+
+            JSONArray array = getItemsToBuy();
+
+            for (Object o: array) {
+                if (o instanceof JSONObject) {
+                    System.out.println(o);
+
+                    boolean steam_price_is_new = ((JSONObject) o).getBoolean("steam_price_is_new");
+                    String skinbaron_ids = ((JSONObject) o).getString("skinbaron_ids");
+                    String name = ((JSONObject) o).getString("name");
+                    double price = ((JSONObject) o).getDouble("steam_price");
+                    double steam_price = ((JSONObject) o).getDouble("steam_price");
+
+                    if (price > max_price) {
+                        continue;
+                    }
+
+                    if (!steam_price_is_new) {
+                        double recent_price = getSteamPriceForGivenName(name);
+                        if (recent_price < steam_price) {
+                            logger.info("steam price is now lower for item " + name + ".");
                             continue;
                         }
                     }
-
-                    String skinbaron_ids = rs.getString("skinbaron_ids");
-                    String name = rs.getString("name");
-                    double price = rs.getDouble("price");
-                    double steam_price = rs.getDouble("steam_price");
 
                     for (String id : skinbaron_ids.split(",")) {
                         logger.info(name + " " + id + " " + price);
@@ -91,79 +96,91 @@ public class Bot {
         }
     }
 
-public static void buyItem(String itemId,Double price,double steamPrice)throws Exception{
+    public static void buyItem(String itemId, Double price, double steamPrice) throws Exception {
 
-        String secret=readPasswordFromFile("C:/passwords/api_secret.txt");
-        String jsonInputString="{\"apikey\": \""+secret+"\",\"total\":"+price+",\"saleids\":[\""+itemId+"\"]}";
+        String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
+        String jsonInputString = "{\"apikey\": \"" + secret + "\",\"total\":" + price + ",\"saleids\":[\"" + itemId + "\"]}";
 
-        HttpPost httpPost=new HttpPost("https://api.skinbaron.de/BuyItems");
-        httpPost.setHeader("Content.Type","application/json");
-        httpPost.setHeader("x-requested-with","XMLHttpRequest");
-        httpPost.setHeader("Accept","application/json");
+        HttpPost httpPost = new HttpPost("https://api.skinbaron.de/BuyItems");
+        httpPost.setHeader("Content.Type", "application/json");
+        httpPost.setHeader("x-requested-with", "XMLHttpRequest");
+        httpPost.setHeader("Accept", "application/json");
 
-        HttpClient client= HttpClients.custom()
-        .setDefaultRequestConfig(RequestConfig.custom()
-        .setCookieSpec(CookieSpecs.STANDARD).build())
-        .build();
+        HttpClient client = HttpClients.custom()
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setCookieSpec(CookieSpecs.STANDARD).build())
+                .build();
 
-        HttpEntity entity=new ByteArrayEntity(jsonInputString.getBytes(StandardCharsets.UTF_8));
+        HttpEntity entity = new ByteArrayEntity(jsonInputString.getBytes(StandardCharsets.UTF_8));
         httpPost.setEntity(entity);
-        HttpResponse response=client.execute(httpPost);
-        String result= EntityUtils.toString(response.getEntity());
+        HttpResponse response = client.execute(httpPost);
+        String result = EntityUtils.toString(response.getEntity());
 
         JSONObject resultJson;
-        try{
-        resultJson=(JSONObject)new JSONTokener(result).nextValue();
-        }catch(ClassCastException exp){
-        logger.error(result);
-        throw new ClassCastException();
+        try {
+            resultJson = (JSONObject) new JSONTokener(result).nextValue();
+        } catch (ClassCastException exp) {
+            logger.error(result);
+            throw new ClassCastException();
         }
 
-        if(resultJson.has("generalErrors")){
-        String error=resultJson.get("generalErrors").toString();
-        logger.error(error);
-        if("[\"some offer(s) are already sold\"]".equals(result)||"[\"count mismatch - maybe some offers have been sold or canceled or you provided wrong saleids\"]".equals(error)){
+        if (resultJson.has("generalErrors")) {
+            String error = resultJson.get("generalErrors").toString();
+            logger.error(error);
+            if ("[\"some offer(s) are already sold\"]".equals(result) || "[\"count mismatch - maybe some offers have been sold or canceled or you provided wrong saleids\"]".equals(error) || "[\"total mismatch - maybe price changed or offers were sold\"]".equals(error)) {
+                requestDeleteSkinbaronId(itemId);
+            }
+            return;
+        }
+
+        JSONObject o = (JSONObject) resultJson.getJSONArray("items").get(0);
+        String name = o.getString("name");
+        price = o.getDouble("price");
+
         requestDeleteSkinbaronId(itemId);
-        }
-        return;
-        }
+        logger.info("Item \"" + name + "\" was bought for " + price + ". Steam: " + steamPrice);
+    }
 
-        JSONObject o=(JSONObject)resultJson.getJSONArray("items").get(0);
-        String name=o.getString("name");
-        price=o.getDouble("price");
+    public static void requestDeleteSkinbaronId(String id) {
+        String url = "http://localhost:8080/api/v1/DeleteSkinbaronId";
 
-        requestDeleteSkinbaronId(itemId);
-        logger.info("Item \""+name+"\" was bought for "+price+". Steam: "+steamPrice);
-        }
-
-public static void requestDeleteSkinbaronId(String id){
-        String url="http://localhost:8080/api/v1/DeleteSkinbaronId";
-
-        RestTemplate restTemplate=new RestTemplate();
-        HttpHeaders headers=new HttpHeaders();
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        JSONObject JsonObject=new JSONObject();
+        JSONObject JsonObject = new JSONObject();
 
-        JsonObject.put("id",id);
+        JsonObject.put("id", id);
 
-        org.springframework.http.HttpEntity<String> request=new org.springframework.http.HttpEntity<>(JsonObject.toString(),headers);
+        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(JsonObject.toString(), headers);
 
-        restTemplate.postForObject(url,request,String.class);
-        }
+        restTemplate.postForObject(url, request, String.class);
+    }
 
-public static void deleteNonExistingSkinbaronItems(String ItemName,double price){
-        String url="http://localhost:8080/api/v1/DeleteNonExistingSkinbaronItems";
+    public static void deleteNonExistingSkinbaronItems(String ItemName, double price) {
+        String url = "http://localhost:8080/api/v1/DeleteNonExistingSkinbaronItems";
 
-        RestTemplate restTemplate=new RestTemplate();
-        HttpHeaders headers=new HttpHeaders();
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        JSONObject JsonObject=new JSONObject();
+        JSONObject JsonObject = new JSONObject();
 
-        JsonObject.put("ItemName",ItemName);
-        JsonObject.put("price",price);
+        JsonObject.put("ItemName", ItemName);
+        JsonObject.put("price", price);
 
-        org.springframework.http.HttpEntity<String> request=new org.springframework.http.HttpEntity<>(JsonObject.toString(),headers);
+        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(JsonObject.toString(), headers);
 
-        restTemplate.postForObject(url,request,String.class);
-        }
-        }
+        restTemplate.postForObject(url, request, String.class);
+    }
+
+    public static JSONArray getItemsToBuy() {
+
+        String url = "http://localhost:8080/api/v1/GetItemsToBuy";
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.TEXT_PLAIN);
+        ResponseEntity<String> responseEntityStr = restTemplate.getForEntity( url,String.class);
+
+        return new JSONArray((responseEntityStr.getBody()));
+    }
+}

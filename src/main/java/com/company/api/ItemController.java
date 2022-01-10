@@ -3,6 +3,7 @@ package com.company.api;
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
 import com.company.service.InsertItemsService;
+import org.json.JSONArray;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -30,7 +31,6 @@ public class ItemController {
     public String addNewSkinbaronItem(@RequestBody SkinbaronItem item) throws Exception {
         return insertItemsService.addNewSkinbaronItem(item);
     }
-
 
     @RequestMapping("AddSteamPrice")
     @PostMapping
@@ -86,6 +86,11 @@ public class ItemController {
     @GetMapping(value="lastSkinbaronId", produces = MediaType.TEXT_PLAIN_VALUE)
     public String getLastSkinbaronId() throws Exception {
         return insertItemsService.getLastSkinbaronId();
+    }
+
+    @GetMapping(value="GetItemsToBuy", produces = MediaType.TEXT_PLAIN_VALUE)
+    public String getItemsToBuy() throws Exception {
+        return insertItemsService.getItemsToBuy().toString();
     }
 
     @GetMapping(value="lastSoldSkinbaronId", produces = MediaType.TEXT_PLAIN_VALUE)

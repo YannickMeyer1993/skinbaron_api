@@ -1,6 +1,8 @@
 package com.company.entrypoints;
 
 import junit.framework.TestCase;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.UUID;
 
@@ -30,5 +32,14 @@ public class BotTest extends TestCase {
         requestInsertSkinbaronItem(uuid,"NAME",3.11,"",0.123456);
         buyItem(uuid,3.11,5d);
         assertTrue(checkIfResultsetIsEmpty("select * from steam.skinbaron_items where id='"+uuid+"'"));
+    }
+
+    public void testGetItemsToBuy() {
+        JSONArray array = getItemsToBuy();
+        for (Object o: array) {
+            if (o instanceof JSONObject) {
+                System.out.println(o);
+            }
+        }
     }
 }

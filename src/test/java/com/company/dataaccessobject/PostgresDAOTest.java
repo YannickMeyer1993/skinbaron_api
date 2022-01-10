@@ -3,6 +3,7 @@ package com.company.dataaccessobject;
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
 import junit.framework.TestCase;
+import org.json.JSONArray;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -138,5 +139,10 @@ public class PostgresDAOTest extends TestCase {
             int count2 = rs2.getInt("sum");
             assertEquals(count, count2);
         }
+    }
+
+    public void testTestGetItemsToBuy() throws Exception {
+        PostgresDAO dao = new PostgresDAO();
+        System.out.println(dao.getItemsToBuy());
     }
 }
