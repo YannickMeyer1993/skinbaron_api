@@ -1,41 +1,41 @@
 package com.company.entrypoints;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.CookieSpecs;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.company.common.PasswordHelper.readPasswordFromFile;
 
-public class ToBeTested {
+public class SkinbaronNewSalesCrawler {
 
-    private final static Logger logger = LoggerFactory.getLogger(ToBeTested.class);
+    private final static Logger logger = LoggerFactory.getLogger(SkinbaronNewSalesCrawler.class);
 
-    //TODO
+    public static void main(String[] args) throws Exception {
+
+        for (String name: getListforNewestSales()) {
+            getNewestSales30Days(name);
+        }
+
+    }
+
+    private static List<String> getListforNewestSales() {
+        //TODO
+        return new ArrayList<>();
+    }
 
     /**
      * Shows the last 10 sold items from the last 30 days
-     * @param itemName Market Hash Name in steam
-     * @throws Exception
+     * @param name Market Hash Name in steam
      */
-    public static void getNewestSales30Days(String itemName) throws Exception {
+    public static void getNewestSales30Days(String name) throws Exception {
 
         logger.info("Skinbaron API GetNewestSales30Days has been called.");
 
@@ -48,12 +48,12 @@ public class ToBeTested {
         headers.set("x-requested-with", "XMLHttpRequest");
         headers.set("Accept", "application/json");
 
-        boolean statTrak = itemName.contains("StatTrak");
-        boolean souvenir = itemName.contains("Souvenir");
+        boolean statTrak = name.contains("StatTrak");
+        boolean souvenir = name.contains("Souvenir");
 
         JSONObject JsonObject = new JSONObject();
         JsonObject.put("apikey",secret);
-        JsonObject.put("itemName",itemName);
+        JsonObject.put("itemName",name);
         JsonObject.put("statTrak",statTrak);
         JsonObject.put("souvenir",souvenir);
         //JsonObject.put("dopplerPhase",false); //We don't get info about the phase within the search function
@@ -65,13 +65,21 @@ public class ToBeTested {
         String result = restTemplate.postForObject(url, request, String.class);
 
         System.out.println(result);
+        requestInsertNewSales(result);
 
-        JSONObject resultJson = new JSONObject(result);
+    }
 
-        if (resultJson.has("message")) {
-            System.out.println("Result: " + resultJson.get("message"));
-            throw new Exception((String) resultJson.get("message"));
-        }
+    private static void requestInsertNewSales(String result) {
+        String url = "http://localhost:8080/api/v1/InsertNewestSales";
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        JSONObject JsonObject = new JSONObject(result);
+
+        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(JsonObject.toString(), headers);
+
+        restTemplate.postForObject(url, request, String.class);
     }
 
 }

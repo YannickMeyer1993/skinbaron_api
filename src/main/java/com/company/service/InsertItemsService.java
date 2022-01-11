@@ -3,6 +3,7 @@ package com.company.service;
 import com.company.dataaccessobject.ItemDAO;
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -61,5 +62,9 @@ public class InsertItemsService {
 
     public JSONArray getItemsToBuy() throws Exception {
         return itemdao.getItemsToBuy();
+    }
+
+    public void insertNewestSales(String payload) throws Exception {
+        itemdao.insertNewestSales(payload);
     }
 }

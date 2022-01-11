@@ -12,7 +12,7 @@ select
 	c.id 
 from
 	steam_item_sale.cases c
-inner join steam_item_sale.steam_most_recent_prices smrp on
+inner join steam.steam_current_prices smrp on
 	c."name" = smrp ."name"
 left join steam_item_sale.inventory_with_prices iwp on
 	c."name" = iwp."name"

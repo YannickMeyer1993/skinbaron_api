@@ -2,6 +2,7 @@ package com.company.dataaccessobject;
 
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
+import com.fasterxml.jackson.databind.JsonNode;
 import junit.framework.TestCase;
 import org.json.JSONArray;
 
@@ -144,5 +145,33 @@ public class PostgresDAOTest extends TestCase {
     public void testTestGetItemsToBuy() throws Exception {
         PostgresDAO dao = new PostgresDAO();
         System.out.println(dao.getItemsToBuy());
+    }
+
+    public void testInsertNewestSales() throws Exception {
+        PostgresDAO dao = new PostgresDAO();
+        String jsonResult = "{\n" +
+                "\t\"newestSales30Days\": [\n" +
+                "\t\t{\n" +
+                "\t\t\t\"itemName\": \"Operation Riptide Case\",\n" +
+                "\t\t\t\"price\": 0.46,\n" +
+                "\t\t\t\"wear\": 0,\n" +
+                "\t\t\t\"dateSold\": \"2022-01-11\"\n" +
+                "\t\t},\n" +
+                "\t\t{\n" +
+                "\t\t\t\"itemName\": \"Operation Riptide Case\",\n" +
+                "\t\t\t\"price\": 0.65,\n" +
+                "\t\t\t\"wear\": 0,\n" +
+                "\t\t\t\"dateSold\": \"2022-01-11\"\n" +
+                "\t\t},\n" +
+                "\t\t{\n" +
+                "\t\t\t\"itemName\": \"Operation Riptide Case\",\n" +
+                "\t\t\t\"price\": 0.65,\n" +
+                "\t\t\t\"wear\": 0,\n" +
+                "\t\t\t\"dateSold\": \"2022-01-11\"\n" +
+                "\t\t}\n" +
+                "\t]\n" +
+                "}";
+
+        dao.insertNewestSales(jsonResult);
     }
 }

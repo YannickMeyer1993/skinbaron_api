@@ -3,6 +3,7 @@ package com.company.dataaccessobject;
 import com.company.model.Item;
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.json.JSONArray;
 
 import java.io.IOException;
@@ -46,4 +47,6 @@ public interface ItemDAO {
     void insertOverviewRow(double steam_balance,double steam_sales_value, double skinbaron_balance) throws Exception;
 
     void deleteSkinbaronId(String id) throws Exception;
+
+    void insertNewestSales(String json) throws Exception;
 }

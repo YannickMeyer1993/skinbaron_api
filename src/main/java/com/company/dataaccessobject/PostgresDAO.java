@@ -2,6 +2,7 @@ package com.company.dataaccessobject;
 
 import com.company.common.Constants;
 import com.company.model.*;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -547,7 +548,10 @@ public class PostgresDAO implements ItemDAO {
                         mapWears.clear();
 
                         int[] updateCounts = pstmt.executeBatch();
-                        System.out.println(updateCounts.length + " were inserted!");
+                        int amountInserts = IntStream.of(updateCounts).sum();
+                        if (amountInserts != 0) {
+                            logger.info(amountInserts + " items were inserted!");
+                        }
                         conn.commit();
                     }
 
@@ -628,5 +632,38 @@ public class PostgresDAO implements ItemDAO {
     @Override
     public void deleteSkinbaronId(String id) throws Exception {
         executeDDL("delete from steam.skinbaron_items where id='"+id+"'");
+    }
+
+    //TODO CleanUp für Müll
+
+    /**
+     * Since a name doesn't make the items unique, the avg/etc must be computed on DB
+     * we don't care for frequently sold items, such that price+date/wear makes it unique
+     * @param json Skinbaron response
+     */
+    @Override
+    public void insertNewestSales(String json) throws Exception {
+
+        String sql = "Insert into steam.skinbaron_newest_sold_items (name,price,wear,datesold) values (?,?,?,?)";
+
+        JSONArray array = (new JSONObject(json)).getJSONArray("newestSales30Days");
+        try (Connection connection = getConnection();PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            for (Object o : array) {
+                if (o instanceof JSONObject) {
+                    pstmt.setString(1,((JSONObject) o).getString("itemName"));
+                    pstmt.setDouble(2,((JSONObject) o).getDouble("price"));
+                    pstmt.setDouble(3,((JSONObject) o).getDouble("wear"));
+                    pstmt.setString(4,((JSONObject) o).getString("dateSold"));
+                    pstmt.addBatch();
+                }
+            }
+
+            int[] updateCounts = pstmt.executeBatch();
+            int amountInserts = IntStream.of(updateCounts).sum();
+            if (amountInserts != 0) {
+                logger.info(amountInserts + " items were inserted!");
+            }
+            connection.commit();
+        }
     }
 }

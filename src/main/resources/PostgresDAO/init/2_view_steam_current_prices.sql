@@ -1,5 +1,3 @@
--- steam_item_sale.steam_most_recent_prices source
-
 CREATE OR REPLACE VIEW steam.steam_current_prices
 AS SELECT distinct t.name,
        t.quantity,

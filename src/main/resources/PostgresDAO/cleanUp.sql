@@ -16,6 +16,6 @@ delete from steam_item_sale.skinbaron_market_search_results where id in ( select
 with deletable_ids as(
 select smsr.id
 from steam_item_sale.skinbaron_market_search_results smsr
-inner join steam_item_sale.steam_most_recent_prices using (name)
+inner join steam.steam_current_prices using (name)
 where smsr .price > 3 * steam_most_recent_prices.price_euro)
 delete from steam_item_sale.skinbaron_market_search_results where id in ( select id from deletable_ids);

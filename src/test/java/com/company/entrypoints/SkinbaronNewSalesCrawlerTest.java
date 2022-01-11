@@ -3,13 +3,13 @@ package com.company.entrypoints;
 import junit.framework.TestCase;
 
 import static com.company.common.LoggingHelper.setUpClass;
-import static com.company.entrypoints.ToBeTested.getNewestSales30Days;
+import static com.company.entrypoints.SkinbaronNewSalesCrawler.getNewestSales30Days;
 
-public class ToBeTestedTest extends TestCase {
+public class SkinbaronNewSalesCrawlerTest extends TestCase {
 
     public void testGetNewestSales30Days() throws Exception {
         setUpClass();
-        String ItemName = "Operation Riptide Case";
+        String ItemName = "Sticker Capsule";
         getNewestSales30Days(ItemName);
     }
 
