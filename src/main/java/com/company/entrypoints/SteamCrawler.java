@@ -182,7 +182,7 @@ public class SteamCrawler {
         double return_price = 0.0;
         boolean item_found = false;
 
-        String url = "https://steamcommunity.com/market/search?q="+java.net.URLDecoder.decode(hash_name, "UTF-8")+"#p1_default_desc";
+        String url = "https://steamcommunity.com/market/search?q="+java.net.URLDecoder.decode(hash_name, "UTF-8")+"&appid=730#p1_default_desc";
 
         WebClient webClient = new WebClient(BrowserVersion.FIREFOX);
         webClient.getOptions().setJavaScriptEnabled(true); // enable javascript

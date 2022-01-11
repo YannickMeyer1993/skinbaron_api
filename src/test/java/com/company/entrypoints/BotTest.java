@@ -44,8 +44,8 @@ public class BotTest extends TestCase {
     }
 
     //TODO
-    public void testTestBuyItem() {
-        // StatTrak™ Negev | Loudmouth (Field-Tested) 27d551f1-43e6-4e32-9951-8cd7716508c3 1.22
-        // Test that this get deleted
+    public void testTestBuyItem() throws Exception {
+        buyItem("27d551f1-43e6-4e32-9951-8cd7716508c3",1.22,2);
+        assertTrue(checkIfResultsetIsEmpty("select * from steam.skinbaron_items where id='27d551f1-43e6-4e32-9951-8cd7716508c3'"));
     }
 }

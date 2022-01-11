@@ -130,7 +130,7 @@ public class Bot {
         if (resultJson.has("generalErrors")) {
             String error = resultJson.get("generalErrors").toString();
             logger.error(error);
-            if ("[\"some offer(s) are already sold\"]".equals(result) || "[\"count mismatch - maybe some offers have been sold or canceled or you provided wrong saleids\"]".equals(error) || "[\"total mismatch - maybe price changed or offers were sold\"]".equals(error)) {
+            if ("[\"some offer(s) are already sold\"]".equals(error) || "[\"count mismatch - maybe some offers have been sold or canceled or you provided wrong saleids\"]".equals(error) || "[\"total mismatch - maybe price changed or offers were sold\"]".equals(error)) {
                 requestDeleteSkinbaronId(itemId);
             }
             return;

@@ -55,4 +55,9 @@ public class SteamCrawlerTest extends TestCase {
         assertEquals(getHighestSteamIteration(),10);
         setHighestSteamIteration(old);
     }
+
+    public void testTestGetSteamPriceForGivenName() throws Exception {
+        double price = SteamCrawler.getSteamPriceForGivenName("Name Tag");
+        assertTrue(price> 1.5);
+    }
 }
