@@ -29,6 +29,7 @@ import static com.company.entrypoints.SkinbaronCrawler.getBalance;
 import static com.company.entrypoints.SteamCrawler.getSteamPriceForGivenName;
 import static java.lang.Math.min;
 
+//TODO interaction/timing with other entrypoints
 public class Bot {
 
     private static Double max_price;
@@ -53,6 +54,8 @@ public class Bot {
 
             JSONArray array = getItemsToBuy();
 
+            logger.info("Amount of different Items: "+array.length());
+
             for (Object o: array) {
                 if (o instanceof JSONObject) {
                     System.out.println(o);
@@ -68,9 +71,9 @@ public class Bot {
                     }
 
                     if (!steam_price_is_new) {
-                        double recent_price = getSteamPriceForGivenName(name);
-                        if (recent_price < steam_price) {
-                            logger.info("steam price is now lower for item " + name + ".");
+                        double current_price = getSteamPriceForGivenName(name);
+                        if (current_price < steam_price) {
+                            logger.info("steam price is now lower for item " + name + "("+current_price+").");
                             continue;
                         }
                     }

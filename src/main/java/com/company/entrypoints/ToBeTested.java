@@ -14,39 +14,59 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 
+import static com.company.common.PasswordHelper.readPasswordFromFile;
+
 public class ToBeTested {
 
     private final static Logger logger = LoggerFactory.getLogger(ToBeTested.class);
 
-    //TODO API does not work yet?
-    public static void getNewestSales30Days(String secret, Connection conn, String itemName) throws Exception {
+    //TODO
 
-        String ItemName = "Aufkleber | device | Atlanta 2017";
+    /**
+     * Shows the last 10 sold items from the last 30 days
+     * @param itemName Market Hash Name in steam
+     * @throws Exception
+     */
+    public static void getNewestSales30Days(String itemName) throws Exception {
+
         logger.info("Skinbaron API GetNewestSales30Days has been called.");
-        String jsonInputString = "{\"apikey\": \"" + secret + "\",\"appId\": 730}";
 
-        HttpPost httpPost = new HttpPost("https://api.skinbaron.de/GetNewestSales30Days");
-        httpPost.setHeader("Content.Type", "application/json");
-        httpPost.setHeader("x-requested-with", "XMLHttpRequest");
-        httpPost.setHeader("Accept", "application/json");
+        String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 
-        HttpClient client = HttpClients.custom()
-                .setDefaultRequestConfig(RequestConfig.custom()
-                        .setCookieSpec(CookieSpecs.STANDARD).build())
-                .build();
+        String url = "https://api.skinbaron.de/GetNewestSales30Days";
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("x-requested-with", "XMLHttpRequest");
+        headers.set("Accept", "application/json");
 
-        HttpEntity entity = new ByteArrayEntity(jsonInputString.getBytes(StandardCharsets.UTF_8));
-        httpPost.setEntity(entity);
-        HttpResponse response = client.execute(httpPost);
-        String result = EntityUtils.toString(response.getEntity());
+        boolean statTrak = itemName.contains("StatTrak");
+        boolean souvenir = itemName.contains("Souvenir");
+
+        JSONObject JsonObject = new JSONObject();
+        JsonObject.put("apikey",secret);
+        JsonObject.put("itemName",itemName);
+        JsonObject.put("statTrak",statTrak);
+        JsonObject.put("souvenir",souvenir);
+        //JsonObject.put("dopplerPhase",false); //We don't get info about the phase within the search function
+
+        System.out.println(JsonObject);
+
+        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(JsonObject.toString(), headers);
+
+        String result = restTemplate.postForObject(url, request, String.class);
 
         System.out.println(result);
-        JSONObject resultJson = (JSONObject) new JSONTokener(result).nextValue();
+
+        JSONObject resultJson = new JSONObject(result);
 
         if (resultJson.has("message")) {
             System.out.println("Result: " + resultJson.get("message"));

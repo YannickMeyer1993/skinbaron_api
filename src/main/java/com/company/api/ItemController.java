@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.*;
 public class ItemController {
     private final InsertItemsService insertItemsService;
 
-    private static org.slf4j.Logger logger = LoggerFactory.getLogger(ItemController.class);
-
     @Autowired
     public ItemController(InsertItemsService insertItemsService) {
         this.insertItemsService = insertItemsService;

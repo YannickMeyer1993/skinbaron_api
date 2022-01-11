@@ -86,7 +86,7 @@ public class SkinbaronCrawler {
         restTemplate.postForObject(url, request, String.class);
     }
 
-
+//TODO take SBINSPECT Link to get Doppler Phase
     /**
      *
      * @param secret api secret
@@ -181,15 +181,13 @@ public class SkinbaronCrawler {
         return (!id.equals(responseEntityStr.getBody()));
     }
 
-    public static void checkLiveSkinbaron() throws Exception {
+    public static void checkLiveSkinbaron() {
 
         logger.info("Checking that Skinbaron is live...");
         int wait_counter = 0;
 
-        String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
-
         while (true) {
-            try (Connection conn = getConnection()){
+            try {
 
                 System.out.println("Waiting for " + Math.pow(2, wait_counter) + " seconds");
                 Thread.sleep((long) (Math.pow(2, wait_counter) * 1000));
