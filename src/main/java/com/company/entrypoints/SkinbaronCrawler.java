@@ -86,7 +86,6 @@ public class SkinbaronCrawler {
         restTemplate.postForObject(url, request, String.class);
     }
 
-//TODO take SBINSPECT Link to get Doppler Phase
     /**
      *
      * @param secret api secret

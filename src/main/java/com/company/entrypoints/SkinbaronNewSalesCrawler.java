@@ -31,11 +31,6 @@ public class SkinbaronNewSalesCrawler {
 
     }
 
-    private static List<String> getListforNewestSales() {
-        //TODO
-        return new ArrayList<>();
-    }
-
     /**
      * Shows the last 10 sold items from the last 30 days
      * @param name Market Hash Name in steam
