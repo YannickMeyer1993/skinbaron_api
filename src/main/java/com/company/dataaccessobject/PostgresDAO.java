@@ -673,6 +673,7 @@ public class PostgresDAO implements ItemDAO {
             }
             connection.commit();
         }
+        //TODO Upsert
         executeDDL("INSERT INTO steam.skinbaron_newest_sold_items (\"name\", doppler_phase, avg_price, min_price, max_price, amount, insert_date)\n" +
                 "select\n" +
                 "\ts.\"name\",\n" +
