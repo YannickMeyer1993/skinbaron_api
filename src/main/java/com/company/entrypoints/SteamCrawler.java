@@ -234,7 +234,7 @@ public class SteamCrawler {
         }
 
         logger.info("Item \""+hash_name+"\" costs "+return_price+" Euro.");
-        //TODO linear waiting time
+
         Thread.sleep((long) 20*1000);
         return return_price;
     }

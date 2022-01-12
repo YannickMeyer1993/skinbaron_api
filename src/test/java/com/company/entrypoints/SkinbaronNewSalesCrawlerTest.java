@@ -9,7 +9,7 @@ public class SkinbaronNewSalesCrawlerTest extends TestCase {
 
     public void testGetNewestSales30Days() throws Exception {
         setUpClass();
-        String ItemName = "Sticker Capsule";
+        String ItemName = "Battle-Scarred";
         getNewestSales30Days(ItemName);
     }
 
@@ -22,6 +22,18 @@ public class SkinbaronNewSalesCrawlerTest extends TestCase {
     public void testGetNewestSales30DaysSouvenir() throws Exception {
         setUpClass();
         String ItemName = "Souvenir Desert Eagle";
+        getNewestSales30Days(ItemName);
+    }
+
+    public void testGetNewestSales30DaysKarambit() throws Exception {
+        setUpClass();
+        String ItemName = "Karambit";
+        getNewestSales30Days(ItemName);
+    }
+
+    public void testGetNewestSales30DaysDoppler() throws Exception {
+        setUpClass();
+        String ItemName = "Doppler";
         getNewestSales30Days(ItemName);
     }
 }

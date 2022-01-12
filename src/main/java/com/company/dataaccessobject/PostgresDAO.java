@@ -40,7 +40,7 @@ public class PostgresDAO implements ItemDAO {
 
         if (checkIfResultsetIsEmpty("select * from steam.item_informations")) {
             crawlItemInformations();
-            crawlWearValues();
+            //crawlWearValues();
         }
 
         //all data is already inside the tables
@@ -647,7 +647,7 @@ public class PostgresDAO implements ItemDAO {
     @Override
     public void insertNewestSales(String json) throws Exception {
 
-        String sql = "Insert into steam.skinbaron_newest_sold_items (name,price,wear,datesold) values (?,?,?,?)";
+        String sql = "Insert into steam.skinbaron_newest_sold_items_tmp (name,price,wear,datesold,doppler_phase) values (?,?,?,?,?)";
 
         JSONArray array = (new JSONObject(json)).getJSONArray("newestSales30Days");
         try (Connection connection = getConnection();PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -657,6 +657,11 @@ public class PostgresDAO implements ItemDAO {
                     pstmt.setDouble(2,((JSONObject) o).getDouble("price"));
                     pstmt.setDouble(3,((JSONObject) o).getDouble("wear"));
                     pstmt.setString(4,((JSONObject) o).getString("dateSold"));
+                    if (((JSONObject) o).has("dopplerPhase")) {
+                        pstmt.setString(5,((JSONObject) o).getString("dopplerPhase"));
+                    } else {
+                        pstmt.setString(5,null);
+                    }
                     pstmt.addBatch();
                 }
             }
@@ -668,5 +673,18 @@ public class PostgresDAO implements ItemDAO {
             }
             connection.commit();
         }
+        executeDDL("INSERT INTO steam.skinbaron_newest_sold_items (\"name\", doppler_phase, avg_price, min_price, max_price, amount, insert_date)\n" +
+                "select\n" +
+                "\ts.\"name\",\n" +
+                "\ts.doppler_phase,\n" +
+                "\tROUND(avg(s.price),2) as avg_price,\n" +
+                "\tmin(s.price) as min_price,\n" +
+                "\tmax(s.price) as max_price,\n" +
+                "\tcount(*) as amount,\n" +
+                "\tcurrent_date as insert_date\n" +
+                "from steam.skinbaron_newest_sold_items_tmp s\n" +
+                "group by s.\"name\" ,s.doppler_phase;");
+        executeDDL("TRUNCATE TABLE steam.skinbaron_newest_sold_items_tmp");
+        executeDDL("delete from steam.skinbaron_newest_sold_items where insert_date != CURRENT_DATE");
     }
 }

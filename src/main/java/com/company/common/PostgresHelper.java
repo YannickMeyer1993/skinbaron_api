@@ -93,8 +93,13 @@ public class PostgresHelper {
 
     public static Boolean checkIfResultsetIsEmpty(String statement) throws Exception {
         logger.info(statement);
+        int count_rows = 0;
         try(Connection connection = getConnection(); Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(statement)) {
-            return !rs.next();
+            while (rs.next()) {
+                count_rows++;
+            }
+            logger.info("Result Set has "+count_rows+" rows.");
+            return count_rows==0;
         }
     }
 }

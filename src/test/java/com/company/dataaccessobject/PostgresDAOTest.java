@@ -172,4 +172,23 @@ public class PostgresDAOTest extends TestCase {
 
         dao.insertNewestSales(jsonResult);
     }
+
+    public void testInsertNewestSalesDoppler() throws Exception {
+        PostgresDAO dao = new PostgresDAO();
+        String jsonResult = "{\n" +
+                "\t\"newestSales30Days\": [\n" +
+                "\t\t{\n" +
+                "\t\t\t\"itemName\": \"★ TEST DOPPLER\",\n" +
+                "\t\t\t\"price\": 390.0,\n" +
+                "\t\t\t\"wear\": 0.032865744,\n" +
+                "\t\t\t\"dopplerPhase\": \"doppler-phase2\",\n" +
+                "\t\t\t\"dateSold\": \"2022-01-12\"\n" +
+                "\t\t}\n" +
+                "\t]\n" +
+                "}";
+
+        dao.insertNewestSales(jsonResult);
+        assertFalse(checkIfResultsetIsEmpty("select * from steam.skinbaron_newest_sold_items where name='★ TEST DOPPLER'"));
+        executeDDL("delete from steam.skinbaron_newest_sold_items where name='★ TEST DOPPLER' and doppler_phase='doppler-phase2'");
+    }
 }
