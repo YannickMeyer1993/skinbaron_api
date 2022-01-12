@@ -58,9 +58,9 @@ public class PostgresDAO implements ItemDAO {
         int amountInserts;
         String last_id = null;
         String SQLUpsert = "WITH\n" +
-                "    to_be_upserted (id,name,price,stickers,wear) AS (\n" +
+                "    to_be_upserted (id,name,price,stickers,wear,inspect,sbinspect) AS (\n" +
                 "        VALUES\n" +
-                "            (?,?,?,?,?)\n" +
+                "            (?,?,?,?,?,?,?)\n" +
                 "    ),\n" +
                 "    updated AS (\n" +
                 "        UPDATE\n" +
@@ -73,8 +73,8 @@ public class PostgresDAO implements ItemDAO {
                 "            s.id = to_be_upserted.id\n" +
                 "        RETURNING s.id\n" +
                 "    )\n" +
-                "INSERT INTO steam.skinbaron_items\n" +
-                "    SELECT * FROM to_be_upserted\n" +
+                "INSERT INTO steam.skinbaron_items (id,name,price,stickers,wear,inspect,sbinspect)\n" +
+                "    SELECT id,name,price,stickers,wear,inspect,sbinspect FROM to_be_upserted\n" +
                 "    WHERE id NOT IN (SELECT id FROM updated);";
 
         try (Connection connection = getConnection(); PreparedStatement pstmt = connection.prepareStatement(SQLUpsert, Statement.RETURN_GENERATED_KEYS)) {
@@ -85,6 +85,8 @@ public class PostgresDAO implements ItemDAO {
                 pstmt.setDouble(3, item.getPrice().getValue());
                 pstmt.setString(4, item.getStickers());
                 pstmt.setDouble(5, item.getWear());
+                pstmt.setString(6, item.getInspect());
+                pstmt.setString(7, item.getSbinspect());
                 pstmt.addBatch();
 
                 last_id = item.getId();
@@ -401,8 +403,11 @@ public class PostgresDAO implements ItemDAO {
                 "select id from steam.skinbaron_items\n" +
                 "inner join maxtimestamp on \"timestamp\" = maxtimestamp.t";
         try(Connection connection = getConnection();Statement st = connection.createStatement();ResultSet rs = st.executeQuery(sql)) {
-            rs.next();
-            result = rs.getString("id");
+            if (rs.next()) {
+                result = rs.getString("id");
+            } else {
+                result = "";
+            }
         }
         return result;
     }

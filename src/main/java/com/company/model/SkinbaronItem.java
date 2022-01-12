@@ -10,6 +10,8 @@ public class SkinbaronItem {
     private final String name;
     private final String Stickers;
     private final double wear;
+    private final String inspect;
+    private final String sbinspect;
 
     public String getId() {
         return id;
@@ -26,9 +28,13 @@ public class SkinbaronItem {
     public SkinbaronItem(@JsonProperty("id") String id,
                          @JsonProperty("price") double price,
                          @JsonProperty("name") String name,
-                         @JsonProperty("sticker")String stickers,
-                         @JsonProperty("wear") double wear) {
+                         @JsonProperty("sticker") String stickers,
+                         @JsonProperty("wear") double wear,
+                         @JsonProperty("inspect") String inspect,
+                         @JsonProperty("sbinspect") String sbinspect) {
         this.id = id;
+        this.inspect = inspect;
+        this.sbinspect = sbinspect;
         this.price = new Price(java.sql.Date.valueOf(LocalDate.now()),price,name);
         this.name = name;
         Stickers = stickers;
@@ -46,4 +52,13 @@ public class SkinbaronItem {
     public double getWear() {
         return wear;
     }
+
+    public String getInspect() {
+        return inspect;
+    }
+
+    public String getSbinspect() {
+        return sbinspect;
+    }
+
 }

@@ -129,12 +129,20 @@ public class SkinbaronCrawler {
                         double price_euro = ((JSONObject) o).getDouble("price");
                         String name = ((JSONObject) o).getString("market_name");
                         String stickers = ((JSONObject) o).getString("stickers");
+                        String inspect ="";
+                        if (((JSONObject) o).has("inspect")) {
+                            inspect = ((JSONObject) o).getString("inspect");
+                        }
+                        String sbinspect="";
+                        if (((JSONObject) o).has("sbinspect")) {
+                            sbinspect = ((JSONObject) o).getString("sbinspect");
+                        }
                         try {
                             wear =  ((JSONObject) o).getDouble("wear");
                         } catch (JSONException je) {
                             wear = null;
                         }
-                        alreadyExisting = requestInsertSkinbaronItem(id,name,price_euro,stickers,wear);
+                        alreadyExisting = requestInsertSkinbaronItem(id,name,price_euro,stickers,wear,inspect,sbinspect);
 
                         if (!alreadyExisting) {
                             amountInserts++;
@@ -159,7 +167,7 @@ public class SkinbaronCrawler {
         }
     }
 
-    static boolean requestInsertSkinbaronItem(@NotNull String id, String name, double price_euro, String stickers, Double wear) {
+    static boolean requestInsertSkinbaronItem(@NotNull String id, String name, double price_euro, String stickers, Double wear,String inspect,String sbinspect) {
         String url = "http://localhost:8080/api/v1/AddSkinbaronItem";
 
         RestTemplate restTemplate = new RestTemplate();
@@ -172,6 +180,10 @@ public class SkinbaronCrawler {
         JsonObject.put("name",name);
         JsonObject.put("sticker",stickers);
         JsonObject.put("wear",wear);
+        JsonObject.put("inspect",inspect);
+        JsonObject.put("sbinspect",sbinspect);
+
+
 
         org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(JsonObject.toString(), headers);
 

@@ -14,7 +14,7 @@ public class SkinbaronCrawlerTest extends TestCase {
 
     public void testrequestInsertSkinbaronItem() throws Exception {
         UUID uuid = UUID.randomUUID();
-        requestInsertSkinbaronItem(uuid.toString(),"Name",2d,"Keine",0.2333d);
+        requestInsertSkinbaronItem(uuid.toString(),"Name",2d,"Keine",0.2333d,"","");
         assertFalse(checkIfResultsetIsEmpty("select * from steam.skinbaron_items where id='"+uuid+"'"));
         executeDDL("delete from steam.skinbaron_items where id='"+uuid+"'");
 

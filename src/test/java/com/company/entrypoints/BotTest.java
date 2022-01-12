@@ -15,7 +15,7 @@ public class BotTest extends TestCase {
 
     public void testDeleteNonExistingSkinbaronItems() throws Exception {
         UUID uuid = UUID.randomUUID();
-        requestInsertSkinbaronItem(uuid.toString(),"Name",2d,"Keine",0.2333d);
+        requestInsertSkinbaronItem(uuid.toString(),"Name",2d,"Keine",0.2333d,"","");
         assertFalse(checkIfResultsetIsEmpty("select * from steam.skinbaron_items where id='"+uuid+"'"));
         deleteNonExistingSkinbaronItems("Name",2d);
         assertTrue(checkIfResultsetIsEmpty("select * from steam.skinbaron_items where id='"+uuid+"'"));
@@ -29,7 +29,7 @@ public class BotTest extends TestCase {
     public void testBuyItem() throws Exception {
         setUpClass();
         String uuid = UUID.randomUUID().toString();
-        requestInsertSkinbaronItem(uuid,"NAME",3.11,"",0.123456);
+        requestInsertSkinbaronItem(uuid,"NAME",3.11,"",0.123456,"","");
         buyItem(uuid,3.11,5d);
         assertTrue(checkIfResultsetIsEmpty("select * from steam.skinbaron_items where id='"+uuid+"'"));
     }

@@ -5,6 +5,8 @@ CREATE TABLE if not exists steam.skinbaron_items (
   "stickers" varchar(300) DEFAULT NULL,
   "wear" varchar(50) DEFAULT NULL,
   "timestamp" timestamp NOT NULL DEFAULT now(),
+  "inspect" varchar(300) DEFAULT NULL,
+  "sbinspect" varchar(300) DEFAULT NULL,
   PRIMARY KEY ("id")
 ) ;
 
