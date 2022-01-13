@@ -21,6 +21,9 @@ public class SkinbaronNewSalesCrawler {
 
     private final static Logger logger = LoggerFactory.getLogger(SkinbaronNewSalesCrawler.class);
 
+
+    //TODO vergleich mit min Preis der letzten Wochen
+    //TODO Anzahl der Verkäufe => Klassifizierung
     public static void main(String[] args) throws Exception {
 
         setUpClass();
