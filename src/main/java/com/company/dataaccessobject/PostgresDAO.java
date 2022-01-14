@@ -23,6 +23,7 @@ import java.util.stream.IntStream;
 
 import static com.company.common.PostgresHelper.*;
 
+//pg dump pro Tabelle
 //TODO Insert Investment Items
 //TODO Insert Collections
 //TODO Items which are sold on 100% Steam Price
