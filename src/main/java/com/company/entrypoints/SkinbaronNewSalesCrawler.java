@@ -61,8 +61,6 @@ public class SkinbaronNewSalesCrawler {
         //JsonObject.put("souvenir",souvenir);//Useless, we want all data at once
         //JsonObject.put("dopplerPhase",false); //We don't get info about the phase within the search function
 
-        System.out.println(JsonObject);
-
         org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(JsonObject.toString(), headers);
         String result = restTemplate.postForObject(url, request, String.class);
         System.out.println(result);

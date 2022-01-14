@@ -42,19 +42,19 @@ public class SteamCrawler {
 
         setUpClass(); //disable Logging
 
-        conversionRateUSDinEUR = getConversionRateToEuro("USD");
-
-        int iteration = getHighestSteamIteration()+1;
-
-        InventoryCrawler invcrawler = new InventoryCrawler();
-        invcrawler.run();
-
         logger.warn("Decimal separator is comma!");
         Scanner sc= new Scanner(System.in);
         logger.warn("Enter current steam balance: ");
         double steam_balance = sc.nextDouble();
         logger.warn("Enter current steam sales value: ");
         double steam_sales_value = sc.nextDouble();
+
+        conversionRateUSDinEUR = getConversionRateToEuro("USD");
+
+        int iteration = getHighestSteamIteration()+1;
+
+        InventoryCrawler invcrawler = new InventoryCrawler();
+        invcrawler.run();
 
         getItemPricesInventory();
 

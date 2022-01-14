@@ -23,6 +23,9 @@ import java.util.stream.IntStream;
 
 import static com.company.common.PostgresHelper.*;
 
+//TODO Insert Investment Items
+//TODO Insert Collections
+//TODO Items which are sold on 100% Steam Price
 @Repository("postgres")
 public class PostgresDAO implements ItemDAO {
     

@@ -1,4 +1,4 @@
-CREATE TABLE if not EXISTS steam_item_sale.cases (
+CREATE TABLE if not EXISTS steam.cases (
 	id int4 NULL,
 	still_get_dropped bool NULL,
 	"name" varchar(30) NULL DEFAULT NULL::character varying,

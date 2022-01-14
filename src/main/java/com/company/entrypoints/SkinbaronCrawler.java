@@ -30,6 +30,7 @@ import static com.company.common.PasswordHelper.readPasswordFromFile;
 import static com.company.common.PostgresHelper.getConnection;
 import static com.company.entrypoints.Bot.buyItem;
 
+//TODO Buy Orders
 public class SkinbaronCrawler {
     private final static Logger logger = LoggerFactory.getLogger(SkinbaronCrawler.class);
 
