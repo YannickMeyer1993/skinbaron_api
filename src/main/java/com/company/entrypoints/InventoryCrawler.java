@@ -206,6 +206,9 @@ public class InventoryCrawler {
         }
     }
 
+    /**
+     * type in API: 2
+     */
     public void getSkinbaronSales() throws Exception {
 
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");

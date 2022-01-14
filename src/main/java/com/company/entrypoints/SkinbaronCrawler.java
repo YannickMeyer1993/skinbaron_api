@@ -250,6 +250,9 @@ public class SkinbaronCrawler {
         return resultArray.length() != 0;
     }
 
+    /**
+     * type in API: 4
+     */
     public static void getSoldItems() throws Exception {
         Connection conn = getConnection();
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
