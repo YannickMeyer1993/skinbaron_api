@@ -49,4 +49,8 @@ public interface ItemDAO {
     void deleteSkinbaronId(String id) throws Exception;
 
     void insertNewestSales(String json) throws Exception;
+
+    void insertSkinbaronSales(String id, String classid, String last_updated, String list_time, double price, String assetid, String name) throws Exception;
+
+    void deleteSkinbaronSalesTable() throws Exception;
 }

@@ -47,6 +47,7 @@ public class SteamCrawler {
         int iteration = getHighestSteamIteration()+1;
 
         InventoryCrawler invcrawler = new InventoryCrawler();
+        invcrawler.run();
 
         logger.warn("Decimal separator is comma!");
         Scanner sc= new Scanner(System.in);

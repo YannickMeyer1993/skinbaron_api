@@ -688,4 +688,31 @@ public class PostgresDAO implements ItemDAO {
         executeDDL("TRUNCATE TABLE steam.skinbaron_newest_sold_items_tmp");
         executeDDL("delete from steam.skinbaron_newest_sold_items where insert_date != CURRENT_DATE");
     }
+
+    @Override
+    public void insertSkinbaronSales(String id, String classid, String last_updated, String list_time, double price, String assetid, String name) throws Exception{
+
+        String sql = "INSERT INTO steam.skinbaron_sales (id, name, classid, last_updated, list_time, price, assetid) VALUES(?,?,?,?,?,?,?);";
+
+        try (Connection connection = getConnection();PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setString(1,id);
+            pstmt.setString(2,name);
+            pstmt.setString(3,classid);
+            pstmt.setString(4,last_updated);
+            pstmt.setString(5,list_time);
+            pstmt.setDouble(6,price);
+            pstmt.setString(7,assetid);
+
+            pstmt.execute();
+
+            connection.commit();
+        }
+
+        logger.info("1 item was inserted into table skinbaron_sales!");
+    }
+
+    @Override
+    public void deleteSkinbaronSalesTable() throws Exception {
+        executeDDL("TRUNCATE TABLE steam.skinbaron_sales;");
+    }
 }

@@ -21,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Map;
 
 import static com.company.common.Constants.*;
 import static com.company.common.LoggingHelper.setUpClass;
@@ -30,15 +31,31 @@ public class InventoryCrawler {
 
     private static org.slf4j.Logger logger = LoggerFactory.getLogger(InventoryCrawler.class);
 
-    public InventoryCrawler() throws Exception {
+    public InventoryCrawler() {
         setUpClass();
+    }
 
+    public void run() throws Exception {
         clearInventory();
         getSkinbaronInventory();
         getItemsfromInventory("https://steamcommunity.com/inventory/76561198286004569/730/2?count=2000", INV_TYPE_steam);
         getItemsfromInventory("https://steamcommunity.com/inventory/76561198331678576/730/2?count=2000", INV_TYPE_smurf);
-        getSkinbaronSales();
+        getSkinbaronSalesForInventory();
         getStorageItems();
+        clearSkinbaronSales();
+        getSkinbaronSalesForTable();
+    }
+
+    void clearSkinbaronSales() {
+        String url = "http://localhost:8080/api/v1/DeleteSkinbaronSales";
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(null, headers);
+
+        restTemplate.postForObject(url, request, String.class);
     }
 
     public void clearInventory() {
@@ -55,7 +72,7 @@ public class InventoryCrawler {
 
     public void getItemsfromInventory(String inventoryurl, String type) throws Exception {
 
-        logger.info("Getting inventory: "+type);
+        logger.info("Getting inventory: " + type);
         HttpGet httpGet = new HttpGet(inventoryurl);
 
         HttpClient client = HttpClients.custom()
@@ -70,7 +87,7 @@ public class InventoryCrawler {
         HashMap<String, Integer> map = getItemsFromSteamHTTP(resultJSON);
 
         for (String key : map.keySet()) {
-            sendRequestInsertInventoryItem(key,map.get(key),type);
+            sendRequestInsertInventoryItem(key, map.get(key), type);
         }
     }
 
@@ -107,21 +124,27 @@ public class InventoryCrawler {
 
                 String item_name = ((String) (((JSONObject) jo).getJSONArray("fraudwarnings").get(0))).split("''")[1];
 
-                switch (item_name){
-                    case "Broken Fang Case":item_name = "Operation Broken Fang Case";
+                switch (item_name) {
+                    case "Broken Fang Case":
+                        item_name = "Operation Broken Fang Case";
                         break;
-                    case "Sticker | Tyloo 2020":item_name = "Sticker | TYLOO | 2020 RMR";
+                    case "Sticker | Tyloo 2020":
+                        item_name = "Sticker | TYLOO | 2020 RMR";
                         break;
-                    case "Wildfire Case":item_name = "Operation Wildfire Case";
+                    case "Wildfire Case":
+                        item_name = "Operation Wildfire Case";
                         break;
-                    case "Sticker | Navi 2020":item_name = "Sticker | Natus Vincere | 2020 RMR";
+                    case "Sticker | Navi 2020":
+                        item_name = "Sticker | Natus Vincere | 2020 RMR";
                         break;
-                    case "Operation Breakout":item_name = "Operation Breakout Weapon Case";
+                    case "Operation Breakout":
+                        item_name = "Operation Breakout Weapon Case";
                         break;
-                    case "Vanguard Case":item_name = "Operation Vanguard Weapon Case";
+                    case "Vanguard Case":
+                        item_name = "Operation Vanguard Weapon Case";
                         break;
                 }
-                sendRequestInsertInventoryItem(item_name,amount,INV_TYPE_storage);
+                sendRequestInsertInventoryItem(item_name, amount, INV_TYPE_storage);
             }
         }
     }
@@ -171,6 +194,7 @@ public class InventoryCrawler {
 
     /**
      * items_per_page is not needed
+     *
      * @throws Exception breaks if error occurs
      */
     public void getSkinbaronInventory() throws Exception {
@@ -201,16 +225,56 @@ public class InventoryCrawler {
         for (Object o : resultArray) {
             if (o instanceof JSONObject) {
                 String name = ((JSONObject) o).getString("marketHashName");
-                sendRequestInsertInventoryItem(name,1,INV_TYPE_skinbaron);
+                sendRequestInsertInventoryItem(name, 1, INV_TYPE_skinbaron);
             }
         }
+    }
+
+    
+    public void getSkinbaronSalesForInventory() throws Exception {
+
+        Map<String,Integer> amountMap = new HashMap<>();
+
+        JSONArray resultArray = getSkinbaronOpenSalesJSONAray();
+        for (int i = 0; i < resultArray.length(); i++) {
+            JSONObject jObject = resultArray.getJSONObject(i);
+            
+            String name = jObject.get("name").toString();
+
+            amountMap.merge(name, 1, Integer::sum);
+        }
+
+        for (String item: amountMap.keySet()) {
+            sendRequestInsertInventoryItem(item, amountMap.get(item), INV_TYPE_SKINBARON_SALES);
+        }
+    }
+
+    public void getSkinbaronSalesForTable() throws Exception {
+
+        JSONArray resultArray = getSkinbaronOpenSalesJSONAray();
+        for (int i = 0; i < resultArray.length(); i++) {
+            JSONObject jObject = resultArray.getJSONObject(i);
+
+            sendRequestInsertSkinbaronSalesItem(jObject);
+        }
+    }
+
+    private void sendRequestInsertSkinbaronSalesItem(JSONObject JsonObject) {
+        String url = "http://localhost:8080/api/v1/InsertSkinbaronSales";
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(JsonObject.toString(), headers);
+
+        restTemplate.postForObject(url, request, String.class);
     }
 
     /**
      * type in API: 2
      */
-    public void getSkinbaronSales() throws Exception {
-
+    public JSONArray getSkinbaronOpenSalesJSONAray() throws Exception {
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 
         logger.info("Skinbaron API GetSales has been called.");
@@ -226,32 +290,34 @@ public class InventoryCrawler {
                         .setCookieSpec(CookieSpecs.STANDARD).build())
                 .build();
 
+        JSONArray result = new JSONArray();
+
         while (true) {
             String jsonInputString = "{\"apikey\": \"" + secret + "\",\"type\":2,\"appid\": 730,\"items_per_page\": 50" + (id == null ? "" : ",\"after_saleid\":\"" + id + "\"") + "}";
 
             HttpEntity entity = new ByteArrayEntity(jsonInputString.getBytes(StandardCharsets.UTF_8));
             httpPost.setEntity(entity);
             HttpResponse response = client.execute(httpPost);
-            String result = EntityUtils.toString(response.getEntity());
 
-            JSONObject resultJson = (JSONObject) new JSONTokener(result).nextValue();
+            JSONObject resultJson = (JSONObject) new JSONTokener(EntityUtils.toString(response.getEntity())).nextValue();
             JSONArray resultArray = ((JSONArray) resultJson.get("response"));
 
             if (resultArray.length() == 0) {
                 break;
             }
-            for (Object o : resultArray) {
-                if (o instanceof JSONObject) {
-                    String name = ((JSONObject) o).getString("name");
-                    id = ((JSONObject) o).getString("id");
 
-                    sendRequestInsertInventoryItem(name,1,INV_TYPE_SKINBARON_SALES);
-                }
+            //append to result
+            int length = result.length();
+            for (int i = 0; i < resultArray.length(); i++) {
+                result.put(length + i, resultArray.get(i));
+                id = ((JSONObject) resultArray.get(i)).getString("id");
             }
         }
+
+        return result;
     }
 
-    public void sendRequestInsertInventoryItem(String ItemName, int amount,String InventoryType) {
+    public void sendRequestInsertInventoryItem(String ItemName, int amount, String InventoryType) {
         String url = "http://localhost:8080/api/v1/AddInventoryItem";
 
         RestTemplate restTemplate = new RestTemplate();

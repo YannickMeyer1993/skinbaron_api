@@ -81,6 +81,12 @@ public class ItemController {
         insertItemsService.deleteInventoryItems();
     }
 
+    @RequestMapping("DeleteSkinbaronSales")
+    @PostMapping
+    public void deleteSkinbaronSales() throws Exception {
+        insertItemsService.deleteSkinbaronSales();
+    }
+
     @GetMapping(value="lastSkinbaronId", produces = MediaType.TEXT_PLAIN_VALUE)
     public String getLastSkinbaronId() throws Exception {
         return insertItemsService.getLastSkinbaronId();
@@ -122,5 +128,20 @@ public class ItemController {
         String id = payload.get("id").asText();
 
         insertItemsService.deleteSkinbaronId(id);
+    }
+
+    @RequestMapping("InsertSkinbaronSales")
+    @PostMapping
+    public void insertSkinbaronSales(@RequestBody com.fasterxml.jackson.databind.JsonNode payload) throws Exception {
+
+        String id = payload.get("id").asText();
+        String classid = payload.get("classid").asText();
+        String last_updated = payload.get("last_updated").asText();
+        String list_time = payload.get("list_time").asText();
+        double price = Double.parseDouble(payload.get("price").asText());
+        String assetid = payload.get("assetid").asText();
+        String name = payload.get("name").asText();
+
+        insertItemsService.insertSkinbaronSales(id,classid,last_updated,list_time,price,assetid,name);
     }
 }

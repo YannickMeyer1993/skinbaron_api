@@ -67,4 +67,12 @@ public class InsertItemsService {
     public void insertNewestSales(String payload) throws Exception {
         itemdao.insertNewestSales(payload);
     }
+
+    public void insertSkinbaronSales(String id, String classid, String last_updated, String list_time, double price, String assetid, String name) throws Exception {
+        itemdao.insertSkinbaronSales(id,classid,last_updated,list_time,price,assetid,name);
+    }
+
+    public void deleteSkinbaronSales() throws Exception {
+        itemdao.deleteSkinbaronSalesTable();
+    }
 }

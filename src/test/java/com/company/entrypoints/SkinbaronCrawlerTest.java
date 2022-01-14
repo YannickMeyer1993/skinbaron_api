@@ -59,4 +59,8 @@ public class SkinbaronCrawlerTest extends TestCase {
         assertEquals(getLastSoldSkinbaronId(), "testGetLastSoldSkinbaronId");
         executeDDL("delete from steam.skinbaron_items where id='testGetLastSoldSkinbaronId'");
     }
+
+    public void testGetSoldItems() throws Exception {
+        getSoldItems();
+    }
 }
