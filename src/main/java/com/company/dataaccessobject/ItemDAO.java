@@ -22,11 +22,7 @@ public interface ItemDAO {
 
     void setHighestSteamIteration(int iteration) throws Exception;
 
-    void addInventoryItem(String itemname,int amount,String inventorytype) throws Exception;
-
     Item getItem(String ItemName);
-
-    void deleteInventoryItems() throws Exception;
 
     void cleanUp() throws Exception;
 
@@ -53,4 +49,6 @@ public interface ItemDAO {
     void deleteSkinbaronSalesTable() throws Exception;
 
     void addSkinbaronInventoryItems(JsonNode payload) throws SQLException;
+
+    void addInventoryItems(JsonNode payload) throws Exception;
 }

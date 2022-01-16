@@ -9,8 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
 
-//TODO batch Inserts
-//TODO alles nach hinten schieben
 @RestController
 @RequestMapping("/api/v1")
 public class ItemController {
@@ -38,15 +36,10 @@ public class ItemController {
         insertItemsService.addNewSteamPrice(price);
     }
 
-    @RequestMapping("AddInventoryItem")
+    @RequestMapping("AddInventoryItems")
     @PostMapping
-    public void addInventoryItem(@RequestBody com.fasterxml.jackson.databind.JsonNode payload) throws Exception {
-
-
-        String itemname = payload.get("itemname").textValue();
-        int amount = Integer.parseInt(payload.get("amount").toPrettyString());
-        String inventorytype = payload.get("inventorytype").textValue();
-        insertItemsService.addInventoryItem(itemname,amount,inventorytype);
+    public void addInventoryItems(@RequestBody com.fasterxml.jackson.databind.JsonNode payload) throws Exception {
+        insertItemsService.addInventoryItems(payload);
     }
 
     @RequestMapping("AddSkinbaronInventoryItems")
@@ -66,6 +59,8 @@ public class ItemController {
         insertItemsService.deleteNonExistingSkinbaronItems(ItemName,price);
     }
 
+    //TODO batch Inserts
+    //TODO alles nach hinten schieben
     @RequestMapping("InsertSoldSkinbaronItem")
     @PostMapping
     public void insertSoldSkinbaronItem(@RequestBody com.fasterxml.jackson.databind.JsonNode payload) throws Exception {
@@ -82,12 +77,6 @@ public class ItemController {
         double commission = Double.parseDouble(payload.get("commission").asText());
 
         insertItemsService.insertSoldSkinbaronItem(itemId,name, price, classid, last_updated, instanceid, list_time, assetid, txid, commission);
-    }
-
-    @RequestMapping("DeleteInventoryItems")
-    @PostMapping
-    public void deleteInventoryItems() throws Exception {
-        insertItemsService.deleteInventoryItems();
     }
 
     @RequestMapping("DeleteSkinbaronSales")
@@ -139,6 +128,8 @@ public class ItemController {
         insertItemsService.deleteSkinbaronId(id);
     }
 
+    //TODO batch Inserts
+    //TODO alles nach hinten schieben
     @RequestMapping("InsertSkinbaronSales")
     @PostMapping
     public void insertSkinbaronSales(@RequestBody com.fasterxml.jackson.databind.JsonNode payload) throws Exception {

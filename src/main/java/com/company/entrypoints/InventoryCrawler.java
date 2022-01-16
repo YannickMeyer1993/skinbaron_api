@@ -31,12 +31,17 @@ public class InventoryCrawler {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(InventoryCrawler.class);
 
+    public JSONArray getInventory() {
+        return inventory;
+    }
+
+    private JSONArray inventory = new JSONArray();
+
     public InventoryCrawler() {
         setUpClass();
     }
 
     public void run() throws Exception {
-        clearInventory();
         getSkinbaronInventory();
         getItemsfromInventory("https://steamcommunity.com/inventory/76561198286004569/730/2?count=2000", INV_TYPE_steam);
         getItemsfromInventory("https://steamcommunity.com/inventory/76561198331678576/730/2?count=2000", INV_TYPE_smurf);
@@ -44,22 +49,12 @@ public class InventoryCrawler {
         getStorageItems();
         clearSkinbaronSales();
         getSkinbaronSalesForTable();
+        insertInventory();
     }
-
+    
+    //TODO will be deleted and used before batch
     void clearSkinbaronSales() {
         String url = "http://localhost:8080/api/v1/DeleteSkinbaronSales";
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(null, headers);
-
-        restTemplate.postForObject(url, request, String.class);
-    }
-
-    public void clearInventory() {
-        String url = "http://localhost:8080/api/v1/DeleteInventoryItems";
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -87,7 +82,7 @@ public class InventoryCrawler {
         HashMap<String, Integer> map = getItemsFromSteamHTTP(resultJSON);
 
         for (String key : map.keySet()) {
-            sendRequestInsertInventoryItem(key, map.get(key), type);
+            insertItemIntoInventory(key, map.get(key), type);
         }
     }
 
@@ -144,7 +139,7 @@ public class InventoryCrawler {
                         item_name = "Operation Vanguard Weapon Case";
                         break;
                 }
-                sendRequestInsertInventoryItem(item_name, amount, INV_TYPE_storage);
+                insertItemIntoInventory(item_name, amount, INV_TYPE_storage);
             }
         }
     }
@@ -234,7 +229,7 @@ public class InventoryCrawler {
         sendRequestInsertSkinbaronInventoryItems(resultArray);
 
         for (String item: amountMap.keySet()) {
-            sendRequestInsertInventoryItem(item, amountMap.get(item), INV_TYPE_skinbaron);
+            insertItemIntoInventory(item, amountMap.get(item), INV_TYPE_skinbaron);
         }
     }
 
@@ -253,7 +248,7 @@ public class InventoryCrawler {
         }
 
         for (String item: amountMap.keySet()) {
-            sendRequestInsertInventoryItem(item, amountMap.get(item), INV_TYPE_SKINBARON_SALES);
+            insertItemIntoInventory(item, amountMap.get(item), INV_TYPE_SKINBARON_SALES);
         }
     }
 
@@ -324,22 +319,29 @@ public class InventoryCrawler {
 
         return result;
     }
-
-    public void sendRequestInsertInventoryItem(String ItemName, int amount, String InventoryType) {
-        String url = "http://localhost:8080/api/v1/AddInventoryItem";
+    
+    public void insertInventory() {
+        logger.info("Inventory will now be inserted.");
+        String url = "http://localhost:8080/api/v1/AddInventoryItems";
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+
+        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(inventory.toString(), headers);
+
+        restTemplate.postForObject(url, request, String.class);
+    }
+
+    public void insertItemIntoInventory(String ItemName, int amount, String InventoryType) {
+        
         JSONObject JsonObject = new JSONObject();
 
         JsonObject.put("itemname", ItemName);
         JsonObject.put("amount", amount);
         JsonObject.put("inventorytype", InventoryType);
 
-        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(JsonObject.toString(), headers);
-
-        restTemplate.postForObject(url, request, String.class);
+        inventory.put(JsonObject);
     }
 
     public void sendRequestInsertSkinbaronInventoryItems(JSONArray array) {

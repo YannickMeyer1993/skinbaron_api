@@ -29,7 +29,6 @@ import static com.company.common.LoggingHelper.setUpClass;
 import static com.company.common.PostgresHelper.getConnection;
 import static com.company.entrypoints.SkinbaronCrawler.getBalance;
 
-//TODO 0 zurückgeben, wenn null kommt
 public class SteamCrawler {
 
     private static Double conversionRateUSDinEUR;

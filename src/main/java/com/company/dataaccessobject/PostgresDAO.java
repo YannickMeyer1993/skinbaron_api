@@ -201,6 +201,9 @@ public class PostgresDAO implements ItemDAO {
     @Override
     public void setHighestSteamIteration(int iteration) throws Exception {
 
+        //for day change
+        initHightestSteamIteration();
+
         String SQLinsert = "UPDATE steam.steam_iteration set iteration=? where \"date\"=current_date";
 
         if (checkIfResultsetIsEmpty("select iteration from steam.steam_iteration where \"date\" = CURRENT_DATE;")) {
@@ -217,7 +220,9 @@ public class PostgresDAO implements ItemDAO {
     }
 
     @Override
-    public void addInventoryItem(String itemname, int amount, String inventorytype) throws Exception {
+    public void addInventoryItems(JsonNode payload) throws Exception {
+
+        executeDDL("update steam.inventory set still_there = false where still_there;");
 
         String sql = "select name from steam.item_informations where name =?;";
         String SQLInsert = "INSERT INTO steam.inventory(inv_type,name,amount,still_there) "
@@ -226,32 +231,41 @@ public class PostgresDAO implements ItemDAO {
         try (Connection connection = getConnection();
              PreparedStatement pstmt1 = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
              PreparedStatement pstmt2 = connection.prepareStatement(SQLInsert, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt1.setString(1, itemname);
 
-            ResultSet rs = pstmt1.executeQuery();
-            if (!rs.next()) {
-                return;
+            JSONArray array = new JSONArray(payload.toString());
+            for (int i=0;i<array.length();i++) {
+                JSONObject o = (JSONObject) array.get(i);
+                String itemname = o.getString("itemname");
+                String inventorytype = o.getString("inventorytype");
+                int amount = o.getInt("amount");
+                pstmt1.setString(1, itemname);
+
+                ResultSet rs = pstmt1.executeQuery();
+                if (!rs.next()) {
+                    continue;
+                }
+
+                pstmt2.setString(1, inventorytype);
+                pstmt2.setString(2, itemname);
+                pstmt2.setInt(3, amount);
+                pstmt2.addBatch();
+                logger.info("Item \"" + itemname + "\" was inserted to inventory.");
             }
 
-            pstmt2.setString(1, inventorytype);
-            pstmt2.setString(2, itemname);
-            pstmt2.setInt(3, amount);
-            pstmt2.execute();
+            int amountInserts;
+            int[] updateCounts = pstmt2.executeBatch();
+            amountInserts = IntStream.of(updateCounts).sum();
+            if (amountInserts != 0) {
+                logger.info(amountInserts + " items were inserted!");
+            }
             connection.commit();
         }
-
-        logger.info("Item \"" + itemname + "\" was inserted to inventory.");
     }
 
     @Override
     public Item getItem(String ItemName) {
         ItemCollection collection = new ItemCollection("", false);
         return new Item(ItemName, collection);
-    }
-
-    @Override
-    public void deleteInventoryItems() throws Exception {
-        executeDDL("update steam.inventory set still_there = false where still_there;");
     }
 
     @Override

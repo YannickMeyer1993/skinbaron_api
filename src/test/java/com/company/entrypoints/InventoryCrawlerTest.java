@@ -7,18 +7,12 @@ import static com.company.common.PostgresHelper.executeDDL;
 
 public class InventoryCrawlerTest extends TestCase {
 
-    public void testTestSendRequestInsertInventoryItem() throws Exception {
+    public void testSendRequestInsertInventoryItem() throws Exception {
         InventoryCrawler crawler = new InventoryCrawler();
-        crawler.sendRequestInsertInventoryItem("AWP | Dragon Lore (Factory New)",1,"Test Inv");
+        crawler.insertItemIntoInventory("AWP | Dragon Lore (Factory New)",1,"Test Inv");
+        crawler.insertInventory();
         assertFalse(checkIfResultsetIsEmpty("select * from steam.inventory where name = 'AWP | Dragon Lore (Factory New)' and inv_type='Test Inv'"));
         executeDDL("DELETE FROM steam.inventory where name = 'AWP | Dragon Lore (Factory New)'");
-    }
-
-    public void testClearInventory() throws Exception {
-        InventoryCrawler crawler = new InventoryCrawler();
-        crawler.clearInventory();
-        assertTrue(checkIfResultsetIsEmpty("select * from steam.inventory where still_there = true"));
-
     }
 
     public void testGetSkinbaronSales() throws Exception {
@@ -47,5 +41,13 @@ public class InventoryCrawlerTest extends TestCase {
     public void testGetSkinbaronInventory() throws Exception {
         InventoryCrawler crawler = new InventoryCrawler();
         crawler.getSkinbaronInventory();
+    }
+
+    public void testAddInventoryItemNegative() throws Exception {
+        InventoryCrawler crawler = new InventoryCrawler();
+        crawler.insertItemIntoInventory("Gibt es nicht",1,"Test Inv");
+        crawler.insertInventory();
+        assertTrue(checkIfResultsetIsEmpty("select * from steam.inventory where name = 'Gibt es nicht' and inv_type='Test Inv'"));
+
     }
 }

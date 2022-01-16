@@ -3,5 +3,6 @@ CREATE TABLE if not exists steam.inventory (
 	"name" varchar(200) NOT NULL,
 	amount int4,
 	still_there bool NOT NULL,
-	"date" date NOT NULL DEFAULT now()
+	"date" date NOT NULL DEFAULT now(),
+	insert_timestamp date NOT NULL DEFAULT now()
 );

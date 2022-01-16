@@ -30,13 +30,10 @@ public class InsertItemsService {
         return itemdao.addSkinbaronItem(skinbaronitem);
     }
 
-    public void addInventoryItem(String itemname,int amount,String inventorytype) throws Exception {
-        itemdao.addInventoryItem(itemname,amount,inventorytype);
+    public void addInventoryItems(JsonNode payload) throws Exception {
+        itemdao.addInventoryItems(payload);
     }
 
-    public void deleteInventoryItems() throws Exception {
-        itemdao.deleteInventoryItems();
-    }
 
     public String getLastSkinbaronId() throws Exception {
         return itemdao.getLastSkinbaronId();
