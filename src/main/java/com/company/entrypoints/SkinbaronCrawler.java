@@ -31,6 +31,7 @@ import static com.company.common.PostgresHelper.getConnection;
 import static com.company.entrypoints.Bot.buyItem;
 
 //TODO Buy Orders
+//TODO Differentiate between tradelock and no tradelock
 public class SkinbaronCrawler {
     private final static Logger logger = LoggerFactory.getLogger(SkinbaronCrawler.class);
 
@@ -88,7 +89,8 @@ public class SkinbaronCrawler {
     }
 
     /**
-     *
+     * "tradelocked": true is useless
+     * price >= 0.05
      * @param secret api secret
      * @param after_saleid last id
      * @return [0] amount_inserts [1] last id
@@ -98,7 +100,7 @@ public class SkinbaronCrawler {
 
         logger.info("Skinbaron API Search has been called.");
         Thread.sleep(1000);
-        String jsonInputString = "{\"apikey\": \"" + secret + "\",\"appid\": 730,\"items_per_page\": "+items_per_page + (!"".equals(after_saleid) ? ",\"after_saleid\":\"" + after_saleid + "\"" : "") + "}";
+        String jsonInputString = "{\"apikey\": \"" + secret + "\",\"appid\": 730,\"min\":0.05,\"items_per_page\": "+items_per_page + (!"".equals(after_saleid) ? ",\"after_saleid\":\"" + after_saleid + "\"" : "") + "}";
 
         HttpPost httpPost = new HttpPost("https://api.skinbaron.de/Search");
         httpPost.setHeader("Content.Type", "application/json");
@@ -320,8 +322,6 @@ public class SkinbaronCrawler {
         String url = "http://localhost:8080/api/v1/lastSkinbaronId";
 
         RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.TEXT_PLAIN);
         ResponseEntity<String> responseEntityStr = restTemplate.getForEntity( url,String.class);
 
         logger.info("last inserted Skinbaron Id: "+responseEntityStr.getBody());
@@ -333,8 +333,6 @@ public class SkinbaronCrawler {
         String url = "http://localhost:8080/api/v1/lastSoldSkinbaronId";
 
         RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.TEXT_PLAIN);
         ResponseEntity<String> responseEntityStr = restTemplate.getForEntity( url,String.class);
 
         return (responseEntityStr.getBody());

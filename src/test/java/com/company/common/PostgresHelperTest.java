@@ -33,7 +33,7 @@ public class PostgresHelperTest extends TestCase {
         executeDDLfromPath("src/test/resources/PostgresHelperTest/emptyStatement.sql");
     }
 
-    public void testExecuteDDL() throws SQLException, IOException {
+    public void testExecuteDDL() throws SQLException {
         executeDDL("select CURRENT_TIMESTAMP;");
     }
 

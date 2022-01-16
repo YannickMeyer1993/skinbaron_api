@@ -3,12 +3,14 @@ package com.company.api;
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
 import com.company.service.InsertItemsService;
-import org.json.JSONArray;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLException;
+
+//TODO batch Inserts
+//TODO alles nach hinten schieben
 @RestController
 @RequestMapping("/api/v1")
 public class ItemController {
@@ -45,6 +47,13 @@ public class ItemController {
         int amount = Integer.parseInt(payload.get("amount").toPrettyString());
         String inventorytype = payload.get("inventorytype").textValue();
         insertItemsService.addInventoryItem(itemname,amount,inventorytype);
+    }
+
+    @RequestMapping("AddSkinbaronInventoryItems")
+    @PostMapping
+    public void addSkinbaronInventoryItems(@RequestBody com.fasterxml.jackson.databind.JsonNode payload) throws SQLException {
+
+        insertItemsService.addSkinbaronInventoryItems(payload);
     }
 
     @RequestMapping("DeleteNonExistingSkinbaronItems")
@@ -141,7 +150,11 @@ public class ItemController {
         double price = Double.parseDouble(payload.get("price").asText());
         String assetid = payload.get("assetid").asText();
         String name = payload.get("name").asText();
+        String contextid = null;
+        if (payload.has("contextid")) {
+            contextid = payload.get("contextid").asText();
+        }
 
-        insertItemsService.insertSkinbaronSales(id,classid,last_updated,list_time,price,assetid,name);
+        insertItemsService.insertSkinbaronSales(id,classid,last_updated,list_time,price,assetid,name,contextid);
     }
 }

@@ -4,21 +4,18 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
 import java.util.Collection;
 import java.util.Properties;
-import java.util.stream.Stream;
 
 import static com.company.common.PasswordHelper.readPasswordFromFile;
 
 public class PostgresHelper {
 
-    private static org.slf4j.Logger logger = LoggerFactory.getLogger(PostgresHelper.class);
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(PostgresHelper.class);
 
     public static Connection getConnection() throws SQLException {
         String url = "jdbc:postgresql://localhost/postgres";

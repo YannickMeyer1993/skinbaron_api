@@ -1,7 +1,10 @@
 package com.company.dataaccessobject;
 
 import com.company.common.Constants;
-import com.company.model.*;
+import com.company.model.Item;
+import com.company.model.ItemCollection;
+import com.company.model.SkinbaronItem;
+import com.company.model.SteamPrice;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
@@ -23,15 +26,15 @@ import java.util.stream.IntStream;
 
 import static com.company.common.PostgresHelper.*;
 
-//pg dump pro Tabelle
+//TODO pg dump pro Tabelle
 //TODO Insert Investment Items
 //TODO Insert Collections
 //TODO Items which are sold on 100% Steam Price
 @Repository("postgres")
 public class PostgresDAO implements ItemDAO {
-    
-    private static org.slf4j.Logger logger = LoggerFactory.getLogger(PostgresDAO.class);
-    String resourcePath = "src/main/resources/PostgresDAO/";
+
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(PostgresDAO.class);
+    final String resourcePath = "src/main/resources/PostgresDAO/";
 
     public PostgresDAO() throws Exception {
         init();
@@ -40,7 +43,7 @@ public class PostgresDAO implements ItemDAO {
     @Override
     public void init() throws Exception {
 
-        executeDDLsfromDirectory(resourcePath+"init/");
+        executeDDLsfromDirectory(resourcePath + "init/");
 
         if (checkIfResultsetIsEmpty("select * from steam.item_informations")) {
             crawlItemInformations();
@@ -107,7 +110,7 @@ public class PostgresDAO implements ItemDAO {
             connection.commit();
         }
 
-        return (amountInserts==1?last_id:"");
+        return (amountInserts == 1 ? last_id : "");
     }
 
     @Override
@@ -147,14 +150,13 @@ public class PostgresDAO implements ItemDAO {
 
         org.json.JSONArray array = new JSONArray();
         try (Connection conn = getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
-            while(rs.next())
-            {
+            while (rs.next()) {
                 JSONObject JsonObject = new JSONObject();
-                JsonObject.put("steam_price_is_new" , rs.getBoolean("steam_price_is_new"));
-                JsonObject.put("skinbaron_ids" , rs.getString("skinbaron_ids"));
-                JsonObject.put("name" , rs.getString("name"));
-                JsonObject.put("skinbaron_price" , rs.getDouble("skinbaron_price"));
-                JsonObject.put("steam_price" , rs.getDouble("steam_price"));
+                JsonObject.put("steam_price_is_new", rs.getBoolean("steam_price_is_new"));
+                JsonObject.put("skinbaron_ids", rs.getString("skinbaron_ids"));
+                JsonObject.put("name", rs.getString("name"));
+                JsonObject.put("skinbaron_price", rs.getDouble("skinbaron_price"));
+                JsonObject.put("steam_price", rs.getDouble("steam_price"));
 
                 array.put(JsonObject);
             }
@@ -215,7 +217,7 @@ public class PostgresDAO implements ItemDAO {
     }
 
     @Override
-    public void addInventoryItem(String itemname,int amount,String inventorytype) throws Exception {
+    public void addInventoryItem(String itemname, int amount, String inventorytype) throws Exception {
 
         String sql = "select name from steam.item_informations where name =?;";
         String SQLInsert = "INSERT INTO steam.inventory(inv_type,name,amount,still_there) "
@@ -233,17 +235,17 @@ public class PostgresDAO implements ItemDAO {
 
             pstmt2.setString(1, inventorytype);
             pstmt2.setString(2, itemname);
-            pstmt2.setInt(3,amount);
+            pstmt2.setInt(3, amount);
             pstmt2.execute();
             connection.commit();
         }
 
-        logger.info("Item \""+ itemname+"\" was inserted to inventory.");
+        logger.info("Item \"" + itemname + "\" was inserted to inventory.");
     }
 
     @Override
     public Item getItem(String ItemName) {
-        ItemCollection collection = new ItemCollection("",false);
+        ItemCollection collection = new ItemCollection("", false);
         return new Item(ItemName, collection);
     }
 
@@ -254,13 +256,13 @@ public class PostgresDAO implements ItemDAO {
 
     @Override
     public void cleanUp() throws Exception {
-        executeDDLfromPath(resourcePath+"cleanUp.sql");
+        executeDDLfromPath(resourcePath + "cleanUp.sql");
     }
 
     @Override
     public void crawlItemInformations() throws Exception {
 
-        Map<String,  String[]> map = new HashMap<>();
+        Map<String, String[]> map = new HashMap<>();
 
         executeDDL("TRUNCATE TABLE steam.item_informations;");
 
@@ -284,15 +286,14 @@ public class PostgresDAO implements ItemDAO {
 
             String name = item.getFirstChild().asNormalizedText();
 
-            if ("".equals(name) || name.contains("Souvenir Souvenir") || name.contains("Sealed Graffiti"))
-            {
+            if ("".equals(name) || name.contains("Souvenir Souvenir") || name.contains("Sealed Graffiti")) {
                 continue;
             }
 
 
-            String weapon=item.getAttribute("data-weapon");
-            String collection=item.getAttribute("data-collection");
-            String quality=item.getAttribute("data-quality");
+            String weapon = item.getAttribute("data-weapon");
+            String collection = item.getAttribute("data-collection");
+            String quality = item.getAttribute("data-quality");
 
             Double vn_price = !"0.00".equals(item.getAttribute("data-vn").trim()) ? Double.parseDouble(item.getAttribute("data-vn")) : null;
             Double bs_price = !"0.00".equals(item.getAttribute("data-bs").trim()) ? Double.parseDouble(item.getAttribute("data-bs")) : null;
@@ -301,87 +302,83 @@ public class PostgresDAO implements ItemDAO {
             Double mw_price = !"0.00".equals(item.getAttribute("data-mw").trim()) ? Double.parseDouble(item.getAttribute("data-mw")) : null;
             Double fn_price = !"0.00".equals(item.getAttribute("data-fn").trim()) ? Double.parseDouble(item.getAttribute("data-fn")) : null;
 
-            if (vn_price == null && fn_price == null && mw_price == null && ft_price == null && ww_price == null && bs_price == null){
+            if (vn_price == null && fn_price == null && mw_price == null && ft_price == null && ww_price == null && bs_price == null) {
                 continue;
             }
 
-            if (name.contains("StatTrak"))
-            {
-                name = name.replace("StatTrak","StatTrak\u2122");
+            if (name.contains("StatTrak")) {
+                name = name.replace("StatTrak", "StatTrak\u2122");
             }
 
-            if (name.contains("/"))
-            {
-                name = name.replace("/","-");
+            if (name.contains("/")) {
+                name = name.replace("/", "-");
             }
 
             //Knife
-            if ("Covert".equals(quality)&&(weapon.contains("Knife") || weapon.contains("Bayonet") || weapon.contains("Shadow Daggers") || weapon.contains("Karambit") ||"".equals(weapon)))
-            {
-                name = "\u2605 "+name;
+            if ("Covert".equals(quality) && (weapon.contains("Knife") || weapon.contains("Bayonet") || weapon.contains("Shadow Daggers") || weapon.contains("Karambit") || "".equals(weapon))) {
+                name = "\u2605 " + name;
             }
 
             //Gloves
-            if (name.contains("Gloves") || name.contains("Hand Wraps"))
-            {
-                name = "\u2605 "+name;
+            if (name.contains("Gloves") || name.contains("Hand Wraps")) {
+                name = "\u2605 " + name;
             }
 
-            name = name.replaceAll(" {2}"," ");
+            name = name.replaceAll(" {2}", " ");
 
 
             String[] infos = new String[4];
-            if (vn_price!=null){
+            if (vn_price != null) {
                 infos[0] = weapon;
                 infos[1] = collection;
                 infos[2] = quality;
-                infos[3] = name.replace("StatTrak\u2122 ","");
-                map.put(name,infos);
+                infos[3] = name.replace("StatTrak\u2122 ", "");
+                map.put(name, infos);
             }
-            if (bs_price!=null){
+            if (bs_price != null) {
                 infos[0] = weapon;
                 infos[1] = collection;
                 infos[2] = quality;
-                infos[3] = name.replace("StatTrak\u2122 ","");
-                map.put(name+" (Battle-Scarred)",infos);
+                infos[3] = name.replace("StatTrak\u2122 ", "");
+                map.put(name + " (Battle-Scarred)", infos);
             }
-            if (ww_price!=null){
+            if (ww_price != null) {
                 infos[0] = weapon;
                 infos[1] = collection;
                 infos[2] = quality;
-                infos[3] = name.replace("StatTrak\u2122 ","");
-                map.put(name+" (Well-Worn)",infos);
+                infos[3] = name.replace("StatTrak\u2122 ", "");
+                map.put(name + " (Well-Worn)", infos);
             }
-            if (ft_price!=null){
+            if (ft_price != null) {
                 infos[0] = weapon;
                 infos[1] = collection;
                 infos[2] = quality;
-                infos[3] = name.replace("StatTrak\u2122 ","");
-                map.put(name+" (Field-Tested)",infos);
+                infos[3] = name.replace("StatTrak\u2122 ", "");
+                map.put(name + " (Field-Tested)", infos);
             }
-            if (mw_price!=null){
+            if (mw_price != null) {
                 infos[0] = weapon;
                 infos[1] = collection;
                 infos[2] = quality;
-                infos[3] = name.replace("StatTrak\u2122 ","");
-                map.put(name+" (Minimal Wear)",infos);
+                infos[3] = name.replace("StatTrak\u2122 ", "");
+                map.put(name + " (Minimal Wear)", infos);
             }
-            if (fn_price!=null){
+            if (fn_price != null) {
                 infos[0] = weapon;
                 infos[1] = collection;
                 infos[2] = quality;
-                infos[3] = name.replace("StatTrak\u2122 ","");
-                map.put(name+" (Factory New)",infos);
+                infos[3] = name.replace("StatTrak\u2122 ", "");
+                map.put(name + " (Factory New)", infos);
             }
         }
 
         String SQLinsert = "INSERT INTO steam.item_informations(name,weapon,collection,quality,name_without_exterior) "
                 + "VALUES(?,?,?,?,?)";
 
-        try (Connection connection = getConnection();PreparedStatement pstmt = connection.prepareStatement(SQLinsert, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = getConnection(); PreparedStatement pstmt = connection.prepareStatement(SQLinsert, Statement.RETURN_GENERATED_KEYS)) {
 
-            for (String key : map.keySet()){
-                pstmt.setString(1,key); //name
+            for (String key : map.keySet()) {
+                pstmt.setString(1, key); //name
                 pstmt.setString(2, map.get(key)[0]); //weapon
                 pstmt.setString(3, map.get(key)[1]); //collection
                 pstmt.setString(4, map.get(key)[2]); //quality
@@ -406,7 +403,7 @@ public class PostgresDAO implements ItemDAO {
                 "(select Max(timestamp) t from steam.skinbaron_items si)\n" +
                 "select id from steam.skinbaron_items\n" +
                 "inner join maxtimestamp on \"timestamp\" = maxtimestamp.t";
-        try(Connection connection = getConnection();Statement st = connection.createStatement();ResultSet rs = st.executeQuery(sql)) {
+        try (Connection connection = getConnection(); Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
             if (rs.next()) {
                 result = rs.getString("id");
             } else {
@@ -418,7 +415,7 @@ public class PostgresDAO implements ItemDAO {
 
     @Override
     public void deleteNonExistingSkinbaronItems(String ItemName, double price) throws Exception {
-        executeDDL("DELETE FROM steam.skinbaron_items where name='"+ItemName+"' and price <= "+price);
+        executeDDL("DELETE FROM steam.skinbaron_items where name='" + ItemName + "' and price <= " + price);
     }
 
     @Override
@@ -428,17 +425,17 @@ public class PostgresDAO implements ItemDAO {
                 "(id, name, price,classid,last_updated,instanceid,list_time,assetid,txid,commission)\n" +
                 "VALUES(?, ?, ?,?,?, ?, ?,?,?, ?);";
 
-        try (Connection connection = getConnection();PreparedStatement pstmt = connection.prepareStatement(sqlIinsert, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = getConnection(); PreparedStatement pstmt = connection.prepareStatement(sqlIinsert, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, itemId);
             pstmt.setString(2, name);
             pstmt.setDouble(3, price);
-            pstmt.setString(4,classid);
-            pstmt.setString(5,last_updated);
-            pstmt.setString(6,instanceid);
-            pstmt.setString(7,list_time);
-            pstmt.setString(8,assetid);
-            pstmt.setString(9,txid);
-            pstmt.setDouble(10,commission);
+            pstmt.setString(4, classid);
+            pstmt.setString(5, last_updated);
+            pstmt.setString(6, instanceid);
+            pstmt.setString(7, list_time);
+            pstmt.setString(8, assetid);
+            pstmt.setString(9, txid);
+            pstmt.setDouble(10, commission);
 
             pstmt.executeUpdate();
             connection.commit();
@@ -452,7 +449,7 @@ public class PostgresDAO implements ItemDAO {
                 "(select Max(timestamp) t from steam.skinbaron_sold_items si)\n" +
                 "select id from steam.skinbaron_sold_items\n" +
                 "inner join maxtimestamp on \"timestamp\" = maxtimestamp.t";
-        try(Connection connection = getConnection();Statement st = connection.createStatement();ResultSet rs = st.executeQuery(sql)) {
+        try (Connection connection = getConnection(); Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
             rs.next();
             result = rs.getString("id");
         }
@@ -464,14 +461,14 @@ public class PostgresDAO implements ItemDAO {
 
         logger.info("Crawler WEAR values. This takes long!");
 
-        Map<String,  String[]> mapWears = new HashMap<>();
+        Map<String, String[]> mapWears = new HashMap<>();
 
         int max_iteration = 20000;
 
         String SQLinsert = "INSERT INTO steam.item_wears(name,id,min_wear,max_wear) "
                 + "VALUES(?,?,?,?)";
 
-        try(Connection conn = getConnection()) {
+        try (Connection conn = getConnection()) {
 
             Collection<Integer> iterators = new HashSet<>();
 
@@ -481,7 +478,7 @@ public class PostgresDAO implements ItemDAO {
             iterators.add(Integer.MAX_VALUE);
 
             //select all ids and excute the complement
-            try(Statement stmt = conn.createStatement();ResultSet rs = stmt.executeQuery("select id from steam.item_wears")) {
+            try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select id from steam.item_wears")) {
 
                 while (rs.next()) {
                     iterators.remove(rs.getInt("id"));
@@ -571,14 +568,14 @@ public class PostgresDAO implements ItemDAO {
     }
 
     @Override
-    public void insertOverviewRow(double steam_balance,double steam_sales_value, double skinbaron_balance) throws Exception {
+    public void insertOverviewRow(double steam_balance, double steam_sales_value, double skinbaron_balance) throws Exception {
 
         double smurf_inv_value;
         double skinbaron_open_sale_wert;
         double steam_inv_value;
         double skinbaron_inv_value;
 
-        try(Connection conn = getConnection();Statement stmt2 = conn.createStatement();ResultSet rs2 = stmt2.executeQuery("with smurf as \n" +
+        try (Connection conn = getConnection(); Statement stmt2 = conn.createStatement(); ResultSet rs2 = stmt2.executeQuery("with smurf as \n" +
                 "(select round(cast(x.smurf_inv_wert as numeric),2) as smurf_inv_value from (select t.smurf_inv_wert \n" +
                 "\tfrom ( select sum(si.amount*si.price_per_unit) as smurf_inv_wert\n" +
                 "\tfrom steam.inventory_with_prices si where inv_type = 'smurf' ) t) x),\n" +
@@ -593,7 +590,7 @@ public class PostgresDAO implements ItemDAO {
                 "skinbaron_open_sales as \n" +
                 "(select ROUND(cast(w.skinbaron_wert as numeric),2) as skinbaron_open_sales_value from ( select t.skinbaron_wert \n" +
                 "\tfrom ( select sum(si.amount*si.price_per_unit) as skinbaron_wert\n" +
-                "\tfrom steam.inventory_with_prices si where inv_type = '"+ Constants.INV_TYPE_SKINBARON_SALES +"' ) t) w)\n" +
+                "\tfrom steam.inventory_with_prices si where inv_type = '" + Constants.INV_TYPE_SKINBARON_SALES + "' ) t) w)\n" +
                 "select smurf.*,skinbaron_open_sales.*,steam_inv.*,skinbaron_inv.* from smurf\n" +
                 "inner join skinbaron_inv on 1=1\n" +
                 "inner join steam_inv on 1=1\n" +
@@ -602,18 +599,18 @@ public class PostgresDAO implements ItemDAO {
             rs2.next();
 
             smurf_inv_value = rs2.getDouble("smurf_inv_value");
-            logger.info("Smurf Inventory Value: "+smurf_inv_value);
+            logger.info("Smurf Inventory Value: " + smurf_inv_value);
             skinbaron_open_sale_wert = rs2.getDouble("skinbaron_open_sales_value");
-            logger.info("Skinbaron open Sales Value: "+skinbaron_open_sale_wert);
+            logger.info("Skinbaron open Sales Value: " + skinbaron_open_sale_wert);
             steam_inv_value = rs2.getDouble("steam_inv_value");
-            logger.info("Steam Inventory Value: "+steam_inv_value);
+            logger.info("Steam Inventory Value: " + steam_inv_value);
             skinbaron_inv_value = rs2.getDouble("skinbaron_inv_value");
-            logger.info("Skinbaron Inventory Value: "+skinbaron_inv_value);
+            logger.info("Skinbaron Inventory Value: " + skinbaron_inv_value);
         }
 
         double sum_rare_items;
 
-        try(Connection conn = getConnection();Statement stmt3 = conn.createStatement();ResultSet rs3 = stmt3.executeQuery("select sum(zusatz_wert) as sum_rare_items from steam.rare_skins;")){
+        try (Connection conn = getConnection(); Statement stmt3 = conn.createStatement(); ResultSet rs3 = stmt3.executeQuery("select sum(zusatz_wert) as sum_rare_items from steam.rare_skins;")) {
             rs3.next();
             sum_rare_items = rs3.getDouble("sum_rare_items");
         }
@@ -623,7 +620,7 @@ public class PostgresDAO implements ItemDAO {
         String sql = "INSERT INTO steam.overview(smurf_inv_value,skinbaron_open_sales,steam_inv_value,skinbaron_inv_value,rare_items_value,steam_balance,steam_open_sales,skinbaron_balance) "
                 + "VALUES(?,?,?,?,?,?,?,?)";
 
-        try (Connection conn = getConnection();PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setDouble(1, smurf_inv_value);
             pstmt.setDouble(2, skinbaron_open_sale_wert);
             pstmt.setDouble(3, steam_inv_value);
@@ -640,12 +637,13 @@ public class PostgresDAO implements ItemDAO {
 
     @Override
     public void deleteSkinbaronId(String id) throws Exception {
-        executeDDL("delete from steam.skinbaron_items where id='"+id+"'");
+        executeDDL("delete from steam.skinbaron_items where id='" + id + "'");
     }
 
     /**
      * only 10 Inserts per Item
      * Since a name doesn't make the items unique, the avg/etc will be computed on DB
+     *
      * @param json Skinbaron response
      */
     @Override
@@ -654,17 +652,17 @@ public class PostgresDAO implements ItemDAO {
         String sql = "Insert into steam.skinbaron_newest_sold_items_tmp (name,price,wear,datesold,doppler_phase) values (?,?,?,?,?)";
 
         JSONArray array = (new JSONObject(json)).getJSONArray("newestSales30Days");
-        try (Connection connection = getConnection();PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = getConnection(); PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             for (Object o : array) {
                 if (o instanceof JSONObject) {
-                    pstmt.setString(1,((JSONObject) o).getString("itemName"));
-                    pstmt.setDouble(2,((JSONObject) o).getDouble("price"));
-                    pstmt.setDouble(3,((JSONObject) o).getDouble("wear"));
-                    pstmt.setString(4,((JSONObject) o).getString("dateSold"));
+                    pstmt.setString(1, ((JSONObject) o).getString("itemName"));
+                    pstmt.setDouble(2, ((JSONObject) o).getDouble("price"));
+                    pstmt.setDouble(3, ((JSONObject) o).getDouble("wear"));
+                    pstmt.setString(4, ((JSONObject) o).getString("dateSold"));
                     if (((JSONObject) o).has("dopplerPhase")) {
-                        pstmt.setString(5,((JSONObject) o).getString("dopplerPhase"));
+                        pstmt.setString(5, ((JSONObject) o).getString("dopplerPhase"));
                     } else {
-                        pstmt.setString(5,null);
+                        pstmt.setString(5, null);
                     }
                     pstmt.addBatch();
                 }
@@ -694,18 +692,19 @@ public class PostgresDAO implements ItemDAO {
     }
 
     @Override
-    public void insertSkinbaronSales(String id, String classid, String last_updated, String list_time, double price, String assetid, String name) throws Exception{
+    public void insertSkinbaronSales(String id, String classid, String last_updated, String list_time, double price, String assetid, String name, String contextid) throws Exception {
 
-        String sql = "INSERT INTO steam.skinbaron_sales (id, name, classid, last_updated, list_time, price, assetid) VALUES(?,?,?,?,?,?,?);";
+        String sql = "INSERT INTO steam.skinbaron_sales (id, name, classid, last_updated, list_time, price, assetid,contextid) VALUES(?,?,?,?,?,?,?,?);";
 
-        try (Connection connection = getConnection();PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt.setString(1,id);
-            pstmt.setString(2,name);
-            pstmt.setString(3,classid);
-            pstmt.setString(4,last_updated);
-            pstmt.setString(5,list_time);
-            pstmt.setDouble(6,price);
-            pstmt.setString(7,assetid);
+        try (Connection connection = getConnection(); PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setString(1, id);
+            pstmt.setString(2, name);
+            pstmt.setString(3, classid);
+            pstmt.setString(4, last_updated);
+            pstmt.setString(5, list_time);
+            pstmt.setDouble(6, price);
+            pstmt.setString(7, assetid);
+            pstmt.setString(8, contextid);
 
             pstmt.execute();
 
@@ -718,5 +717,44 @@ public class PostgresDAO implements ItemDAO {
     @Override
     public void deleteSkinbaronSalesTable() throws Exception {
         executeDDL("TRUNCATE TABLE steam.skinbaron_sales;");
+    }
+
+    @Override
+    public void addSkinbaronInventoryItems(JsonNode payload) throws SQLException {
+
+        executeDDL("TRUNCATE TABLE steam.skinbaron_inventory;");
+        String sql = "INSERT INTO steam.skinbaron_inventory (id, name, tradeLockHourseLeft) VALUES(?,?,?);";
+
+        try (Connection connection = getConnection(); PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            JSONArray array = new JSONArray(payload.toString());
+
+            logger.debug("Length of Input JSON Array: " + array.length());
+
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject o = array.getJSONObject(i);
+
+                logger.debug("JSON Object with index "+i+" is \n" + o);
+                String name = o.getString("marketHashName");
+                int id = o.getInt("id");
+                int tradeLockHoursLeft = 0;
+                if (o.has("tradeLockHoursLeft")) {
+                    tradeLockHoursLeft = o.getInt("tradeLockHoursLeft");
+                }
+                pstmt.setInt(1, id);
+                pstmt.setString(2, name);
+                pstmt.setInt(3, tradeLockHoursLeft);
+                pstmt.addBatch();
+
+            }
+
+            int amountInserts;
+            int[] updateCounts = pstmt.executeBatch();
+            amountInserts = IntStream.of(updateCounts).sum();
+            if (amountInserts != 0) {
+                logger.info(amountInserts + " items were inserted into skinbaron inventory!");
+            }
+            connection.commit();
+        }
     }
 }

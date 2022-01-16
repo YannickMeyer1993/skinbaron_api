@@ -4,9 +4,7 @@ import com.company.model.Item;
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.json.JSONArray;
 
-import java.io.IOException;
 import java.sql.SQLException;
 
 public interface ItemDAO {
@@ -50,7 +48,9 @@ public interface ItemDAO {
 
     void insertNewestSales(String json) throws Exception;
 
-    void insertSkinbaronSales(String id, String classid, String last_updated, String list_time, double price, String assetid, String name) throws Exception;
+    void insertSkinbaronSales(String id, String classid, String last_updated, String list_time, double price, String assetid, String name, String contextid) throws Exception;
 
     void deleteSkinbaronSalesTable() throws Exception;
+
+    void addSkinbaronInventoryItems(JsonNode payload) throws SQLException;
 }

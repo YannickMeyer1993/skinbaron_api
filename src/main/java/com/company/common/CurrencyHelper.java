@@ -1,17 +1,10 @@
 package com.company.common;
 
-import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.List;
 
-/*
- * converts USD to EUR s
- *
-*/
 public class CurrencyHelper {
 
     /**
@@ -35,8 +28,7 @@ public class CurrencyHelper {
 
         }
 
-        try (WebClient webClient = new WebClient(com.gargoylesoftware.htmlunit.BrowserVersion.FIREFOX))
-        {
+        try (WebClient webClient = new WebClient(com.gargoylesoftware.htmlunit.BrowserVersion.FIREFOX)) {
             webClient.getOptions().setJavaScriptEnabled(false);
             webClient.getOptions().setCssEnabled(true);
             webClient.getOptions().setThrowExceptionOnScriptError(false);
@@ -50,19 +42,16 @@ public class CurrencyHelper {
             {
                 try {
                     line = item_USBtoEUR.getFirstChild().asNormalizedText();
-                }
-                catch (NullPointerException e){
+                } catch (NullPointerException e) {
                     throw new Exception("Kein Wert für Währung gefunden!");
                 }
             }
 
             return Double.parseDouble(line.replace("1 "+Currency+" = ","").replace(" EUR","").replace(",", "."));
+        } catch (Exception e) {
+            Thread.sleep(5000);
+            return getConversionRateToEuro(Currency); //if error, then try again recursively
         }
-        catch (FailingHttpStatusCodeException e)
-        {
-            e.printStackTrace();
-        }
-        return null;
     }
 
 }

@@ -12,7 +12,7 @@ public class CleanerController {
 
     private final CleanUpService cleanUpService;
 
-    private static org.slf4j.Logger logger = LoggerFactory.getLogger(ItemController.class);
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ItemController.class);
 
     @Autowired
     public CleanerController(CleanUpService cleanUpService) {

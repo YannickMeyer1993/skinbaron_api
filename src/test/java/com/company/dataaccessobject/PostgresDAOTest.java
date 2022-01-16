@@ -25,9 +25,6 @@ public class PostgresDAOTest extends TestCase {
                 "        group by name having count(*) > 1;"));
     }
 
-    public void testGetItemsToBuy() {
-    }
-
     public void testAddSkinbaronItem() throws Exception {
         PostgresDAO dao = new PostgresDAO();
         String ItemName = "Item Name";

@@ -1,11 +1,11 @@
-CREATE TABLE steam.collections (
+CREATE TABLE IF NOT EXISTS steam.collections (
 	collection varchar NOT NULL,
 	is_cool boolean default false
 );
 
 truncate table steam.collections;
 
-INSERT INTO steam_item_sale.meta_table_good_collections (collection,is_cool) VALUES
+INSERT INTO steam.collections (collection,is_cool) VALUES
 	 ('The Office Collection',true),
 	 ('The Alpha Collection',true),
 	 ('The Militia Collection',true),

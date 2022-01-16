@@ -29,7 +29,7 @@ import static com.company.common.PasswordHelper.readPasswordFromFile;
 
 public class InventoryCrawler {
 
-    private static org.slf4j.Logger logger = LoggerFactory.getLogger(InventoryCrawler.class);
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(InventoryCrawler.class);
 
     public InventoryCrawler() {
         setUpClass();
@@ -222,11 +222,19 @@ public class InventoryCrawler {
         JSONObject resultJson = (JSONObject) new JSONTokener(result).nextValue();
         JSONArray resultArray = ((JSONArray) resultJson.get("items"));
 
+        Map<String,Integer> amountMap = new HashMap<>();
+
         for (Object o : resultArray) {
             if (o instanceof JSONObject) {
                 String name = ((JSONObject) o).getString("marketHashName");
-                sendRequestInsertInventoryItem(name, 1, INV_TYPE_skinbaron);
+                amountMap.merge(name, 1, Integer::sum);
             }
+        }
+
+        sendRequestInsertSkinbaronInventoryItems(resultArray);
+
+        for (String item: amountMap.keySet()) {
+            sendRequestInsertInventoryItem(item, amountMap.get(item), INV_TYPE_skinbaron);
         }
     }
 
@@ -330,6 +338,18 @@ public class InventoryCrawler {
         JsonObject.put("inventorytype", InventoryType);
 
         org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(JsonObject.toString(), headers);
+
+        restTemplate.postForObject(url, request, String.class);
+    }
+
+    public void sendRequestInsertSkinbaronInventoryItems(JSONArray array) {
+        String url = "http://localhost:8080/api/v1/AddSkinbaronInventoryItems";
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(array.toString(), headers);
 
         restTemplate.postForObject(url, request, String.class);
     }

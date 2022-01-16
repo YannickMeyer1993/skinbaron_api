@@ -1,6 +1,5 @@
 package com.company.entrypoints;
 
-import com.company.dataaccessobject.PostgresDAO;
 import junit.framework.TestCase;
 
 import java.io.File;

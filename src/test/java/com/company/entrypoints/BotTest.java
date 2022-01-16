@@ -47,4 +47,8 @@ public class BotTest extends TestCase {
         buyItem("27d551f1-43e6-4e32-9951-8cd7716508c3",1.22,2);
         assertTrue(checkIfResultsetIsEmpty("select * from steam.skinbaron_items where id='27d551f1-43e6-4e32-9951-8cd7716508c3'"));
     }
+
+    public void testTestBuyItem1() throws Exception {
+        buyItem("1cb8423b-4491-4e44-889e-a442d111bf1e",0.05,1);
+    }
 }

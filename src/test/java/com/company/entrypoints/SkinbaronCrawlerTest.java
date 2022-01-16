@@ -7,7 +7,6 @@ import java.util.UUID;
 import static com.company.common.PasswordHelper.readPasswordFromFile;
 import static com.company.common.PostgresHelper.checkIfResultsetIsEmpty;
 import static com.company.common.PostgresHelper.executeDDL;
-import static com.company.entrypoints.Bot.deleteNonExistingSkinbaronItems;
 import static com.company.entrypoints.SkinbaronCrawler.*;
 
 public class SkinbaronCrawlerTest extends TestCase {

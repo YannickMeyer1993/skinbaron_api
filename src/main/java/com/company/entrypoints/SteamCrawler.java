@@ -245,8 +245,6 @@ public class SteamCrawler {
         String url = "http://localhost:8080/api/v1/GetHightestSteamIteration";
 
         RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.TEXT_PLAIN);
         ResponseEntity<String> responseEntityStr = restTemplate.getForEntity( url,String.class);
 
         if (responseEntityStr.getBody() == null) {

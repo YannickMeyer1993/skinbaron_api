@@ -1,6 +1,5 @@
 package com.company.api;
 
-import com.company.service.CleanUpService;
 import com.company.service.SteamService;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,7 @@ public class SteamController {
 
     private final SteamService steamService;
 
-    private static org.slf4j.Logger logger = LoggerFactory.getLogger(ItemController.class);
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ItemController.class);
 
     @Autowired
     public SteamController(SteamService steamService) {
