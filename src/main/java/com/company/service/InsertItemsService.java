@@ -43,8 +43,8 @@ public class InsertItemsService {
         itemdao.deleteNonExistingSkinbaronItems(ItemName,price);
     }
 
-    public void insertSoldSkinbaronItem(String itemId, String name, double price, String classid, String last_updated, String instanceid, String list_time, String assetid, String txid, double commission) throws Exception {
-        itemdao.insertSoldSkinbaronItem(itemId,name, price, classid, last_updated, instanceid, list_time, assetid, txid, commission);
+    public void insertSoldSkinbaronItem(JsonNode payload) throws Exception {
+        itemdao.insertSoldSkinbaronItem(payload);
     }
 
     public String getLastSoldSkinbaronId() throws Exception {

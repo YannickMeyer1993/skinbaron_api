@@ -46,14 +46,16 @@ public class SkinbaronCrawlerTest extends TestCase {
 
     }
 
+    //TODO
     public void testRequestInsertSoldSkinbaronItem() throws Exception {
-        requestInsertSoldSkinbaronItem("testRequestInsertSoldSkinbaronItem","Operation Riptide Case",0,"4578724859","1641446620","519977179","1640260702","24258366051","PZZWWTZFS9FT",0);
+        //requestInsertSoldSkinbaronItem("testRequestInsertSoldSkinbaronItem","Operation Riptide Case",0,"4578724859","1641446620","519977179","1640260702","24258366051","PZZWWTZFS9FT",0);
         assertFalse(checkIfResultsetIsEmpty("select * from steam.skinbaron_sold_items where id='testRequestInsertSoldSkinbaronItem'"));
         executeDDL("delete from steam.skinbaron_sold_items where id='testRequestInsertSoldSkinbaronItem'");
     }
 
+    //TODO
     public void testGetLastSoldSkinbaronId() throws Exception {
-        requestInsertSoldSkinbaronItem("testGetLastSoldSkinbaronId","Operation Case",0,"4578724859","1641446620","519977179","1640260702","24258366051","PZZWWTZFS9FT",0);
+        //requestInsertSoldSkinbaronItem("testGetLastSoldSkinbaronId","Operation Case",0,"4578724859","1641446620","519977179","1640260702","24258366051","PZZWWTZFS9FT",0);
 
         assertEquals(getLastSoldSkinbaronId(), "testGetLastSoldSkinbaronId");
         executeDDL("delete from steam.skinbaron_items where id='testGetLastSoldSkinbaronId'");

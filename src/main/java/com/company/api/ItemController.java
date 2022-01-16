@@ -3,6 +3,7 @@ package com.company.api;
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
 import com.company.service.InsertItemsService;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -60,23 +61,10 @@ public class ItemController {
     }
 
     //TODO batch Inserts
-    //TODO alles nach hinten schieben
     @RequestMapping("InsertSoldSkinbaronItem")
     @PostMapping
-    public void insertSoldSkinbaronItem(@RequestBody com.fasterxml.jackson.databind.JsonNode payload) throws Exception {
-
-        double price = Double.parseDouble(payload.get("price").asText());
-        String itemId = payload.get("itemId").textValue();
-        String name = payload.get("name").textValue();
-        String classid = payload.get("classid").textValue();
-        String last_updated = payload.get("last_updated").textValue();
-        String instanceid = payload.get("instanceid").textValue();
-        String list_time = payload.get("list_time").textValue();
-        String assetid = payload.get("assetid").textValue();
-        String txid = payload.get("txid").textValue();
-        double commission = Double.parseDouble(payload.get("commission").asText());
-
-        insertItemsService.insertSoldSkinbaronItem(itemId,name, price, classid, last_updated, instanceid, list_time, assetid, txid, commission);
+    public void insertSoldSkinbaronItem(@RequestBody JsonNode payload) throws Exception {
+        insertItemsService.insertSoldSkinbaronItem(payload);
     }
 
     @RequestMapping("DeleteSkinbaronSales")

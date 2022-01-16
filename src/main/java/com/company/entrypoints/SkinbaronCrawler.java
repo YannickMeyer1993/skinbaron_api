@@ -257,6 +257,7 @@ public class SkinbaronCrawler {
      * type in API: 4
      */
     public static void getSoldItems() throws Exception {
+        logger.info("Getting Sold Items...");
         Connection conn = getConnection();
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 
@@ -291,18 +292,9 @@ public class SkinbaronCrawler {
             for (int i = 0; i < jArray.length(); i++) {
                 JSONObject jObject = jArray.getJSONObject(i);
 
-                String classid = jObject.get("classid").toString();
-                String last_updated = jObject.get("last_updated").toString();
-                String instanceid = jObject.get("instanceid").toString();
-                String list_time = jObject.get("list_time").toString();
-                double price = Double.parseDouble(jObject.get("price").toString());
-                String assetid = jObject.get("assetid").toString();
-                String name = jObject.get("name").toString();
-                String txid = jObject.get("txid").toString();
-                double commission = Double.parseDouble(jObject.get("commission").toString());
                 itemId = jObject.get("id").toString();
 
-                boolean was_inserted = requestInsertSoldSkinbaronItem(itemId,name,price,classid,last_updated,instanceid,list_time,assetid,txid,commission);
+                boolean was_inserted = requestInsertSoldSkinbaronItem(jArray.getJSONObject(i));
 
                 if (lastSoldId.equals(itemId) || !was_inserted) { //if not inserted, then is was already present => end loop
                     return;
@@ -338,26 +330,14 @@ public class SkinbaronCrawler {
         return (responseEntityStr.getBody());
     }
 
-    public static boolean requestInsertSoldSkinbaronItem(String itemId, String name, double price, String classid, String last_updated, String instanceid, String list_time, String assetid, String txid, double commission) {
+    public static boolean requestInsertSoldSkinbaronItem(JSONObject payload) {
         String url = "http://localhost:8080/api/v1/InsertSoldSkinbaronItem";
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        JSONObject JsonObject = new JSONObject();
 
-        JsonObject.put("itemId",itemId);
-        JsonObject.put("name",name);
-        JsonObject.put("price",price);
-        JsonObject.put("classid",classid);
-        JsonObject.put("last_updated",last_updated);
-        JsonObject.put("instanceid",instanceid);
-        JsonObject.put("list_time",list_time);
-        JsonObject.put("assetid",assetid);
-        JsonObject.put("txid",txid);
-        JsonObject.put("commission",commission);
-
-        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(JsonObject.toString(), headers);
+        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(payload.toString(), headers);
 
         try {
             restTemplate.postForObject(url, request, String.class);

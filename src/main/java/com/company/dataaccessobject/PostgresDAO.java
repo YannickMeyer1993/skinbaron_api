@@ -432,8 +432,19 @@ public class PostgresDAO implements ItemDAO {
         executeDDL("DELETE FROM steam.skinbaron_items where name='" + ItemName + "' and price <= " + price);
     }
 
+    //TODO \" entfernen
     @Override
-    public void insertSoldSkinbaronItem(String itemId, String name, double price, String classid, String last_updated, String instanceid, String list_time, String assetid, String txid, double commission) throws Exception {
+    public void insertSoldSkinbaronItem(JsonNode payload) throws Exception {
+        String classid = payload.get("classid").toString();
+        String last_updated = payload.get("last_updated").toString();
+        String instanceid = payload.get("instanceid").toString();
+        String list_time = payload.get("list_time").toString();
+        double price = Double.parseDouble(payload.get("price").toString());
+        String assetid = payload.get("assetid").toString();
+        String name = payload.get("name").toString();
+        String txid = payload.get("txid").toString();
+        double commission = Double.parseDouble(payload.get("commission").toString());
+        String itemId = payload.get("id").toString();
 
         String sqlIinsert = "INSERT INTO steam.skinbaron_sold_items\n" +
                 "(id, name, price,classid,last_updated,instanceid,list_time,assetid,txid,commission)\n" +
