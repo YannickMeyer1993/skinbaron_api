@@ -255,6 +255,7 @@ public class SkinbaronCrawler {
 
     /**
      * type in API: 4
+     * only works fully, if insert is not interrupted/partially
      */
     public static void getSoldItems() throws Exception {
         logger.info("Getting Sold Items...");

@@ -13,6 +13,7 @@ import static com.company.entrypoints.SkinbaronCrawler.requestInsertSkinbaronIte
 
 public class BotTest extends TestCase {
 
+    //TODO
     public void testDeleteNonExistingSkinbaronItems() throws Exception {
         UUID uuid = UUID.randomUUID();
         requestInsertSkinbaronItem(uuid.toString(),"Name",2d,"Keine",0.2333d,"","");

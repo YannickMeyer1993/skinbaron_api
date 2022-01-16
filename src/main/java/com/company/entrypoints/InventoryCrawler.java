@@ -47,22 +47,8 @@ public class InventoryCrawler {
         getItemsfromInventory("https://steamcommunity.com/inventory/76561198331678576/730/2?count=2000", INV_TYPE_smurf);
         getSkinbaronSalesForInventory();
         getStorageItems();
-        clearSkinbaronSales();
         getSkinbaronSalesForTable();
         insertInventory();
-    }
-    
-    //TODO will be deleted and used before batch
-    void clearSkinbaronSales() {
-        String url = "http://localhost:8080/api/v1/DeleteSkinbaronSales";
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(null, headers);
-
-        restTemplate.postForObject(url, request, String.class);
     }
 
     public void getItemsfromInventory(String inventoryurl, String type) throws Exception {
@@ -255,21 +241,14 @@ public class InventoryCrawler {
     public void getSkinbaronSalesForTable() throws Exception {
 
         JSONArray resultArray = getSkinbaronOpenSalesJSONAray();
-        for (int i = 0; i < resultArray.length(); i++) {
-            JSONObject jObject = resultArray.getJSONObject(i);
 
-            sendRequestInsertSkinbaronSalesItem(jObject);
-        }
-    }
-
-    private void sendRequestInsertSkinbaronSalesItem(JSONObject JsonObject) {
         String url = "http://localhost:8080/api/v1/InsertSkinbaronSales";
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(JsonObject.toString(), headers);
+        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(resultArray.toString(), headers);
 
         restTemplate.postForObject(url, request, String.class);
     }

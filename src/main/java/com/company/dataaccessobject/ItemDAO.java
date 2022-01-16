@@ -44,7 +44,7 @@ public interface ItemDAO {
 
     void insertNewestSales(String json) throws Exception;
 
-    void insertSkinbaronSales(String id, String classid, String last_updated, String list_time, double price, String assetid, String name, String contextid) throws Exception;
+    void insertSkinbaronSales(JsonNode payload) throws Exception;
 
     void deleteSkinbaronSalesTable() throws Exception;
 

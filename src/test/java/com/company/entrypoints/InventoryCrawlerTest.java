@@ -25,15 +25,8 @@ public class InventoryCrawlerTest extends TestCase {
         System.out.println(crawler.getSkinbaronOpenSalesJSONAray().length());
     }
 
-    public void testClearSkinbaronSales() throws Exception {
-        InventoryCrawler crawler = new InventoryCrawler();
-        crawler.clearSkinbaronSales();
-        assertTrue(checkIfResultsetIsEmpty("select * from steam.skinbaron_sales;"));
-    }
-
     public void testGetSkinbaronSalesForTable() throws Exception {
         InventoryCrawler crawler = new InventoryCrawler();
-        crawler.clearSkinbaronSales();
         crawler.getSkinbaronSalesForTable();
         assertFalse(checkIfResultsetIsEmpty("select * from steam.skinbaron_sales;"));
     }

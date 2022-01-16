@@ -67,8 +67,8 @@ public class InsertItemsService {
         itemdao.insertNewestSales(payload);
     }
 
-    public void insertSkinbaronSales(String id, String classid, String last_updated, String list_time, double price, String assetid, String name, String contextid) throws Exception {
-        itemdao.insertSkinbaronSales(id,classid,last_updated,list_time,price,assetid,name,contextid);
+    public void insertSkinbaronSales(JsonNode payload) throws Exception {
+        itemdao.insertSkinbaronSales(payload);
     }
 
     public void deleteSkinbaronSales() throws Exception {

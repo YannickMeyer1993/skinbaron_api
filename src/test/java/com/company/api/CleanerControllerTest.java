@@ -15,7 +15,7 @@ public class CleanerControllerTest {
 
     @Test
     @Ignore
-    public void testDeleteInventoryItems() throws Exception {
+    public void testCleanUp() throws Exception {
         String url = "http://localhost:8080/api/v1/cleanup";
 
         RestTemplate restTemplate = new RestTemplate();

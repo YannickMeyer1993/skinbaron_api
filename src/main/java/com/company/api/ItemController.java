@@ -60,7 +60,6 @@ public class ItemController {
         insertItemsService.deleteNonExistingSkinbaronItems(ItemName,price);
     }
 
-    //TODO batch Inserts
     @RequestMapping("InsertSoldSkinbaronItem")
     @PostMapping
     public void insertSoldSkinbaronItem(@RequestBody JsonNode payload) throws Exception {
@@ -116,24 +115,9 @@ public class ItemController {
         insertItemsService.deleteSkinbaronId(id);
     }
 
-    //TODO batch Inserts
-    //TODO alles nach hinten schieben
     @RequestMapping("InsertSkinbaronSales")
     @PostMapping
-    public void insertSkinbaronSales(@RequestBody com.fasterxml.jackson.databind.JsonNode payload) throws Exception {
-
-        String id = payload.get("id").asText();
-        String classid = payload.get("classid").asText();
-        String last_updated = payload.get("last_updated").asText();
-        String list_time = payload.get("list_time").asText();
-        double price = Double.parseDouble(payload.get("price").asText());
-        String assetid = payload.get("assetid").asText();
-        String name = payload.get("name").asText();
-        String contextid = null;
-        if (payload.has("contextid")) {
-            contextid = payload.get("contextid").asText();
-        }
-
-        insertItemsService.insertSkinbaronSales(id,classid,last_updated,list_time,price,assetid,name,contextid);
+    public void insertSkinbaronSales(@RequestBody JsonNode payload) throws Exception {
+        insertItemsService.insertSkinbaronSales(payload);
     }
 }

@@ -435,16 +435,16 @@ public class PostgresDAO implements ItemDAO {
     //TODO \" entfernen
     @Override
     public void insertSoldSkinbaronItem(JsonNode payload) throws Exception {
-        String classid = payload.get("classid").toString();
-        String last_updated = payload.get("last_updated").toString();
-        String instanceid = payload.get("instanceid").toString();
-        String list_time = payload.get("list_time").toString();
-        double price = Double.parseDouble(payload.get("price").toString());
-        String assetid = payload.get("assetid").toString();
-        String name = payload.get("name").toString();
-        String txid = payload.get("txid").toString();
-        double commission = Double.parseDouble(payload.get("commission").toString());
-        String itemId = payload.get("id").toString();
+        String classid = payload.get("classid").asText();
+        String last_updated = payload.get("last_updated").asText();
+        String instanceid = payload.get("instanceid").asText();
+        String list_time = payload.get("list_time").asText();
+        double price = Double.parseDouble(payload.get("price").asText());
+        String assetid = payload.get("assetid").asText();
+        String name = payload.get("name").asText();
+        String txid = payload.get("txid").asText();
+        double commission = Double.parseDouble(payload.get("commission").asText());
+        String itemId = payload.get("id").asText();
 
         String sqlIinsert = "INSERT INTO steam.skinbaron_sold_items\n" +
                 "(id, name, price,classid,last_updated,instanceid,list_time,assetid,txid,commission)\n" +
@@ -718,26 +718,51 @@ public class PostgresDAO implements ItemDAO {
     }
 
     @Override
-    public void insertSkinbaronSales(String id, String classid, String last_updated, String list_time, double price, String assetid, String name, String contextid) throws Exception {
+    public void insertSkinbaronSales(JsonNode payload) throws Exception {
 
         String sql = "INSERT INTO steam.skinbaron_sales (id, name, classid, last_updated, list_time, price, assetid,contextid) VALUES(?,?,?,?,?,?,?,?);";
 
+        executeDDL("truncate table steam.skinbaron_sales;");
+
+        JSONArray resultArray = new JSONArray(payload.toString());
         try (Connection connection = getConnection(); PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt.setString(1, id);
-            pstmt.setString(2, name);
-            pstmt.setString(3, classid);
-            pstmt.setString(4, last_updated);
-            pstmt.setString(5, list_time);
-            pstmt.setDouble(6, price);
-            pstmt.setString(7, assetid);
-            pstmt.setString(8, contextid);
 
-            pstmt.execute();
+            for (int i = 0; i < resultArray.length(); i++) {
+                JSONObject jObject = resultArray.getJSONObject(i);
+                logger.info(jObject.toString());
 
+                String id = jObject.getString("id");
+                String classid = jObject.getString("classid");
+                int last_updated = jObject.getInt("last_updated");
+                int list_time = jObject.getInt("list_time");
+                double price = jObject.getDouble("price");
+                String assetid = jObject.getString("assetid");
+                String name = jObject.getString("name");
+                String contextid = null;
+                if (jObject.has("contextid")) {
+                    contextid = jObject.getString("contextid");
+                }
+
+                pstmt.setString(1, id);
+                pstmt.setString(2, name);
+                pstmt.setString(3, classid);
+                pstmt.setInt(4, last_updated);
+                pstmt.setInt(5, list_time);
+                pstmt.setDouble(6, price);
+                pstmt.setString(7, assetid);
+                pstmt.setString(8, contextid);
+
+                pstmt.addBatch();
+            }
+
+            int amountInserts;
+            int[] updateCounts = pstmt.executeBatch();
+            amountInserts = IntStream.of(updateCounts).sum();
+            if (amountInserts != 0) {
+                logger.info(amountInserts + " items were inserted into skinbaron sales table!");
+            }
             connection.commit();
         }
-
-        logger.info("1 item was inserted into table skinbaron_sales!");
     }
 
     @Override

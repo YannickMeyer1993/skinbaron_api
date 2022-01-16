@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 
 import java.util.UUID;
 
+import static com.company.common.LoggingHelper.setUpClass;
 import static com.company.common.PasswordHelper.readPasswordFromFile;
 import static com.company.common.PostgresHelper.checkIfResultsetIsEmpty;
 import static com.company.common.PostgresHelper.executeDDL;
@@ -62,6 +63,7 @@ public class SkinbaronCrawlerTest extends TestCase {
     }
 
     public void testGetSoldItems() throws Exception {
+        setUpClass();
         getSoldItems();
     }
 }

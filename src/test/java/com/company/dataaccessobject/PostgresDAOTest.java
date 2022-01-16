@@ -68,6 +68,7 @@ public class PostgresDAOTest extends TestCase {
     public void testTestAddSkinbaronItem() throws Exception {
         PostgresDAO dao = new PostgresDAO();
         SkinbaronItem item = new SkinbaronItem("FakeID",3d,"AWP Drachlore","Keine",0.12345d, "","");
+        dao.addSkinbaronItem(item);
         assertFalse(checkIfResultsetIsEmpty("select * from steam.skinbaron_items where id='FakeID' and name='AWP Drachlore'"));
         executeDDL("delete from steam.skinbaron_items where id='FakeID' and name='AWP Drachlore'");
     }
@@ -89,6 +90,7 @@ public class PostgresDAOTest extends TestCase {
 
     public void testViewCurrentSteamPrices() throws Exception {
         setUpClass();
+        executeDDL("delete from steam.steam_prices where name = 'Sticker Capsule' and \"date\"= CURRENT_DATE");
         double result = getSteamPriceForGivenName("Sticker Capsule");
 
         //Could be wrong if price changes within a day and after the second run because minimum
