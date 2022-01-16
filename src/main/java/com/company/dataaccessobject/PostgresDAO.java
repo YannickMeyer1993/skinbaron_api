@@ -654,6 +654,7 @@ public class PostgresDAO implements ItemDAO {
         executeDDL("delete from steam.skinbaron_items where id='" + id + "'");
     }
 
+    //TODO take raw data
     /**
      * only 10 Inserts per Item
      * Since a name doesn't make the items unique, the avg/etc will be computed on DB
