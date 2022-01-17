@@ -3,5 +3,6 @@ name varchar(100) NOT NULL,
 price decimal(12,2) NOT NULL,
 wear varchar(50) DEFAULT NULL,
 datesold varchar(50) DEFAULT NULL,
-doppler_phase varchar(50) default null
+doppler_phase varchar(50) default null,
+insert_timestamp timestamp default now()
 );
