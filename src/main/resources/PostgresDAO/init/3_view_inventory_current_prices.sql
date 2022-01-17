@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW steam.inventory_with_prices
+CREATE OR REPLACE VIEW steam.inventory_current_prices
 AS
 select
 	si.name,

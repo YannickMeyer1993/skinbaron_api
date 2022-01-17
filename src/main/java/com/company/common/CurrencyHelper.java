@@ -50,6 +50,7 @@ public class CurrencyHelper {
             return Double.parseDouble(line.replace("1 "+Currency+" = ","").replace(" EUR","").replace(",", "."));
         } catch (Exception e) {
             Thread.sleep(5000);
+            System.out.println("OOPPSSS");
             return getConversionRateToEuro(Currency); //if error, then try again recursively
         }
     }

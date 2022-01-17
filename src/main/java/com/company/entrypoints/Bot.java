@@ -47,8 +47,6 @@ public class Bot {
 
             for (Object o: array) {
                 if (o instanceof JSONObject) {
-                    System.out.println(o);
-
                     boolean steam_price_is_new = ((JSONObject) o).getBoolean("steam_price_is_new");
                     String skinbaron_ids = ((JSONObject) o).getString("skinbaron_ids");
                     String name = ((JSONObject) o).getString("name");
@@ -120,8 +118,6 @@ public class Bot {
             logger.error(result);
             throw new ClassCastException();
         }
-
-        logger.info(resultJson.toString());
 
         if (resultJson.has("generalErrors")) {
             String error = resultJson.get("generalErrors").toString();

@@ -18,7 +18,7 @@ public class SkinbaronNewSalesCrawler {
 
     //TODO vergleich mit min Preis der letzten Wochen
     //TODO Anzahl der Verkäufe => Klassifizierung
-    //TODO Alle behalten statt aggregieren
+    //TODO Clean Up
     public static void main(String[] args) throws Exception {
 
         setUpClass();

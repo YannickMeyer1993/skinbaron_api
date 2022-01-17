@@ -9,7 +9,6 @@ import static com.company.entrypoints.BuffCrawler.getBuffItemWithExterior;
 
 public class BuffCrawlerTest extends TestCase {
 
-    //TODO
     public void testgetBuffItemWithPageCount() throws Exception {
         setUpClass();
         getBuffItemWithExterior(871156);

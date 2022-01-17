@@ -476,7 +476,6 @@ public class PostgresDAO implements ItemDAO {
         executeDDL("DELETE FROM steam.skinbaron_items where name='" + ItemName + "' and price <= " + price);
     }
 
-    //TODO \" entfernen
     @Override
     public void insertSoldSkinbaronItem(JsonNode payload) throws Exception {
         String classid = payload.get("classid").asText();
@@ -709,7 +708,6 @@ public class PostgresDAO implements ItemDAO {
         executeDDL("delete from steam.skinbaron_items where id='" + id + "'");
     }
 
-    //TODO take raw data
     /**
      * only 10 Inserts per Item
      * Since a name doesn't make the items unique, the avg/etc will be computed on DB
@@ -719,7 +717,7 @@ public class PostgresDAO implements ItemDAO {
     @Override
     public void insertNewestSales(String json) throws Exception {
 
-        String sql = "Insert into steam.skinbaron_newest_sold_items_tmp (name,price,wear,datesold,doppler_phase) values (?,?,?,?,?)";
+        String sql = "Insert into steam.skinbaron_newest_sold_items (name,price,wear,datesold,doppler_phase) values (?,?,?,?,?)";
 
         JSONArray array = (new JSONObject(json)).getJSONArray("newestSales30Days");
         try (Connection connection = getConnection(); PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -745,20 +743,6 @@ public class PostgresDAO implements ItemDAO {
             }
             connection.commit();
         }
-        //TODO Upsert
-        executeDDL("INSERT INTO steam.skinbaron_newest_sold_items (\"name\", doppler_phase, avg_price, min_price, max_price, amount, insert_date)\n" +
-                "select\n" +
-                "\ts.\"name\",\n" +
-                "\ts.doppler_phase,\n" +
-                "\tROUND(avg(s.price),2) as avg_price,\n" +
-                "\tmin(s.price) as min_price,\n" +
-                "\tmax(s.price) as max_price,\n" +
-                "\tcount(*) as amount,\n" +
-                "\tcurrent_date as insert_date\n" +
-                "from steam.skinbaron_newest_sold_items_tmp s\n" +
-                "group by s.\"name\" ,s.doppler_phase;");
-        executeDDL("TRUNCATE TABLE steam.skinbaron_newest_sold_items_tmp");
-        executeDDL("delete from steam.skinbaron_newest_sold_items where insert_date != CURRENT_DATE");
     }
 
     @Override
