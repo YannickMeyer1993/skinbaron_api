@@ -2,7 +2,10 @@ package com.company.dataaccessobject;
 
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
+import com.fasterxml.jackson.databind.JsonNode;
 import junit.framework.TestCase;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -93,22 +96,30 @@ public class PostgresDAOTest extends TestCase {
         executeDDL("delete from steam.steam_prices where name = 'Sticker Capsule' and \"date\"= CURRENT_DATE");
         double result = getSteamPriceForGivenName("Sticker Capsule");
 
-        //Could be wrong if price changes within a day and after the second run because minimum
         assertFalse(checkIfResultsetIsEmpty("select * from steam.steam_current_prices where name = 'Sticker Capsule' and \"date\"= CURRENT_DATE and price_euro="+result));
+
+        try (Connection connection = getConnection(); Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery("select count(*),name from steam.steam_current_prices group by name having count(*) > 1")) {
+            assertFalse(rs.next());
+        }
+    }
+
+    public void testViewCurrentBuffPrices() throws Exception {
+        setUpClass();
 
         try (Connection connection = getConnection(); Statement st = connection.createStatement();
              ResultSet rs = st.executeQuery("select count(*) from steam.item_informations");
              Statement st2 = connection.createStatement();
-             ResultSet rs2 = st2.executeQuery("select count(*) from steam.steam_current_prices")) {
+             ResultSet rs2 = st2.executeQuery("select count(*) from steam.buff_current_prices")) {
             rs.next();
             rs2.next();
             int count = rs.getInt("count");
             int count2 = rs2.getInt("count");
-            assertTrue(count <= count2);
+            assertTrue(count >= count2);
         }
 
         try (Connection connection = getConnection(); Statement st = connection.createStatement();
-             ResultSet rs = st.executeQuery("select count(*),name from steam.steam_current_prices group by name having count(*) > 1")) {
+             ResultSet rs = st.executeQuery("select count(*),id from steam.buff_current_prices group by id having count(*) > 1")) {
             assertFalse(rs.next());
         }
     }
@@ -176,5 +187,21 @@ public class PostgresDAOTest extends TestCase {
         dao.insertNewestSales(jsonResult);
         assertFalse(checkIfResultsetIsEmpty("select * from steam.skinbaron_newest_sold_items where name='★ TEST DOPPLER'"));
         executeDDL("delete from steam.skinbaron_newest_sold_items where name='★ TEST DOPPLER' and doppler_phase='doppler-phase2'");
+    }
+
+    public void testInsertBuffPrices() throws Exception {
+        String json = "[{\"id\":1,\"name\":\"TEST\",\"has_exterior\":false,\"price_euro\":4}]";
+        PostgresDAO dao = new PostgresDAO();
+        JSONArray insert = new JSONArray(json);
+        dao.insertBuffPrices(insert);
+        assertFalse(checkIfResultsetIsEmpty("select * from steam.buff_prices where name = 'TEST'"));
+        executeDDL("delete from steam.buff_prices where name = 'TEST'");
+    }
+
+    public void testGetBuffIds() throws Exception {
+        PostgresDAO dao = new PostgresDAO();
+        JSONArray array = new JSONArray(dao.getBuffIds());
+
+        assertTrue(array.length()>15000);
     }
 }

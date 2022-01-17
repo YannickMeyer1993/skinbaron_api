@@ -1,19 +1,18 @@
 package com.company.postgres.buff;
 
-import com.company.entrypoints.BuffCrawler;
 import junit.framework.TestCase;
 
-import java.sql.Connection;
 
-import static com.company.common.PostgresHelper.getConnection;
+import static com.company.common.LoggingHelper.setUpClass;
+import static com.company.entrypoints.BuffCrawler.getBuffItemWithExterior;
 
 
 public class BuffCrawlerTest extends TestCase {
 
     //TODO
     public void testgetBuffItemWithPageCount() throws Exception {
-        Connection conn = getConnection();
-        BuffCrawler.getBuffItem(conn,871156);
+        setUpClass();
+        getBuffItemWithExterior(871156);
     }
 
 }

@@ -11,7 +11,7 @@ public class SteamController {
 
     private final SteamService steamService;
 
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ItemController.class);
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(SteamController.class);
 
     @Autowired
     public SteamController(SteamService steamService) {

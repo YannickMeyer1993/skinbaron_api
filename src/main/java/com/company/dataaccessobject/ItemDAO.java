@@ -4,6 +4,7 @@ import com.company.model.Item;
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.json.JSONArray;
 
 import java.sql.SQLException;
 
@@ -51,4 +52,8 @@ public interface ItemDAO {
     void addSkinbaronInventoryItems(JsonNode payload) throws SQLException;
 
     void addInventoryItems(JsonNode payload) throws Exception;
+
+    void insertBuffPrices(JSONArray payload) throws Exception;
+
+    String getBuffIds() throws SQLException;
 }

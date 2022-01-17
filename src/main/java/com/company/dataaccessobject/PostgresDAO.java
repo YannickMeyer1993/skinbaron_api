@@ -263,6 +263,50 @@ public class PostgresDAO implements ItemDAO {
     }
 
     @Override
+    public void insertBuffPrices(JSONArray array) throws Exception {
+        String SQLUpsert = "INSERT INTO steam.buff_prices (id,price_euro)\n" +
+                "    VALUES (?,?);";
+
+        try (Connection connection = getConnection();PreparedStatement pstmt = connection.prepareStatement(SQLUpsert, Statement.RETURN_GENERATED_KEYS)) {
+
+            for (int i=0;i<array.length();i++) {
+                JSONObject o = (JSONObject) array.get(i);
+
+                pstmt.setInt(1, o.getInt("id"));
+                pstmt.setDouble(2, o.getDouble("price_euro"));
+
+                pstmt.addBatch();
+            }
+
+            int amountInserts;
+            int[] updateCounts = pstmt.executeBatch();
+            amountInserts = IntStream.of(updateCounts).sum();
+            if (amountInserts != 0) {
+                logger.info(amountInserts + " items were inserted!");
+            }
+
+            connection.commit();
+        }
+
+
+    }
+
+    @Override
+    public String getBuffIds() throws SQLException {
+        JSONArray result = new JSONArray();
+
+        try(Connection connection = getConnection();Statement st = connection.createStatement();ResultSet rs = st.executeQuery("select id,has_exterior from steam.buff_current_prices;")) {
+            while (rs.next()) {
+                JSONObject o = new JSONObject();
+                o.put("id",rs.getInt("id"));
+                o.put("has_exterior",rs.getBoolean("has_exterior"));
+                result.put(o);
+            }
+        }
+        return result.toString();
+    }
+
+    @Override
     public Item getItem(String ItemName) {
         ItemCollection collection = new ItemCollection("", false);
         return new Item(ItemName, collection);

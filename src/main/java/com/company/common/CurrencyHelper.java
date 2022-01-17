@@ -24,7 +24,7 @@ public class CurrencyHelper {
                 url = "https://www.finanzen.net/waehrungsrechner/euro_chinesicher-renminbi-yuan";
                 break;
             default:
-                throw new IllegalArgumentException("Currency must be RMB or USD.");
+                throw new IllegalArgumentException("Currency must be CNY or USD.");
 
         }
 
