@@ -1,29 +1,32 @@
 create or replace
-view steam_item_sale.cases_infos as
+view steam.cases_additional_information as
 select
 	c."name",
 	c.release_date ,
-	smrp.quantity,
+	smrp.quantity as market_quantity,
 	smrp.price_euro,
 	smrp.quantity* smrp.price_euro as market_volume,
 	sum(coalesce(iwp.amount, 0)) as anzahl_vorhanden,
 	c.still_get_dropped,
-	c.rare_special_item,
-	c.id 
+	smrp.quantity/price_euro as quantity_per_euro,
+	c.id,
+	ds.dsratio
 from
-	steam_item_sale.cases c
+	steam.cases c
 inner join steam.steam_current_prices smrp on
 	c."name" = smrp ."name"
-left join steam_item_sale.inventory_with_prices iwp on
+left join steam.inventory_current_prices iwp on
 	c."name" = iwp."name"
+inner join steam.steam_avg_prices ds on
+	c."name" = ds."name"
 group by
 	c.name,
-	quantity ,
+	smrp.quantity ,
 	price_euro,
 	market_volume,
 	c.release_date,
 	c.still_get_dropped,
-	c.rare_special_item,
-	c.id
+	c.id,
+	ds.dsratio
 order by
-	quantity
+	smrp.quantity

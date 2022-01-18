@@ -30,19 +30,14 @@ import static com.company.common.PasswordHelper.readPasswordFromFile;
 import static com.company.common.PostgresHelper.getConnection;
 import static com.company.entrypoints.Bot.buyItem;
 
-//TODO Buy Orders
-//TODO Differentiate between tradelock and no tradelock
 public class SkinbaronCrawler {
     private final static Logger logger = LoggerFactory.getLogger(SkinbaronCrawler.class);
 
     public static void main(String[] args) throws Exception {
 
         setUpClass(); //disable Logging
-
         requestCleanUp();
-
         checkLiveSkinbaron();
-
         getSoldItems();
 
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");

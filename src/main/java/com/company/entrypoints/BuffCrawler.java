@@ -72,8 +72,8 @@ public class BuffCrawler {
         webClient.getOptions().setJavaScriptEnabled(true); // enable javascript
         webClient.getOptions().setCssEnabled(true);
         webClient.getOptions().setThrowExceptionOnScriptError(false); //even if there is error in js continue
-        webClient.waitForBackgroundJavaScriptStartingBefore(1000000);
-        webClient.waitForBackgroundJavaScript(10000000); // important! wait when javascript finishes rendering
+        webClient.waitForBackgroundJavaScriptStartingBefore(100000);
+        webClient.waitForBackgroundJavaScript(100000); // important! wait when javascript finishes rendering
         HtmlPage page = webClient.getPage(url);
         Thread.sleep(1000); //needed to load page
 
@@ -90,6 +90,7 @@ public class BuffCrawler {
         List<com.gargoylesoftware.htmlunit.html.DomElement> Items = page.getByXPath("//*[contains(@class, 'f_Strong')]");
 
         double min_price_rmb = Double.MAX_VALUE;
+        //should be Items.size() = # on website - 1 for ref price
         for (DomElement elem : Items) {
 
             try {
@@ -131,8 +132,8 @@ public class BuffCrawler {
         webClient.getOptions().setJavaScriptEnabled(true); // enable javascript
         webClient.getOptions().setCssEnabled(true);
         webClient.getOptions().setThrowExceptionOnScriptError(false); //even if there is error in js continue
-        webClient.waitForBackgroundJavaScriptStartingBefore(1000000);
-        webClient.waitForBackgroundJavaScript(10000000); // important! wait when javascript finishes rendering
+        webClient.waitForBackgroundJavaScriptStartingBefore(100000);
+        webClient.waitForBackgroundJavaScript(100000); // important! wait when javascript finishes rendering
         HtmlPage page = webClient.getPage(url);
         Thread.sleep(1000);
 

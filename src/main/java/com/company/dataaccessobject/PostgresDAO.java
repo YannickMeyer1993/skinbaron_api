@@ -16,7 +16,11 @@ import org.dom4j.io.SAXReader;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.StringReader;
 import java.sql.*;
@@ -26,10 +30,6 @@ import java.util.stream.IntStream;
 
 import static com.company.common.PostgresHelper.*;
 
-//TODO pg dump pro Tabelle
-//TODO Insert Investment Items
-//TODO Insert Collections
-//TODO Items which are sold on 100% Steam Price
 @Repository("postgres")
 public class PostgresDAO implements ItemDAO {
 
@@ -304,6 +304,44 @@ public class PostgresDAO implements ItemDAO {
             }
         }
         return result.toString();
+    }
+
+    @Override
+    public void insertCollections() throws Exception {
+        executeDDL("truncate table steam.collections");
+
+        List<String> list = new ArrayList<>();
+
+        String url = "https://csgo.exchange/collection/";
+        WebClient webClient = new WebClient(BrowserVersion.FIREFOX);
+        webClient.getOptions().setJavaScriptEnabled(true); // enable javascript
+        webClient.getOptions().setCssEnabled(true);
+        webClient.getOptions().setThrowExceptionOnScriptError(false); //even if there is error in js continue
+        webClient.waitForBackgroundJavaScriptStartingBefore(1000000);
+        webClient.waitForBackgroundJavaScript(10000000); // important! wait when javascript finishes rendering
+        HtmlPage page = webClient.getPage(url);
+        Thread.sleep(1000);
+
+        List<DomElement> Items = page.getByXPath("//*[contains(@class, 'vItem')]");
+
+        for (DomElement item : Items) {
+            String name = item.getAttribute("data-custom");
+            list.add(name);
+        }
+
+        String sql = "insert into steam.collections (name) values (?);";
+        try (Connection connection = getConnection();PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            for (String s : list) {
+                pstmt.setString(1, s);
+                pstmt.addBatch();
+            }
+
+            pstmt.executeBatch();
+            connection.commit();
+        }
+
+        //TODO determine is_cool
     }
 
     @Override
@@ -646,19 +684,19 @@ public class PostgresDAO implements ItemDAO {
         try (Connection conn = getConnection(); Statement stmt2 = conn.createStatement(); ResultSet rs2 = stmt2.executeQuery("with smurf as \n" +
                 "(select round(cast(x.smurf_inv_wert as numeric),2) as smurf_inv_value from (select t.smurf_inv_wert \n" +
                 "\tfrom ( select sum(si.amount*si.price_per_unit) as smurf_inv_wert\n" +
-                "\tfrom steam.inventory_with_prices si where inv_type = 'smurf' ) t) x),\n" +
+                "\tfrom steam.inventory_current_prices si where inv_type = 'smurf' ) t) x),\n" +
                 "skinbaron_inv as \n" +
                 "(select ROUND(cast(w.skinbaron_wert as numeric),2) as skinbaron_inv_value from ( select t.skinbaron_wert \n" +
                 "\tfrom ( select sum(si.amount*si.price_per_unit) as skinbaron_wert\n" +
-                "\tfrom steam.inventory_with_prices si where inv_type = 'skinbaron' ) t) w),\n" +
+                "\tfrom steam.inventory_current_prices si where inv_type = 'skinbaron' ) t) w),\n" +
                 "steam_inv as \n" +
                 "(select ROUND(cast(w.skinbaron_wert as numeric),2) as steam_inv_value from ( select t.skinbaron_wert \n" +
                 "\tfrom ( select sum(si.amount*si.price_per_unit) as skinbaron_wert\n" +
-                "\tfrom steam.inventory_with_prices si where inv_type = 'steam' or inv_type like 'storage%' ) t) w),\n" +
+                "\tfrom steam.inventory_current_prices si where inv_type = 'steam' or inv_type like 'storage%' ) t) w),\n" +
                 "skinbaron_open_sales as \n" +
                 "(select ROUND(cast(w.skinbaron_wert as numeric),2) as skinbaron_open_sales_value from ( select t.skinbaron_wert \n" +
                 "\tfrom ( select sum(si.amount*si.price_per_unit) as skinbaron_wert\n" +
-                "\tfrom steam.inventory_with_prices si where inv_type = '" + Constants.INV_TYPE_SKINBARON_SALES + "' ) t) w)\n" +
+                "\tfrom steam.inventory_current_prices si where inv_type = '" + Constants.INV_TYPE_SKINBARON_SALES + "' ) t) w)\n" +
                 "select smurf.*,skinbaron_open_sales.*,steam_inv.*,skinbaron_inv.* from smurf\n" +
                 "inner join skinbaron_inv on 1=1\n" +
                 "inner join steam_inv on 1=1\n" +

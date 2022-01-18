@@ -128,7 +128,7 @@ public class PostgresDAOTest extends TestCase {
         try (Connection connection = getConnection(); Statement st = connection.createStatement();
              ResultSet rs = st.executeQuery("select sum(amount) from steam.inventory where still_there = true");
              Statement st2 = connection.createStatement();
-             ResultSet rs2 = st2.executeQuery("select sum(amount) from steam.inventory_with_prices")) {
+             ResultSet rs2 = st2.executeQuery("select sum(amount) from steam.inventory_current_prices")) {
             rs.next();
             rs2.next();
             int count = rs.getInt("sum");
@@ -203,5 +203,12 @@ public class PostgresDAOTest extends TestCase {
         JSONArray array = new JSONArray(dao.getBuffIds());
 
         assertTrue(array.length()>15000);
+    }
+
+    public void testInsertCollections() throws Exception {
+        setUpClass();
+        PostgresDAO dao = new PostgresDAO();
+        dao.insertCollections();
+
     }
 }

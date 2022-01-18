@@ -56,4 +56,6 @@ public interface ItemDAO {
     void insertBuffPrices(JSONArray payload) throws Exception;
 
     String getBuffIds() throws SQLException;
+
+    void insertCollections() throws Exception;
 }
