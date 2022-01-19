@@ -295,11 +295,12 @@ public class PostgresDAO implements ItemDAO {
     public String getBuffIds() throws SQLException {
         JSONArray result = new JSONArray();
 
-        try(Connection connection = getConnection();Statement st = connection.createStatement();ResultSet rs = st.executeQuery("select id,has_exterior from steam.buff_current_prices;")) {
+        try(Connection connection = getConnection();Statement st = connection.createStatement();ResultSet rs = st.executeQuery("select id,has_exterior,name from steam.buff_current_prices;")) {
             while (rs.next()) {
                 JSONObject o = new JSONObject();
                 o.put("id",rs.getInt("id"));
                 o.put("has_exterior",rs.getBoolean("has_exterior"));
+                o.put("name",rs.getString("name"));
                 result.put(o);
             }
         }
@@ -340,8 +341,6 @@ public class PostgresDAO implements ItemDAO {
             pstmt.executeBatch();
             connection.commit();
         }
-
-        //TODO determine is_cool
     }
 
     @Override

@@ -13,12 +13,11 @@ import static com.company.entrypoints.SkinbaronCrawler.requestInsertSkinbaronIte
 
 public class BotTest extends TestCase {
 
-    //TODO
     public void testDeleteNonExistingSkinbaronItems() throws Exception {
         UUID uuid = UUID.randomUUID();
         requestInsertSkinbaronItem(uuid.toString(),"Name",2d,"Keine",0.2333d,"","");
         assertFalse(checkIfResultsetIsEmpty("select * from steam.skinbaron_items where id='"+uuid+"'"));
-        deleteNonExistingSkinbaronItems("Name",2d);
+        deleteNonExistingSkinbaronItems("Name",2.00);
         assertTrue(checkIfResultsetIsEmpty("select * from steam.skinbaron_items where id='"+uuid+"'"));
     }
 

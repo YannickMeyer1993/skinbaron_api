@@ -1,6 +1,7 @@
 package com.company.entrypoints;
 
 import junit.framework.TestCase;
+import org.json.JSONObject;
 
 import java.util.UUID;
 
@@ -47,19 +48,18 @@ public class SkinbaronCrawlerTest extends TestCase {
 
     }
 
-    //TODO
     public void testRequestInsertSoldSkinbaronItem() throws Exception {
-        //requestInsertSoldSkinbaronItem("testRequestInsertSoldSkinbaronItem","Operation Riptide Case",0,"4578724859","1641446620","519977179","1640260702","24258366051","PZZWWTZFS9FT",0);
-        assertFalse(checkIfResultsetIsEmpty("select * from steam.skinbaron_sold_items where id='testRequestInsertSoldSkinbaronItem'"));
-        executeDDL("delete from steam.skinbaron_sold_items where id='testRequestInsertSoldSkinbaronItem'");
+        String json = "{\"classid\":\"533226233\",\"last_updated\":1642596533,\"instanceid\":\"143865972\",\"list_time\":1642493665,\"price\":1.6,\"assetid\":\"24420146865\",\"appid\":730,\"name\":\"Name Tag\",\"txid\":\"PR7PTTEZ8224\",\"commission\":0.24,\"id\":\"TEST\",\"state\":4}\n";
+        requestInsertSoldSkinbaronItem(new JSONObject(json));
+        assertFalse(checkIfResultsetIsEmpty("select * from steam.skinbaron_sold_items where id='TEST'"));
+        executeDDL("delete from steam.skinbaron_sold_items where id='TEST'");
     }
 
-    //TODO
     public void testGetLastSoldSkinbaronId() throws Exception {
-        //requestInsertSoldSkinbaronItem("testGetLastSoldSkinbaronId","Operation Case",0,"4578724859","1641446620","519977179","1640260702","24258366051","PZZWWTZFS9FT",0);
-
-        assertEquals(getLastSoldSkinbaronId(), "testGetLastSoldSkinbaronId");
-        executeDDL("delete from steam.skinbaron_items where id='testGetLastSoldSkinbaronId'");
+        String json = "{\"classid\":\"533226233\",\"last_updated\":1642596533,\"instanceid\":\"143865972\",\"list_time\":1642493665,\"price\":1.6,\"assetid\":\"24420146865\",\"appid\":730,\"name\":\"Name Tag\",\"txid\":\"PR7PTTEZ8224\",\"commission\":0.24,\"id\":\"TEST\",\"state\":4}\n";
+        requestInsertSoldSkinbaronItem(new JSONObject(json));
+        assertEquals(getLastSoldSkinbaronId(), "TEST");
+        executeDDL("delete from steam.skinbaron_items where id='TEST'");
     }
 
     public void testGetSoldItems() throws Exception {

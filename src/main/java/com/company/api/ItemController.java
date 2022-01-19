@@ -55,7 +55,7 @@ public class ItemController {
     public void deleteNonExistingSkinbaronItems(@RequestBody com.fasterxml.jackson.databind.JsonNode payload) throws Exception {
 
         String ItemName = payload.get("ItemName").textValue();
-        double price = Double.parseDouble(payload.get("price").textValue());
+        double price = Double.parseDouble(payload.get("price").asText());
 
         insertItemsService.deleteNonExistingSkinbaronItems(ItemName,price);
     }

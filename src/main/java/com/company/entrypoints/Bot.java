@@ -86,6 +86,7 @@ public class Bot {
         }
     }
 
+    //TODO buy item at most 10x
     public static void buyItem(String id,double price,double steamPrice) throws Exception {
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 
