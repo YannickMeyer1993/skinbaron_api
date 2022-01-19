@@ -83,6 +83,8 @@ public class SkinbaronCrawler {
         restTemplate.postForObject(url, request, String.class);
     }
 
+
+    //TODO batch + to back
     /**
      * "tradelocked": true is useless
      * price >= 0.05
