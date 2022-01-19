@@ -27,8 +27,8 @@ public class SkinbaronItem {
 
     public SkinbaronItem(@JsonProperty("id") String id,
                          @JsonProperty("price") double price,
-                         @JsonProperty("name") String name,
-                         @JsonProperty("sticker") String stickers,
+                         @JsonProperty("market_name") String name,
+                         @JsonProperty("stickers") String stickers,
                          @JsonProperty("wear") double wear,
                          @JsonProperty("inspect") String inspect,
                          @JsonProperty("sbinspect") String sbinspect) {

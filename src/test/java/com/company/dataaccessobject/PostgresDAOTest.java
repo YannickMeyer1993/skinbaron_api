@@ -190,12 +190,12 @@ public class PostgresDAOTest extends TestCase {
     }
 
     public void testInsertBuffPrices() throws Exception {
-        String json = "[{\"id\":1,\"name\":\"TEST\",\"has_exterior\":false,\"price_euro\":4}]";
+        String json = "[{\"id\":1222332233,\"price_euro\":4}]";
         PostgresDAO dao = new PostgresDAO();
         JSONArray insert = new JSONArray(json);
         dao.insertBuffPrices(insert);
-        assertFalse(checkIfResultsetIsEmpty("select * from steam.buff_prices where name = 'TEST'"));
-        executeDDL("delete from steam.buff_prices where name = 'TEST'");
+        assertFalse(checkIfResultsetIsEmpty("select * from steam.buff_prices where id = 1222332233"));
+        executeDDL("delete from steam.buff_prices where id = 1222332233");
     }
 
     public void testGetBuffIds() throws Exception {

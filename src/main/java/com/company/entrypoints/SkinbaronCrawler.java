@@ -124,24 +124,7 @@ public class SkinbaronCrawler {
 
                 for (Object o : resultArray) {
                     if (o instanceof JSONObject) {
-                        id = ((JSONObject) o).getString("id");
-                        double price_euro = ((JSONObject) o).getDouble("price");
-                        String name = ((JSONObject) o).getString("market_name");
-                        String stickers = ((JSONObject) o).getString("stickers");
-                        String inspect ="";
-                        if (((JSONObject) o).has("inspect")) {
-                            inspect = ((JSONObject) o).getString("inspect");
-                        }
-                        String sbinspect="";
-                        if (((JSONObject) o).has("sbinspect")) {
-                            sbinspect = ((JSONObject) o).getString("sbinspect");
-                        }
-                        try {
-                            wear =  ((JSONObject) o).getDouble("wear");
-                        } catch (JSONException je) {
-                            wear = null;
-                        }
-                        alreadyExisting = requestInsertSkinbaronItem(id,name,price_euro,stickers,wear,inspect,sbinspect);
+                        alreadyExisting = requestInsertSkinbaronItem((JSONObject) o);
 
                         if (!alreadyExisting) {
                             amountInserts++;
@@ -166,25 +149,16 @@ public class SkinbaronCrawler {
         }
     }
 
-    static boolean requestInsertSkinbaronItem(@NotNull String id, String name, double price_euro, String stickers, Double wear,String inspect,String sbinspect) {
+    static boolean requestInsertSkinbaronItem(JSONObject o) {
         String url = "http://localhost:8080/api/v1/AddSkinbaronItem";
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        JSONObject JsonObject = new JSONObject();
 
-        JsonObject.put("id",id);
-        JsonObject.put("price",price_euro);
-        JsonObject.put("name",name);
-        JsonObject.put("sticker",stickers);
-        JsonObject.put("wear",wear);
-        JsonObject.put("inspect",inspect);
-        JsonObject.put("sbinspect",sbinspect);
+        String id = o.getString("id");
 
-
-
-        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(JsonObject.toString(), headers);
+        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(o.toString(), headers);
 
         ResponseEntity<String> responseEntityStr = restTemplate.postForEntity(url, request, String.class);
 

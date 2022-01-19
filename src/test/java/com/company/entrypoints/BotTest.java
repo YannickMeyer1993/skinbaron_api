@@ -15,9 +15,10 @@ public class BotTest extends TestCase {
 
     public void testDeleteNonExistingSkinbaronItems() throws Exception {
         UUID uuid = UUID.randomUUID();
-        requestInsertSkinbaronItem(uuid.toString(),"Name",2d,"Keine",0.2333d,"","");
+        String json = "{\"img\":\"bild\",\"price\":1.54,\"appid\":730,\"sbinspect\":\"https://skinbaron.de/offers/show?offerUuid=4b8e92a2-fedd-48c6-b1cc-a2afc6eee35f\",\"stickers\":\"\",\"id\":\""+uuid+"\",\"market_name\":\"Name\"}";
+        requestInsertSkinbaronItem(new JSONObject(json));
         assertFalse(checkIfResultsetIsEmpty("select * from steam.skinbaron_items where id='"+uuid+"'"));
-        deleteNonExistingSkinbaronItems("Name",2.00);
+        deleteNonExistingSkinbaronItems("Name",1.54);
         assertTrue(checkIfResultsetIsEmpty("select * from steam.skinbaron_items where id='"+uuid+"'"));
     }
 
@@ -29,7 +30,8 @@ public class BotTest extends TestCase {
     public void testBuyItem() throws Exception {
         setUpClass();
         String uuid = UUID.randomUUID().toString();
-        requestInsertSkinbaronItem(uuid,"NAME",3.11,"",0.123456,"","");
+        String json = "{\"img\":\"bild\",\"price\":3.11,\"appid\":730,\"sbinspect\":\"https://skinbaron.de/offers/show?offerUuid=4b8e92a2-fedd-48c6-b1cc-a2afc6eee35f\",\"stickers\":\"\",\"id\":\""+uuid+"\",\"market_name\":\"Name\"}";
+        requestInsertSkinbaronItem(new JSONObject(json));
         buyItem(uuid,3.11,5d);
         assertTrue(checkIfResultsetIsEmpty("select * from steam.skinbaron_items where id='"+uuid+"'"));
     }

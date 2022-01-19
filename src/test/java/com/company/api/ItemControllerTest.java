@@ -68,8 +68,8 @@ public class ItemControllerTest {
 
         JsonObject.put("id",uuid);
         JsonObject.put("price",3d);
-        JsonObject.put("name","Drachenlore");
-        JsonObject.put("sticker","Keine");
+        JsonObject.put("market_name","Drachenlore");
+        JsonObject.put("stickers","Keine");
         JsonObject.put("wear",0.1221133d);
 
         HttpEntity<String> request = new HttpEntity<>(JsonObject.toString(), headers);

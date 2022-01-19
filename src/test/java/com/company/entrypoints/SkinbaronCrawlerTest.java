@@ -15,13 +15,15 @@ public class SkinbaronCrawlerTest extends TestCase {
 
     public void testrequestInsertSkinbaronItem() throws Exception {
         UUID uuid = UUID.randomUUID();
-        requestInsertSkinbaronItem(uuid.toString(),"Name",2d,"Keine",0.2333d,"","");
+        String json = "{\"img\":\"https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXO9B9WLbU5oA9OA1_TRvahz93XbA0ma11T4On1L1Jjh6qQJWxBv4nvkdaPkvGkMbiDkz9UupFz3LvDp4qn2wf6ux070bHpuI4\",\"price\":1.54,\"appid\":730,\"sbinspect\":\"https://skinbaron.de/offers/show?offerUuid=4b8e92a2-fedd-48c6-b1cc-a2afc6eee35f\",\"stickers\":\"\",\"id\":\""+uuid+"\",\"market_name\":\"Music Kit | Scarlxrd, CHAIN$AW.LXADXUT.\"}";
+        requestInsertSkinbaronItem(new JSONObject(json));
         assertFalse(checkIfResultsetIsEmpty("select * from steam.skinbaron_items where id='"+uuid+"'"));
         executeDDL("delete from steam.skinbaron_items where id='"+uuid+"'");
 
     }
 
     public void testSearch() throws Exception {
+        setUpClass();
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
         String after_saleid = "";
         //get an existing id
