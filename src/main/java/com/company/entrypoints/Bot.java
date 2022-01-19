@@ -50,7 +50,7 @@ public class Bot {
                     boolean steam_price_is_new = ((JSONObject) o).getBoolean("steam_price_is_new");
                     String skinbaron_ids = ((JSONObject) o).getString("skinbaron_ids");
                     String name = ((JSONObject) o).getString("name");
-                    double price = ((JSONObject) o).getDouble("steam_price");
+                    double price = ((JSONObject) o).getDouble("skinbaron_price");
                     double steam_price = ((JSONObject) o).getDouble("steam_price");
 
                     if (price > max_price) {
@@ -60,7 +60,7 @@ public class Bot {
                     if (!steam_price_is_new) {
                         double current_price = getSteamPriceForGivenName(name);
                         if (current_price < steam_price) {
-                            logger.info("steam price is now lower for item " + name + "("+current_price+").");
+                            logger.info("steam price is now lower for item " + name + " ("+current_price+").");
                             continue;
                         }
                     }

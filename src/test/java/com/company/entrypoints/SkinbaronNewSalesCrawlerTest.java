@@ -27,7 +27,7 @@ public class SkinbaronNewSalesCrawlerTest extends TestCase {
 
     public void testGetNewestSales30DaysKarambit() throws Exception {
         setUpClass();
-        String ItemName = "Karambit";
+        String ItemName = "★ StatTrak™ Talon Knife | Stained (Field-Tested)";
         getNewestSales30Days(ItemName);
     }
 
