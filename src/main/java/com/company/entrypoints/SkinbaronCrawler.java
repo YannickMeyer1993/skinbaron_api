@@ -96,7 +96,7 @@ public class SkinbaronCrawler {
         int amountInserts = 0;
 
         logger.info("Skinbaron API Search has been called.");
-        Thread.sleep(1000);
+        //Thread.sleep(1000);
         String jsonInputString = "{\"apikey\": \"" + secret + "\",\"appid\": 730,\"min\":0.05,\"items_per_page\": "+items_per_page + (!"".equals(after_saleid) ? ",\"after_saleid\":\"" + after_saleid + "\"" : "") + "}";
 
         HttpPost httpPost = new HttpPost("https://api.skinbaron.de/Search");
@@ -124,6 +124,9 @@ public class SkinbaronCrawler {
 
                 for (Object o : resultArray) {
                     if (o instanceof JSONObject) {
+                        //set id
+                        id = ((JSONObject) o).getString("id");
+
                         alreadyExisting = requestInsertSkinbaronItem((JSONObject) o);
 
                         if (!alreadyExisting) {
