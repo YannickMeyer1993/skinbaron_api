@@ -254,7 +254,7 @@ public class SteamCrawler {
 
     public static void getItemPricesInventory() throws Exception {
         try(Connection conn = getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select distinct name from steam.inventory_current_prices s\n" +
-                " where \"date\" != current_date  order by name;")) {
+                " where \"date\" != current_date or price_per_unit=0 order by name;")) {
             String name;
             while (rs.next()) {
                 name = rs.getString("name");
