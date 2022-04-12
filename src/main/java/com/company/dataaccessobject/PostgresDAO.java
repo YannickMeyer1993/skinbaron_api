@@ -295,7 +295,10 @@ public class PostgresDAO implements ItemDAO {
     public String getBuffIds() throws SQLException {
         JSONArray result = new JSONArray();
 
-        try(Connection connection = getConnection();Statement st = connection.createStatement();ResultSet rs = st.executeQuery("select id,has_exterior,name from steam.buff_current_prices;")) {
+        try(Connection connection = getConnection();Statement st = connection.createStatement();ResultSet rs = st.executeQuery("select b.* from steam.buff_current_prices b\n" +
+                "inner join steam.item_informations ii using(name)\n" +
+                "where \"name\" not like '★%' and DATE(insert_timestamp) != current_date \n" +
+                "order by insert_timestamp desc;")) {
             while (rs.next()) {
                 JSONObject o = new JSONObject();
                 o.put("id",rs.getInt("id"));

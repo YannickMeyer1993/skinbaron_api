@@ -24,6 +24,7 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static com.company.common.CurrencyHelper.getConversionRateToEuro;
 import static com.company.common.LoggingHelper.setUpClass;
@@ -47,6 +48,33 @@ public class BuffCrawler {
         setUpClass();
         JSONArray array = getBuffIds();
 
+        //System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "15");;
+        IntStream.range(0, array.length()).parallel().forEach(i -> {
+            JSONObject o = array.getJSONObject(i);
+            if (o.getBoolean("has_exterior")) {
+                try {
+                    getBuffItemWithExterior(o.getInt("id"));
+                } catch (Exception e) {
+                    logger.info("Error at Id: "+ o.getInt("id"));
+                    e.printStackTrace();
+                }
+            } else if (!o.getBoolean("has_exterior")) {
+                try {
+                    getBuffItemNoExterior(o.getInt("id"));
+                } catch (Exception e) {
+                    logger.info("Error at Id: "+ o.getInt("id"));
+                    e.printStackTrace();
+                }
+            } else {
+                try {
+                    throw new Exception("No information about exterior given.");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        /*
         for (int i = 0; i < array.length(); i++) {
             JSONObject o = array.getJSONObject(i);
             if (o.getBoolean("has_exterior")) {
@@ -57,6 +85,7 @@ public class BuffCrawler {
                 throw new Exception("No information about exterior given.");
             }
         }
+        */
     }
 
     public static void getBuffItemNoExterior(int id) throws InterruptedException, IOException, DocumentException {
