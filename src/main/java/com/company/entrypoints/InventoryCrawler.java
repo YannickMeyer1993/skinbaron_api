@@ -124,6 +124,9 @@ public class InventoryCrawler {
                     case "Vanguard Case":
                         item_name = "Operation Vanguard Weapon Case";
                         break;
+                    case "Riptide Case":
+                        item_name = "Operation Riptide Case";
+                        break;
                 }
                 insertItemIntoInventory(item_name, amount, INV_TYPE_storage);
             }
