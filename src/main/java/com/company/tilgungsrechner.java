@@ -58,8 +58,8 @@ public class tilgungsrechner {
         PostgresHelper.executeDDL("truncate table monitoring.metrics;");
 
         //System.out.println("Höhe nach 9 Monaten");
-        double nochZuZahlen = compute(25578.66d, 3.69d,263.33d,6, "31.12.2021");//50k
-        compute(nochZuZahlen, 2.12d,158.80d,180, "30.06.2022");//50k
+        //double nochZuZahlen = compute(25578.66d, 3.69d,263.33d,6, "31.12.2021");//50k
+        //compute(nochZuZahlen, 2.12d,158.80d,180, "30.06.2022");//50k
         //compute(10000.00d, 5.00d, 41.67d,9);//10k
         //compute(17042.61d, 5.46d,115.82d,9);//21.7k
         //compute(58604.63d, 2.00d,204.17d,9);//70k
@@ -85,22 +85,10 @@ public class tilgungsrechner {
 
         //System.out.println();
         //Keine Info über Volltilgung
-        //System.out.println("21700 Euro (Kostenlos tilgen)");
-        //compute(16691.79d, 2.06d,115.82d,1200);//21.7k
+        System.out.println("21700 Euro (Kostenlos tilgen)");
+        compute(16691.79d, 2.46d,162.57d,180,"30.06.2022");//21.7k
+        compute(10000d, 2.89d,68.42d,120,"30.06.2022");//21.7k
 
-        //System.out.println();
-        //15 Jahre Laufzeit
-        //Zinsschaden ist nur bezogen auf 10,5 Jahre
-
-        //Vorfälligkeiten für 24000 bei 2.12% --870 Euro
-        //Vorfälligkeiten für 10000 bei 2.30% --181 Euro
-        //System.out.print("50000 Euro ");
-        //compute(23895.99d, 2.12d,155.33d,126);// Neue Rate, sodass 15 Jahre Volltilgung
-        //System.out.print("10000 Euro ");
-        //compute(10000.00d, 2.30d, 66d,126);//Neue Rate, sodass 15 Jahre Volltilgung
-
-
-        compute(150000.00d, 2.30d, 538d,3000,"31.10.2022");
     }
 
 }
