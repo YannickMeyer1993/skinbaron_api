@@ -348,28 +348,18 @@ public class PostgresDAO implements ItemDAO {
 
         String sql = "Insert into steam.skinbaron_pricelist (name,price,dopplerphase) values (?,?,?)";
 
-        JSONArray array = new JSONArray(payload.get("map"));
+        JSONArray array = new JSONArray(payload.get("map").toString());
         //logger.info(String.valueOf(array.length()));
 
-        //TODO kaputt
         try (Connection connection = getConnection(); PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             for (Object o : array) {
                 if (o instanceof JSONObject) {
-                    for (Iterator<String> it = ((JSONObject) o).keys(); it.hasNext(); ) {
-                        String s = it.next();
-                        logger.info(s);
-                    }
-                    if (1==1) {
-                        break;
-                    }
-
                     if (!((JSONObject) o).has("marketHashName")) {
                         //logger.info(((JSONObject) o).toString());
                         continue;
                     }
                     pstmt.setString(1, ((JSONObject) o).getString("marketHashName"));
                     pstmt.setDouble(2, ((JSONObject) o).getDouble("lowestPrice"));
-                    pstmt.setString(3, ((JSONObject) o).getString("dopplerClassName"));
                     if (((JSONObject) o).has("dopplerClassName")) {
                         pstmt.setString(3, ((JSONObject) o).getString("dopplerClassName"));
                     } else {
