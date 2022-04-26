@@ -16,11 +16,7 @@ import org.dom4j.io.SAXReader;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.StringReader;
 import java.sql.*;
@@ -342,6 +338,52 @@ public class PostgresDAO implements ItemDAO {
             }
 
             pstmt.executeBatch();
+            connection.commit();
+        }
+    }
+
+    @Override
+    public void insertPriceList(JsonNode payload) throws Exception {
+        executeDDL("truncate table steam.skinbaron_pricelist");
+
+        String sql = "Insert into steam.skinbaron_pricelist (name,price,dopplerphase) values (?,?,?)";
+
+        JSONArray array = new JSONArray(payload.get("map"));
+        //logger.info(String.valueOf(array.length()));
+
+        //TODO kaputt
+        try (Connection connection = getConnection(); PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            for (Object o : array) {
+                if (o instanceof JSONObject) {
+                    for (Iterator<String> it = ((JSONObject) o).keys(); it.hasNext(); ) {
+                        String s = it.next();
+                        logger.info(s);
+                    }
+                    if (1==1) {
+                        break;
+                    }
+
+                    if (!((JSONObject) o).has("marketHashName")) {
+                        //logger.info(((JSONObject) o).toString());
+                        continue;
+                    }
+                    pstmt.setString(1, ((JSONObject) o).getString("marketHashName"));
+                    pstmt.setDouble(2, ((JSONObject) o).getDouble("lowestPrice"));
+                    pstmt.setString(3, ((JSONObject) o).getString("dopplerClassName"));
+                    if (((JSONObject) o).has("dopplerClassName")) {
+                        pstmt.setString(3, ((JSONObject) o).getString("dopplerClassName"));
+                    } else {
+                        pstmt.setString(3, null);
+                    }
+                    pstmt.addBatch();
+                }
+            }
+
+            int[] updateCounts = pstmt.executeBatch();
+            int amountInserts = IntStream.of(updateCounts).sum();
+            if (amountInserts != 0) {
+                logger.info(amountInserts + " items were inserted!");
+            }
             connection.commit();
         }
     }

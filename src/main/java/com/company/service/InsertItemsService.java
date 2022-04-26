@@ -67,6 +67,10 @@ public class InsertItemsService {
         itemdao.insertNewestSales(payload);
     }
 
+    public void insertPriceList(JsonNode payload) throws Exception {
+        itemdao.insertPriceList(payload);
+    }
+
     public void insertSkinbaronSales(JsonNode payload) throws Exception {
         itemdao.insertSkinbaronSales(payload);
     }

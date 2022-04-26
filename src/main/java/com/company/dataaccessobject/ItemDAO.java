@@ -58,4 +58,6 @@ public interface ItemDAO {
     String getBuffIds() throws SQLException;
 
     void insertCollections() throws Exception;
+
+    void insertPriceList(JsonNode payload) throws Exception;
 }

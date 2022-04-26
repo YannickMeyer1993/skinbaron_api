@@ -38,6 +38,7 @@ public class SkinbaronCrawler {
         setUpClass(); //disable Logging
         requestCleanUp();
         checkLiveSkinbaron();
+        getPriceList();
         getSoldItems();
 
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
@@ -67,6 +68,53 @@ public class SkinbaronCrawler {
             logger.info("New Search started.");
             logger.info("------------------------------------------------------------------");
         }
+    }
+
+    static void getPriceList() throws Exception {
+        String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
+
+        logger.info("Skinbaron API /GetPriceList has been called.");
+        String jsonInputString = "{\"appId\": 730,\"apikey\": \"" + secret + "\"}";
+
+        HttpPost httpPost = new HttpPost("https://api.skinbaron.de/GetPriceList");
+        httpPost.setHeader("Content.Type", "application/json");
+        httpPost.setHeader("x-requested-with", "XMLHttpRequest");
+        httpPost.setHeader("Accept", "application/json");
+
+        HttpClient client = HttpClients.custom()
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setCookieSpec(CookieSpecs.STANDARD).build())
+                .build();
+
+        HttpEntity entity = new ByteArrayEntity(jsonInputString.getBytes(StandardCharsets.UTF_8));
+        httpPost.setEntity(entity);
+        HttpResponse response = client.execute(httpPost);
+        String result = EntityUtils.toString(response.getEntity());
+
+        JSONObject resultJson = (JSONObject) new JSONTokener(result).nextValue();
+
+        if (resultJson.has("message")) {
+            System.out.println("Result: " + resultJson.get("message"));
+            throw new Exception((String) resultJson.get("message"));
+        }
+
+        System.out.println(result);
+
+        requestInsertPriceList(resultJson);
+
+    }
+
+    static void requestInsertPriceList(JSONObject o) {
+        String url = "http://localhost:8080/api/v1/InsertPriceList";
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(o.toString(), headers);
+
+        ResponseEntity<String> responseEntityStr = restTemplate.postForEntity(url, request, String.class);
+
     }
 
     private static void requestCleanUp() {

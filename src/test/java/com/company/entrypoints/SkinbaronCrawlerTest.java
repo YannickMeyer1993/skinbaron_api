@@ -68,4 +68,9 @@ public class SkinbaronCrawlerTest extends TestCase {
         setUpClass();
         getSoldItems();
     }
+
+    public void testGetPriceList() throws Exception {
+        setUpClass();
+        getPriceList();
+    }
 }

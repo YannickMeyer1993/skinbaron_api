@@ -120,4 +120,10 @@ public class ItemController {
     public void insertSkinbaronSales(@RequestBody JsonNode payload) throws Exception {
         insertItemsService.insertSkinbaronSales(payload);
     }
+
+    @RequestMapping("InsertPriceList")
+    @PostMapping
+    public void insertPriceList(@RequestBody JsonNode payload) throws Exception {
+        insertItemsService.insertPriceList(payload);
+    }
 }
