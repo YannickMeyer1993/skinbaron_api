@@ -86,8 +86,8 @@ public class tilgungsrechner {
         //System.out.println();
         //Keine Info über Volltilgung
         System.out.println("21700 Euro (Kostenlos tilgen)");
-        compute(16691.79d, 2.46d,162.57d,180,"30.06.2022");//21.7k
-        compute(10000d, 2.89d,68.42d,120,"30.06.2022");//21.7k
+        compute(16691.79d, 2.49d,62.57d,180,"30.06.2022");//21.7k
+        //compute(10000d, 2.89d,68.42d,120,"30.06.2022");//21.7k
 
     }
 

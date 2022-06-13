@@ -29,7 +29,6 @@ import java.util.stream.IntStream;
 import static com.company.common.CurrencyHelper.getConversionRateToEuro;
 import static com.company.common.LoggingHelper.setUpClass;
 
-//TODO multplie threads
 public class BuffCrawler {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(BuffCrawler.class);
