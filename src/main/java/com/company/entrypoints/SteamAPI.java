@@ -25,7 +25,7 @@ public class SteamAPI {
         int start = 8000;
         //TODO start with last successfull index of current date, else =0
 
-        while (true) { //todo end criteria
+        while (true) { //todo end criteria total count < index
             try {
                 requestSearch(start);
                 Thread.sleep(3000);
