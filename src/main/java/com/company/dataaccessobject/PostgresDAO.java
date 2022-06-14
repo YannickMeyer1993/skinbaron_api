@@ -142,7 +142,7 @@ public class PostgresDAO implements ItemDAO {
 
     @Override
     public JSONArray getItemsToBuy() throws Exception {
-        String query = "select steam_price_is_new,skinbaron_price,steam_price, name,skinbaron_ids from steam.skinbaron_buyable_items order by rati desc";
+        String query = "select steam_price_is_new,skinbaron_price,steam_price, name,skinbaron_ids,buff_price,buff_price_is_new,has_exterior,buff_id from steam.skinbaron_buyable_items order by rati desc";
 
         org.json.JSONArray array = new JSONArray();
         try (Connection conn = getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
@@ -153,6 +153,10 @@ public class PostgresDAO implements ItemDAO {
                 JsonObject.put("name", rs.getString("name"));
                 JsonObject.put("skinbaron_price", rs.getDouble("skinbaron_price"));
                 JsonObject.put("steam_price", rs.getDouble("steam_price"));
+                JsonObject.put("buff_price_is_new", rs.getBoolean("buff_price_is_new"));
+                JsonObject.put("buff_price", rs.getDouble("buff_price"));
+                JsonObject.put("has_exterior",rs.getBoolean("has_exterior"));
+                JsonObject.put("buff_id",rs.getInt("buff_id"));
 
                 array.put(JsonObject);
             }

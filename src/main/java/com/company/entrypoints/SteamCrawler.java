@@ -63,6 +63,8 @@ public class SteamCrawler {
 
         logger.info("Starting with iteration: " + iteration);
 
+        /*
+        //deprecated
         int wait_counter = 0;
         boolean iteration_successfull = false;
         while (iteration < MAX_ITERATION || !iteration_successfull) {
@@ -84,6 +86,7 @@ public class SteamCrawler {
             }
         }
         logger.info("Reached maximum iteration.");
+        */
     }
 
     static void setHighestSteamIteration(int iteration) {

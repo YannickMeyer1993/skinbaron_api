@@ -79,7 +79,7 @@ public class BuffCrawler {
         });
     }
 
-    public static void getBuffItemNoExterior(int id) throws InterruptedException, IOException, DocumentException {
+    public static double getBuffItemNoExterior(int id) throws InterruptedException, IOException, DocumentException {
 
         logger.info("Buff Id: "+id);
 
@@ -124,10 +124,6 @@ public class BuffCrawler {
 
         }
 
-        if (min_price_rmb == Double.MAX_VALUE) {
-            return;
-        }
-
         double price_euro = Double.parseDouble(df.format(conversionRateRMBinEUR * min_price_rmb).replace(",", "."));
 
         JSONObject o = new JSONObject();
@@ -139,9 +135,11 @@ public class BuffCrawler {
         JSONArray array = new JSONArray();
         array.put(o);
         insertBuffPrices(array);
+
+        return price_euro;
     }
 
-    public static void getBuffItemWithExterior(int id) throws Exception {
+    public static double getBuffItemWithExterior(int id) throws Exception {
 
         DecimalFormat df = new DecimalFormat("0.00");
         df.setRoundingMode(RoundingMode.HALF_UP);
@@ -170,6 +168,7 @@ public class BuffCrawler {
         List<com.gargoylesoftware.htmlunit.html.DomElement> Items = page.getByXPath("//*[contains(@class, 'relative-goods')]");
 
         JSONArray array = new JSONArray();
+        double returnValue = 0;
 
         for (DomNode element : Items.get(0).getChildNodes()) {
             String goodsId;
@@ -193,6 +192,8 @@ public class BuffCrawler {
                 logger.info("Buff Id "+goodsId+" has no price");
                 price_euro = 0;
             }
+            returnValue = price_euro;
+
             JSONObject o = new JSONObject();
             o.put("id", goodsId);
             o.put("price_euro", price_euro);
@@ -201,6 +202,7 @@ public class BuffCrawler {
             array.put(o);
         }
         insertBuffPrices(array);
+        return returnValue;
     }
 
     public static void getNewBuffIds() throws FileNotFoundException {

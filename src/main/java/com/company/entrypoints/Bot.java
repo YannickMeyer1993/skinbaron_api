@@ -14,6 +14,8 @@ import java.util.Scanner;
 
 import static com.company.common.LoggingHelper.setUpClass;
 import static com.company.common.PasswordHelper.readPasswordFromFile;
+import static com.company.entrypoints.BuffCrawler.getBuffItemNoExterior;
+import static com.company.entrypoints.BuffCrawler.getBuffItemWithExterior;
 import static com.company.entrypoints.SkinbaronCrawler.checkIfExists;
 import static com.company.entrypoints.SkinbaronCrawler.getBalance;
 import static com.company.entrypoints.SteamCrawler.getSteamPriceForGivenName;
@@ -53,6 +55,16 @@ public class Bot {
                     double price = ((JSONObject) o).getDouble("skinbaron_price");
                     double steam_price = ((JSONObject) o).getDouble("steam_price");
 
+                    boolean buff_price_is_new = ((JSONObject) o).getBoolean("buff_price_is_new");
+                    double buff_price = ((JSONObject) o).getDouble("buff_price");
+                    boolean has_exterior = ((JSONObject) o).getBoolean("has_exterior");
+                    int buff_id = ((JSONObject) o).getInt("buff_id");
+
+                    if (buff_id ==0) {
+                        logger.error("Buff id is null!");
+                        continue;
+                    }
+
                     if (price > max_price) {
                         continue;
                     }
@@ -63,6 +75,29 @@ public class Bot {
                             logger.info("steam price is now lower for item " + name + " ("+current_price+").");
                             continue;
                         }
+                    }
+
+                    double current_price = 0d;
+
+                    if (!buff_price_is_new) {
+                        logger.info("Checking buff price for id: "+buff_id);
+                        if (has_exterior) {
+                            current_price = getBuffItemWithExterior(buff_id);
+                        } else if (!has_exterior) {
+                            current_price = getBuffItemNoExterior(buff_id);
+                        } else {
+                            throw new Exception("Item has no information about exterior");
+                        }
+
+                        if (current_price < buff_price) {
+                            logger.info("buff price is now lower for item " + name + " ("+current_price+").");
+                            continue;
+                        }
+                    }
+
+                    if (price >= buff_price*0.95) {
+                        logger.info("Did not buy item, because buff price is cheaper than Skinbaron price!");
+                        continue;
                     }
 
                     for (String id : skinbaron_ids.split(",")) {

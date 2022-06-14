@@ -13,13 +13,15 @@ public class BuffCrawlerTest extends TestCase {
 
     public void testGetBuffItemNoExterior() throws DocumentException, IOException, InterruptedException {
         setUpClass();
-        getBuffItemNoExterior(40398);
+        double val = getBuffItemNoExterior(40398);
+        assertTrue(val > 0);
         //Sticker | Keyd Stars (Foil) | Katowice 2015
     }
 
     public void testGetBuffItemWithExterior() throws Exception {
         setUpClass();
-        getBuffItemWithExterior(38198);
+        double val = getBuffItemWithExterior(38198);
+        assertTrue(val > 0);
         //StatTrak™ AK-47 | Jaguar (Well-Worn)
     }
 
