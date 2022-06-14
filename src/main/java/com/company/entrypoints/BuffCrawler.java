@@ -124,6 +124,10 @@ public class BuffCrawler {
 
         }
 
+        if (min_price_rmb == Double.MAX_VALUE) {
+            min_price_rmb = 0;
+        }
+
         double price_euro = Double.parseDouble(df.format(conversionRateRMBinEUR * min_price_rmb).replace(",", "."));
 
         JSONObject o = new JSONObject();
