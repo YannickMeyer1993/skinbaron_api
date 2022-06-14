@@ -8,6 +8,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.apache.xpath.operations.Bool;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -22,12 +23,13 @@ public class SteamAPI {
 
     public static void main(String[] args) throws Exception {
         setUpClass(); //disable Logging
-        int start = 8000;
+        Boolean repeat = true;
+        int start = 80000;
         //TODO start with last successfull index of current date, else =0
 
-        while (true) { //todo end criteria total count < index
+        while (repeat) {
             try {
-                requestSearch(start);
+                repeat = requestSearch(start);
                 Thread.sleep(3000);
                 start+=100;
             } catch (Exception e) {
@@ -37,7 +39,7 @@ public class SteamAPI {
         }
     }
 
-    private static void requestSearch(int start) throws Exception {
+    private static Boolean requestSearch(int start) throws Exception {
         HttpPost httpPost = new HttpPost("https://steamcommunity.com/market/search/render/?search_descriptions=0&sort_column=name&sort_dir=desc&appid=730&norender=1&count=500&currency=3&start="+start);
         httpPost.setHeader("Content.Type", "application/json");
         httpPost.setHeader("x-requested-with", "XMLHttpRequest");
@@ -55,6 +57,11 @@ public class SteamAPI {
 
         if (!resultJson.has("success") || resultJson.getInt("total_count")==0) {
             throw new Exception(resultJson.toString());
+        }
+
+        if (start > resultJson.getInt("total_count")) {
+            logger.info("End reached.");
+            return false;
         }
 
         logger.info("Success: "+resultJson.getBoolean("success"));
@@ -91,6 +98,7 @@ public class SteamAPI {
             }
         }
 
-        logger.info(insertArray.toString());
+        //logger.info(insertArray.toString());
+        return true;
     }
 }
