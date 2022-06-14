@@ -161,6 +161,9 @@ public class SteamCrawler {
         return true;
     }
 
+    /*
+    //TODO add source as parameter
+     */
     public static void requestInsertNewSteamprice(String name,Double price, int quantity) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
