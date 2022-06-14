@@ -18,12 +18,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.stream.IntStream;
 
 import static com.company.common.CurrencyHelper.getConversionRateToEuro;
@@ -45,9 +48,11 @@ public class BuffCrawler {
 
     public static void main(String[] args) throws Exception {
         setUpClass();
+
+        //TODO Display count of unknown Buff Ids
+
         JSONArray array = getBuffIds();
 
-        //System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "15");;
         IntStream.range(0, array.length()).parallel().forEach(i -> {
             JSONObject o = array.getJSONObject(i);
             if (o.getBoolean("has_exterior")) {
@@ -72,19 +77,6 @@ public class BuffCrawler {
                 }
             }
         });
-
-        /*
-        for (int i = 0; i < array.length(); i++) {
-            JSONObject o = array.getJSONObject(i);
-            if (o.getBoolean("has_exterior")) {
-                getBuffItemWithExterior(o.getInt("id"));
-            } else if (!o.getBoolean("has_exterior")) {
-                getBuffItemNoExterior(o.getInt("id"));
-            } else {
-                throw new Exception("No information about exterior given.");
-            }
-        }
-        */
     }
 
     public static void getBuffItemNoExterior(int id) throws InterruptedException, IOException, DocumentException {
@@ -211,23 +203,26 @@ public class BuffCrawler {
         insertBuffPrices(array);
     }
 
-    public static void getNewBuffItems() {
-        //TODO Iterate over Number 0-1000000
+    public static void getNewBuffIds() throws FileNotFoundException {
 
-        ArrayList l = new ArrayList();
-        for (int i=0;i<1000000;i++) {
-            l.add(i);
+        //Read csv
+        JSONArray a = new JSONArray();
+        Scanner sc = new Scanner(new File("src/main/resources/PostgresDAO/buff/item_ids.csv"));
+        while (sc.hasNext()) {
+            String line = sc.next();
+            JSONObject o = new JSONObject();
+            int id = Integer.parseInt(line.split(",")[0]);
+            Boolean has_exterior = Boolean.valueOf(line.split(",")[1]);
+            String name = line.split(",")[2];
+            o.put("id",id);
+            o.put("has_exterior",has_exterior);
+            o.put("name",name);
+            a.put(o);
         }
 
-        JSONArray a = getBuffIds();
-        for (Object o: a) {
-            if (o instanceof JSONObject) {
-                l.remove(((JSONObject) o).getInt("id"));
-            }
-        }
+        //TODO insert into DB
 
-        logger.info(l.toString());
-        logger.info(String.valueOf(l.size()));
+        //TODO overwrite csv
     }
 
     /**

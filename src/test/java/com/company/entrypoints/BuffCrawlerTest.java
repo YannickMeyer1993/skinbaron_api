@@ -3,6 +3,7 @@ package com.company.entrypoints;
 import junit.framework.TestCase;
 import org.dom4j.DocumentException;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import static com.company.common.LoggingHelper.setUpClass;
@@ -22,7 +23,7 @@ public class BuffCrawlerTest extends TestCase {
         //StatTrak™ AK-47 | Jaguar (Well-Worn)
     }
 
-    public void testGetNewBuffItems() {
-        getNewBuffItems();
+    public void testGetNewBuffIds() throws FileNotFoundException {
+        getNewBuffIds();
     }
 }
