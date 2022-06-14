@@ -213,6 +213,21 @@ public class BuffCrawler {
 
     public static void getNewBuffItems() {
         //TODO Iterate over Number 0-1000000
+
+        ArrayList l = new ArrayList();
+        for (int i=0;i<1000000;i++) {
+            l.add(i);
+        }
+
+        JSONArray a = getBuffIds();
+        for (Object o: a) {
+            if (o instanceof JSONObject) {
+                l.remove(((JSONObject) o).getInt("id"));
+            }
+        }
+
+        logger.info(l.toString());
+        logger.info(String.valueOf(l.size()));
     }
 
     /**

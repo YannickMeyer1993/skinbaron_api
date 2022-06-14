@@ -6,8 +6,7 @@ import org.dom4j.DocumentException;
 import java.io.IOException;
 
 import static com.company.common.LoggingHelper.setUpClass;
-import static com.company.entrypoints.BuffCrawler.getBuffItemNoExterior;
-import static com.company.entrypoints.BuffCrawler.getBuffItemWithExterior;
+import static com.company.entrypoints.BuffCrawler.*;
 
 public class BuffCrawlerTest extends TestCase {
 
@@ -23,4 +22,7 @@ public class BuffCrawlerTest extends TestCase {
         //StatTrak™ AK-47 | Jaguar (Well-Worn)
     }
 
+    public void testGetNewBuffItems() {
+        getNewBuffItems();
+    }
 }

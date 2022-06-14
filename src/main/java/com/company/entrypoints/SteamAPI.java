@@ -24,7 +24,7 @@ public class SteamAPI {
     public static void main(String[] args) throws Exception {
         setUpClass(); //disable Logging
         Boolean repeat = true;
-        int start = 80000;
+        int start = 0;
         //TODO start with last successfull index of current date, else =0
 
         while (repeat) {
