@@ -21,7 +21,6 @@ import static com.company.entrypoints.SkinbaronCrawler.getBalance;
 import static com.company.entrypoints.SteamCrawler.getSteamPriceForGivenName;
 import static java.lang.Math.min;
 
-//TODO interaction/timing with other entrypoints
 public class Bot {
 
     private static final Logger logger = LoggerFactory.getLogger(Bot.class);
