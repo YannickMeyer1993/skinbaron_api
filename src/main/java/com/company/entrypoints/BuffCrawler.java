@@ -209,26 +209,33 @@ public class BuffCrawler {
         return returnValue;
     }
 
-    public static void getNewBuffIds() throws FileNotFoundException {
+    public static void getNewBuffIds() throws Exception {
 
-        //Read csv
-        JSONArray a = new JSONArray();
-        Scanner sc = new Scanner(new File("src/main/resources/PostgresDAO/buff/item_ids.csv"));
-        while (sc.hasNext()) {
-            String line = sc.next();
-            JSONObject o = new JSONObject();
-            int id = Integer.parseInt(line.split(",")[0]);
-            Boolean has_exterior = Boolean.valueOf(line.split(",")[1]);
-            String name = line.split(",")[2];
-            o.put("id",id);
-            o.put("has_exterior",has_exterior);
-            o.put("name",name);
-            a.put(o);
+        ArrayList l = new ArrayList();
+        for (int i=1;i<1000000;i++) {
+            l.add(i);
         }
 
-        //TODO insert into DB
+        for (Object o: getBuffIds()) {
+            if (o instanceof JSONObject) {
+                l.remove(((JSONObject) o).getInt("id"));
+            }
+        }
 
-        //TODO overwrite csv
+        logger.info("Size of ids that are tested: "+l.size());
+
+        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "5");
+
+        IntStream.range(0, l.size()).parallel().forEach(i -> {
+            int j = (int) l.get(i);
+            try {
+                getBuffItemNoExterior( j);
+                getBuffItemWithExterior( j);
+            } catch (Exception e) {
+                logger.error("Id " + j + " is no item!");
+            }
+
+        });
     }
 
     /**

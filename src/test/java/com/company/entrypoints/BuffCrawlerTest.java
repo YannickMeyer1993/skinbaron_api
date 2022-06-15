@@ -25,7 +25,7 @@ public class BuffCrawlerTest extends TestCase {
         //StatTrak™ AK-47 | Jaguar (Well-Worn)
     }
 
-    public void testGetNewBuffIds() throws FileNotFoundException {
+    public void testGetNewBuffIds() throws Exception {
         getNewBuffIds();
     }
 }
