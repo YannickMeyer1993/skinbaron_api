@@ -1,28 +1,28 @@
 create or replace
 view steam.buff_current_prices
 as
+with max_ts as (
 select
-	distinct
-	id,
-	has_exterior,
-	insert_timestamp,
-	name,
-	price_euro
+	distinct s.name,
+	max(s.insert_timestamp) as insert_timestamp
 from
-	(
-	select
-		distinct buff.id,
-		has_exterior,
-		insert_timestamp,
-		name,
-		price_euro,
-            rank() over (partition by bii.name
-	order by
-		buff.insert_timestamp desc,
-		buff.price_euro) as ranking
-	from
-		steam.buff_prices buff inner join steam.buff_item_informations bii on buff.id=bii.id) t
-where
-	t.ranking = 1
-	or t.ranking is null
-order by id;
+	steam.buff_prices s
+group by
+	s.name
+        )
+ select
+	distinct t.name,
+	id,
+	min(t.price_euro) as price_euro,
+	t.insert_timestamp,
+	has_exterior
+from
+	steam.buff_prices t
+join max_ts on
+	max_ts.name::text = t.name::text
+	and max_ts.insert_timestamp = t.insert_timestamp
+group by
+	t.id,
+	t.name,
+	t.insert_timestamp,
+	t.has_exterior ;

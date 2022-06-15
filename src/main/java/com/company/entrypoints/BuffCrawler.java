@@ -163,11 +163,13 @@ public class BuffCrawler {
         List<DomElement> names = page.getByXPath("//*[contains(@class, 'cru-goods')]");
         for (DomElement name : names) {
             Document name_xml = new SAXReader().read(new StringReader(name.asXml()));
-            //if (name_xml.valueOf("span") == null) {
-                //hash_name = name_xml.valueOf("span").trim();
-            //}
+            if (name_xml.valueOf("span") != null) {
+                hash_name = name_xml.valueOf("span").trim();
+            }
 
         }
+
+        logger.info("Name of Item: " + hash_name);
 
         List<com.gargoylesoftware.htmlunit.html.DomElement> Items = page.getByXPath("//*[contains(@class, 'relative-goods')]");
 
@@ -202,6 +204,7 @@ public class BuffCrawler {
             o.put("id", goodsId);
             o.put("price_euro", price_euro);
             o.put("has_exterior", true);
+            o.put("name",hash_name);
 
             array.put(o);
         }
