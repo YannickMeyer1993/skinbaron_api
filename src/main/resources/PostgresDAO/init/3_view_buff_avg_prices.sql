@@ -13,12 +13,12 @@ AS SELECT s.name,
                     rank() OVER (PARTITION BY s1.name ORDER BY s1.insert_timestamp DESC) AS ranking
                    FROM ( SELECT sip.name,
                             sip.price_euro,
-                            sip.insert_timestamp ,
+                            sip.insert_timestamp,
                             rank() OVER (PARTITION BY sip.name, sip.insert_timestamp ORDER BY sip.insert_timestamp) AS ranking
                            FROM steam.buff_prices sip) s1
                   WHERE s1.ranking = 1) t1
           WHERE t1.ranking <= 30
           GROUP BY t1.name) s
      JOIN steam.buff_current_prices t USING (name)
-  WHERE t.price_euro <> 0::double precision
+  WHERE t.price_euro <> 0::double precision and s.durchschnitt<>0
   ORDER BY (t.price_euro / s.durchschnitt::double precision) DESC;

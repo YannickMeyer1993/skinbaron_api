@@ -1,12 +1,15 @@
 package com.company.entrypoints;
 
 import junit.framework.TestCase;
+import org.json.JSONArray;
 
 import static com.company.common.PostgresHelper.checkIfResultsetIsEmpty;
 import static com.company.common.PostgresHelper.executeDDL;
 import static com.company.entrypoints.InventoryCrawler.*;
 
 public class InventoryCrawlerTest extends TestCase {
+
+    JSONArray inventory = new JSONArray();
 
     public void testSendRequestInsertInventoryItem() throws Exception {
 
@@ -17,7 +20,7 @@ public class InventoryCrawlerTest extends TestCase {
     }
 
     public void testGetSkinbaronSales() throws Exception {
-        getSkinbaronSalesForInventory();
+        getSkinbaronSalesForInventory(inventory);
     }
 
     public void testGetSkinbaronOpenSalesJSONAray() throws Exception {
@@ -30,7 +33,7 @@ public class InventoryCrawlerTest extends TestCase {
     }
 
     public void testGetSkinbaronInventory() throws Exception {
-        getSkinbaronInventory();
+        getSkinbaronInventory(inventory);
     }
 
     public void testAddInventoryItemNegative() throws Exception {

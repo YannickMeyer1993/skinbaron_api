@@ -60,18 +60,21 @@ public class InventoryCrawler {
 
         insertOverviewRow(steam_balance, steam_sales_value, skinbaron_balance );
         inventory = new JSONArray();
-        getSkinbaronInventory();
-        getItemsfromInventory("https://steamcommunity.com/inventory/76561198286004569/730/2?count=2000", INV_TYPE_steam);
-        getItemsfromInventory("https://steamcommunity.com/inventory/76561198331678576/730/2?count=2000", INV_TYPE_smurf);
-        getSkinbaronSalesForInventory();
-        getStorageItems();
+
+        //add result to inventory
+        getSkinbaronInventory(inventory);
+        getItemsfromInventory(inventory,"https://steamcommunity.com/inventory/76561198286004569/730/2?count=2000", INV_TYPE_steam);
+        getItemsfromInventory(inventory,"https://steamcommunity.com/inventory/76561198331678576/730/2?count=2000", INV_TYPE_smurf);
+        getSkinbaronSalesForInventory(inventory);
+        getStorageItems(inventory);
+
         getSkinbaronSalesForTable();
         insertInventory();
         getItemPricesInventory();
 
     }
 
-    public static void getItemsfromInventory(String inventoryurl, String type) throws Exception {
+    public static JSONArray getItemsfromInventory(JSONArray inventory, String inventoryurl, String type) throws Exception {
 
         logger.info("Getting inventory: " + type);
         HttpGet httpGet = new HttpGet(inventoryurl);
@@ -88,11 +91,18 @@ public class InventoryCrawler {
         HashMap<String, Integer> map = getItemsFromSteamHTTP(resultJSON);
 
         for (String key : map.keySet()) {
-            insertItemIntoInventory(key, map.get(key), type);
+            JSONObject o = new JSONObject();
+            o.put("itemname", key);
+            o.put("amount", map.get(key));
+            o.put("inventorytype", type);
+
+            inventory.put(o);
         }
+
+        return inventory;
     }
 
-    public static void getStorageItems() throws IOException {
+    public static JSONArray getStorageItems(JSONArray inventory) throws IOException {
 
         logger.info("Getting storage items");
 
@@ -148,9 +158,17 @@ public class InventoryCrawler {
                         item_name = "Operation Riptide Case";
                         break;
                 }
-                insertItemIntoInventory(item_name, amount, INV_TYPE_storage);
+
+                JSONObject o = new JSONObject();
+                o.put("itemname", item_name);
+                o.put("amount", amount);
+                o.put("inventorytype", INV_TYPE_storage);
+
+                inventory.put(o);
             }
         }
+
+        return inventory;
     }
 
     public static HashMap<String, Integer> getItemsFromSteamHTTP(String resultJSON) {
@@ -201,7 +219,7 @@ public class InventoryCrawler {
      *
      * @throws Exception breaks if error occurs
      */
-    public static void getSkinbaronInventory() throws Exception {
+    public static JSONArray getSkinbaronInventory(JSONArray inventory) throws Exception {
 
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 
@@ -238,12 +256,20 @@ public class InventoryCrawler {
         sendRequestInsertSkinbaronInventoryItems(resultArray);
 
         for (String item: amountMap.keySet()) {
-            insertItemIntoInventory(item, amountMap.get(item), INV_TYPE_skinbaron);
+            JSONObject o = new JSONObject();
+
+            o.put("itemname", item);
+            o.put("amount", amountMap.get(item));
+            o.put("inventorytype", INV_TYPE_skinbaron);
+
+            inventory.put(o);
         }
+
+        return inventory;
     }
 
     
-    public static void getSkinbaronSalesForInventory() throws Exception {
+    public static JSONArray getSkinbaronSalesForInventory(JSONArray inventory) throws Exception {
 
         Map<String,Integer> amountMap = new HashMap<>();
 
@@ -257,8 +283,16 @@ public class InventoryCrawler {
         }
 
         for (String item: amountMap.keySet()) {
-            insertItemIntoInventory(item, amountMap.get(item), INV_TYPE_SKINBARON_SALES);
+            JSONObject o = new JSONObject();
+
+            o.put("itemname", item);
+            o.put("amount", amountMap.get(item));
+            o.put("inventorytype", INV_TYPE_SKINBARON_SALES);
+
+            inventory.put(o);
         }
+
+        return inventory;
     }
 
     public static void getSkinbaronSalesForTable() throws Exception {
