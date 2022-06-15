@@ -169,8 +169,6 @@ public class BuffCrawler {
 
         }
 
-        logger.info("Name of Item: " + hash_name);
-
         List<com.gargoylesoftware.htmlunit.html.DomElement> Items = page.getByXPath("//*[contains(@class, 'relative-goods')]");
 
         JSONArray array = new JSONArray();
@@ -204,7 +202,10 @@ public class BuffCrawler {
             o.put("id", goodsId);
             o.put("price_euro", price_euro);
             o.put("has_exterior", true);
-            o.put("name",hash_name);
+
+            if (goodsId.equals(String.valueOf(id))) { //name is only correct for main item
+                o.put("name", hash_name);
+            }
 
             array.put(o);
         }

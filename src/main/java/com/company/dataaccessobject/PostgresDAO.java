@@ -1,6 +1,7 @@
 package com.company.dataaccessobject;
 
 import com.company.common.Constants;
+import com.company.common.PostgresHelper;
 import com.company.model.Item;
 import com.company.model.ItemCollection;
 import com.company.model.SkinbaronItem;
@@ -264,8 +265,8 @@ public class PostgresDAO implements ItemDAO {
 
     @Override
     public void insertBuffPrices(JSONArray array) throws Exception {
-        String SQLUpsert = "INSERT INTO steam.buff_prices (id,price_euro)\n" +
-                "    VALUES (?,?);";
+        String SQLUpsert = "INSERT INTO steam.buff_prices (id,price_euro,name,has_exterior)\n" +
+                "    VALUES (?,?,?,?);";
 
         try (Connection connection = getConnection();PreparedStatement pstmt = connection.prepareStatement(SQLUpsert, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -274,6 +275,12 @@ public class PostgresDAO implements ItemDAO {
 
                 pstmt.setInt(1, o.getInt("id"));
                 pstmt.setDouble(2, o.getDouble("price_euro"));
+                if (o.has("name")) {
+                    pstmt.setString(3,o.getString("name"));
+                } else {
+                    pstmt.setString(3,null);
+                }
+                pstmt.setBoolean(4,o.getBoolean("has_exterior"));
 
                 pstmt.addBatch();
             }
@@ -288,6 +295,10 @@ public class PostgresDAO implements ItemDAO {
             connection.commit();
         }
 
+        PostgresHelper.executeDDL("update steam.buff_prices s\n" +
+                "set \"name\" = t.\"name\"\n" +
+                "from (select distinct id,\"name\" from steam.buff_prices where \"name\" is not null) t\n" +
+                "where s.\"name\" is null and s.id =t.id;");
 
     }
 
