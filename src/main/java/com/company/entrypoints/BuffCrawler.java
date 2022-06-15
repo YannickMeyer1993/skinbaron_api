@@ -216,19 +216,14 @@ public class BuffCrawler {
     public static void getNewBuffIds() throws Exception {
 
         ArrayList l = new ArrayList();
-        for (int i=1;i<1000000;i++) {
-            l.add(i);
-        }
 
-        for (Object o: getBuffIds()) {
-            if (o instanceof JSONObject) {
-                l.remove(((JSONObject) o).getInt("id"));
-            }
+        for (int i=870000;i<880000;i++) {
+                l.add(i);
         }
 
         logger.info("Size of ids that are tested: "+l.size());
 
-        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "5");
+        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "3");
 
         IntStream.range(0, l.size()).parallel().forEach(i -> {
             int j = (int) l.get(i);

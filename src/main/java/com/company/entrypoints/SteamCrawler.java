@@ -29,6 +29,7 @@ import static com.company.common.LoggingHelper.setUpClass;
 import static com.company.common.PostgresHelper.getConnection;
 import static com.company.entrypoints.SkinbaronCrawler.getBalance;
 
+//TODO rework as deprecated
 public class SteamCrawler {
 
     private static Double conversionRateUSDinEUR;
