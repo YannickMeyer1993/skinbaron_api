@@ -74,7 +74,7 @@ public class InventoryCrawler {
 
     }
 
-    public static JSONArray getItemsfromInventory(JSONArray inventory, String inventoryurl, String type) throws Exception {
+    public static void getItemsfromInventory(JSONArray inventory, String inventoryurl, String type) throws Exception {
 
         logger.info("Getting inventory: " + type);
         HttpGet httpGet = new HttpGet(inventoryurl);
@@ -99,10 +99,9 @@ public class InventoryCrawler {
             inventory.put(o);
         }
 
-        return inventory;
     }
 
-    public static JSONArray getStorageItems(JSONArray inventory) throws IOException {
+    public static void getStorageItems(JSONArray inventory) throws IOException {
 
         logger.info("Getting storage items");
 
@@ -167,8 +166,6 @@ public class InventoryCrawler {
                 inventory.put(o);
             }
         }
-
-        return inventory;
     }
 
     public static HashMap<String, Integer> getItemsFromSteamHTTP(String resultJSON) {
@@ -219,7 +216,7 @@ public class InventoryCrawler {
      *
      * @throws Exception breaks if error occurs
      */
-    public static JSONArray getSkinbaronInventory(JSONArray inventory) throws Exception {
+    public static void getSkinbaronInventory(JSONArray inventory) throws Exception {
 
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 
@@ -264,12 +261,10 @@ public class InventoryCrawler {
 
             inventory.put(o);
         }
-
-        return inventory;
     }
 
     
-    public static JSONArray getSkinbaronSalesForInventory(JSONArray inventory) throws Exception {
+    public static void getSkinbaronSalesForInventory(JSONArray inventory) throws Exception {
 
         Map<String,Integer> amountMap = new HashMap<>();
 
@@ -291,8 +286,6 @@ public class InventoryCrawler {
 
             inventory.put(o);
         }
-
-        return inventory;
     }
 
     public static void getSkinbaronSalesForTable() throws Exception {
