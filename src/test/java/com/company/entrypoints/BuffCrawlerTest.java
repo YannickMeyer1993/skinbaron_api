@@ -26,6 +26,6 @@ public class BuffCrawlerTest extends TestCase {
     }
 
     public void testGetNewBuffIds() throws Exception {
-        getNewBuffIds();
+        //getNewBuffIds();
     }
 }

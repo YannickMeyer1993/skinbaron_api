@@ -13,27 +13,4 @@ public class SkinbaronNewSalesCrawlerTest extends TestCase {
         getNewestSales30Days(ItemName);
     }
 
-    public void testGetNewestSales30DaysStatTrak() throws Exception {
-        setUpClass();
-        String ItemName = "StatTrak™ Desert Eagle";
-        getNewestSales30Days(ItemName);
-    }
-
-    public void testGetNewestSales30DaysSouvenir() throws Exception {
-        setUpClass();
-        String ItemName = "Souvenir Desert Eagle";
-        getNewestSales30Days(ItemName);
-    }
-
-    public void testGetNewestSales30DaysKarambit() throws Exception {
-        setUpClass();
-        String ItemName = "★ StatTrak™ Talon Knife | Stained (Field-Tested)";
-        getNewestSales30Days(ItemName);
-    }
-
-    public void testGetNewestSales30DaysDoppler() throws Exception {
-        setUpClass();
-        String ItemName = "Doppler";
-        getNewestSales30Days(ItemName);
-    }
 }

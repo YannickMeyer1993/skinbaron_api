@@ -20,28 +20,46 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 import static com.company.common.Constants.*;
+import static com.company.common.CurrencyHelper.getConversionRateToEuro;
 import static com.company.common.LoggingHelper.setUpClass;
 import static com.company.common.PasswordHelper.readPasswordFromFile;
+import static com.company.common.PostgresHelper.getConnection;
+import static com.company.entrypoints.SkinbaronCrawler.getBalance;
+import static com.company.entrypoints.SteamAPI.getSteamPriceForGivenName;
+
 
 public class InventoryCrawler {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(InventoryCrawler.class);
 
-    public JSONArray getInventory() {
-        return inventory;
-    }
+    private static JSONArray inventory = new JSONArray();
+    private static Double conversionRateUSDinEUR;
 
-    private JSONArray inventory = new JSONArray();
-
-    public InventoryCrawler() {
+    public static void main(String[] args) throws Exception {
         setUpClass();
-    }
 
-    public void run() throws Exception {
+        logger.warn("Decimal separator is comma!");
+        Scanner sc= new Scanner(System.in);
+        logger.warn("Enter current steam balance: ");
+        double steam_balance = sc.nextDouble();
+        logger.warn("Enter current steam sales value: ");
+        double steam_sales_value = sc.nextDouble();
+
+        conversionRateUSDinEUR = getConversionRateToEuro("USD");
+
+
+        double skinbaron_balance = getBalance();
+
+        insertOverviewRow(steam_balance, steam_sales_value, skinbaron_balance );
+        inventory = new JSONArray();
         getSkinbaronInventory();
         getItemsfromInventory("https://steamcommunity.com/inventory/76561198286004569/730/2?count=2000", INV_TYPE_steam);
         getItemsfromInventory("https://steamcommunity.com/inventory/76561198331678576/730/2?count=2000", INV_TYPE_smurf);
@@ -49,9 +67,11 @@ public class InventoryCrawler {
         getStorageItems();
         getSkinbaronSalesForTable();
         insertInventory();
+        getItemPricesInventory();
+
     }
 
-    public void getItemsfromInventory(String inventoryurl, String type) throws Exception {
+    public static void getItemsfromInventory(String inventoryurl, String type) throws Exception {
 
         logger.info("Getting inventory: " + type);
         HttpGet httpGet = new HttpGet(inventoryurl);
@@ -72,7 +92,7 @@ public class InventoryCrawler {
         }
     }
 
-    public void getStorageItems() throws IOException {
+    public static void getStorageItems() throws IOException {
 
         logger.info("Getting storage items");
 
@@ -181,7 +201,7 @@ public class InventoryCrawler {
      *
      * @throws Exception breaks if error occurs
      */
-    public void getSkinbaronInventory() throws Exception {
+    public static void getSkinbaronInventory() throws Exception {
 
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 
@@ -223,7 +243,7 @@ public class InventoryCrawler {
     }
 
     
-    public void getSkinbaronSalesForInventory() throws Exception {
+    public static void getSkinbaronSalesForInventory() throws Exception {
 
         Map<String,Integer> amountMap = new HashMap<>();
 
@@ -241,7 +261,7 @@ public class InventoryCrawler {
         }
     }
 
-    public void getSkinbaronSalesForTable() throws Exception {
+    public static void getSkinbaronSalesForTable() throws Exception {
 
         JSONArray resultArray = getSkinbaronOpenSalesJSONAray();
 
@@ -259,7 +279,7 @@ public class InventoryCrawler {
     /**
      * type in API: 2
      */
-    public JSONArray getSkinbaronOpenSalesJSONAray() throws Exception {
+    public static JSONArray getSkinbaronOpenSalesJSONAray() throws Exception {
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 
         logger.info("Skinbaron API GetSales has been called.");
@@ -302,7 +322,7 @@ public class InventoryCrawler {
         return result;
     }
     
-    public void insertInventory() {
+    public static void insertInventory() {
         logger.info("Inventory will now be inserted.");
         String url = "http://localhost:8080/api/v1/AddInventoryItems";
 
@@ -315,7 +335,7 @@ public class InventoryCrawler {
         restTemplate.postForObject(url, request, String.class);
     }
 
-    public void insertItemIntoInventory(String ItemName, int amount, String InventoryType) {
+    public static void insertItemIntoInventory(String ItemName, int amount, String InventoryType) {
         
         JSONObject JsonObject = new JSONObject();
 
@@ -326,7 +346,7 @@ public class InventoryCrawler {
         inventory.put(JsonObject);
     }
 
-    public void sendRequestInsertSkinbaronInventoryItems(JSONArray array) {
+    public static void sendRequestInsertSkinbaronInventoryItems(JSONArray array) {
         String url = "http://localhost:8080/api/v1/AddSkinbaronInventoryItems";
 
         RestTemplate restTemplate = new RestTemplate();
@@ -334,6 +354,34 @@ public class InventoryCrawler {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(array.toString(), headers);
+
+        restTemplate.postForObject(url, request, String.class);
+    }
+
+    public static void getItemPricesInventory() throws Exception {
+        try(Connection conn = getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select distinct name from steam.inventory_current_prices s\n" +
+                " where \"date\" != current_date or price_per_unit=0 order by name;")) {
+            String name;
+            while (rs.next()) {
+                name = rs.getString("name");
+                getSteamPriceForGivenName(name);
+            }
+        }
+    }
+
+    public static void insertOverviewRow(double steam_balance, double steam_sales_value, double skinbaron_balance) {
+
+        String url = "http://localhost:8080/api/v1/SetOverview";
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        JSONObject JsonObject = new JSONObject();
+
+        JsonObject.put("steambalance", steam_balance);
+        JsonObject.put("steamopensales", steam_sales_value);
+        JsonObject.put("skinbaronbalance",skinbaron_balance);
+
+        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(JsonObject.toString(), headers);
 
         restTemplate.postForObject(url, request, String.class);
     }

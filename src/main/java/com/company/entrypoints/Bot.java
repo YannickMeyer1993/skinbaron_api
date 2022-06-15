@@ -18,7 +18,7 @@ import static com.company.entrypoints.BuffCrawler.getBuffItemNoExterior;
 import static com.company.entrypoints.BuffCrawler.getBuffItemWithExterior;
 import static com.company.entrypoints.SkinbaronCrawler.checkIfExists;
 import static com.company.entrypoints.SkinbaronCrawler.getBalance;
-import static com.company.entrypoints.SteamCrawler.getSteamPriceForGivenName;
+import static com.company.entrypoints.SteamAPI.getSteamPriceForGivenName;
 import static java.lang.Math.min;
 
 public class Bot {
