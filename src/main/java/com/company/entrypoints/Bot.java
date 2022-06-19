@@ -76,25 +76,20 @@ public class Bot {
                         }
                     }
 
-                    double current_price = 0d;
-
                     if (!buff_price_is_new) {
+
+                        double current_price;
                         logger.info("Checking buff price for id: "+buff_id);
                         if (has_exterior) {
                             current_price = getBuffItemWithExterior(buff_id);
-                        } else if (!has_exterior) {
-                            current_price = getBuffItemNoExterior(buff_id);
                         } else {
-                            throw new Exception("Item has no information about exterior");
+                            current_price = getBuffItemNoExterior(buff_id);
                         }
 
-                        if (current_price < buff_price) {
-                            logger.info("buff price is now lower for item " + name + " ("+current_price+").");
-                            continue;
-                        }
+                        buff_price = current_price;
                     }
 
-                    if (price >= buff_price*0.95) {
+                    if (price <= buff_price*0.9) {
                         logger.info("Did not buy item, because buff price is cheaper than Skinbaron price!");
                         continue;
                     }
