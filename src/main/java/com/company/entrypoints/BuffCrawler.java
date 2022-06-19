@@ -23,6 +23,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.RoundingMode;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +34,7 @@ import java.util.stream.IntStream;
 
 import static com.company.common.CurrencyHelper.getConversionRateToEuro;
 import static com.company.common.LoggingHelper.setUpClass;
+import static com.company.common.PostgresHelper.getConnection;
 
 public class BuffCrawler {
 
@@ -217,19 +221,32 @@ public class BuffCrawler {
 
         ArrayList l = new ArrayList();
 
-        for (int i=870000;i<880000;i++) {
+        for (int i=887000;i<890000;i++) {
                 l.add(i);
+        }
+
+        for (Object o: getBuffIds()) {
+            if (o instanceof JSONObject) {
+                if (l.contains(((JSONObject) o).getInt("id"))) {
+                    l.remove(((JSONObject) o).getInt("id"));
+                }
+            }
         }
 
         logger.info("Size of ids that are tested: "+l.size());
 
-        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "3");
+        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "5");
 
         IntStream.range(0, l.size()).parallel().forEach(i -> {
             int j = (int) l.get(i);
             try {
-                getBuffItemNoExterior( j);
-                getBuffItemWithExterior( j);
+                try {
+                    getBuffItemNoExterior(j);
+                    logger.info("Got id: "+j);
+                } catch (Exception e){
+                    getBuffItemWithExterior(j);
+                    logger.info("Got id: "+j);
+                }
             } catch (Exception e) {
                 logger.error("Id " + j + " is no item!");
             }
