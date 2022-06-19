@@ -49,4 +49,8 @@ public class SteamAPITest extends TestCase {
         double price = SteamAPI.getSteamPriceForGivenName("Name Tag");
         assertTrue(price> 1.5);
     }
+
+    public void testRequestSearch() throws Exception {
+        requestSearch(2000);
+    }
 }
