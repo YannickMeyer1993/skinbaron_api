@@ -15,7 +15,7 @@ import static com.company.entrypoints.BuffCrawler.*;
 
 public class BuffCrawlerTest extends TestCase {
 
-    public void testGetBuffItemNoExterior() throws DocumentException, IOException, InterruptedException {
+    public void testGetBuffItemNoExterior() throws Exception {
         setUpClass();
         double val = getBuffItemNoExterior(40398);
         assertTrue(val > 0);

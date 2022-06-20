@@ -83,7 +83,7 @@ public class BuffCrawler {
         });
     }
 
-    public static double getBuffItemNoExterior(int id) throws InterruptedException, IOException, DocumentException {
+    public static double getBuffItemNoExterior(int id) throws Exception {
 
         logger.info("Buff Id: "+id);
 
@@ -112,7 +112,7 @@ public class BuffCrawler {
         }
 
         if (hash_name == null) {
-            return 0d;
+            throw new Exception("This is not valid Buff Id.");
         }
 
         List<com.gargoylesoftware.htmlunit.html.DomElement> Items = page.getByXPath("//*[contains(@class, 'f_Strong')]");
@@ -221,12 +221,12 @@ public class BuffCrawler {
         return returnValue;
     }
 
-    public static void getNewBuffIds() throws Exception {
+    public static void getNewBuffIds() {
 
         ArrayList l = new ArrayList();
 
         for (int i=880000;i<890000;i++) {
-                l.add(i);
+            l.add(i);
         }
 
         logger.info("Size of ids that are tested: "+l.size());
