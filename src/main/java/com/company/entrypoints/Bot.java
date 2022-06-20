@@ -100,8 +100,7 @@ public class Bot {
                             if (buy_item) {
                                 buyItem(id, price, steam_price);
                             } else {
-                                boolean exists = checkIfExists(name, price);
-                                if (!exists) {
+                                if (!checkIfExists(name, price)) {
                                     deleteNonExistingSkinbaronItems(name, price);
                                 }
                             }

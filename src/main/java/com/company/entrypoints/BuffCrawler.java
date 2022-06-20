@@ -111,6 +111,10 @@ public class BuffCrawler {
             hash_name = name_xml.valueOf("span").trim();
         }
 
+        if (hash_name == null) {
+            return 0d;
+        }
+
         List<com.gargoylesoftware.htmlunit.html.DomElement> Items = page.getByXPath("//*[contains(@class, 'f_Strong')]");
 
         double min_price_rmb = Double.MAX_VALUE;
@@ -221,21 +225,13 @@ public class BuffCrawler {
 
         ArrayList l = new ArrayList();
 
-        for (int i=887000;i<890000;i++) {
+        for (int i=880000;i<890000;i++) {
                 l.add(i);
-        }
-
-        for (Object o: getBuffIds()) {
-            if (o instanceof JSONObject) {
-                if (l.contains(((JSONObject) o).getInt("id"))) {
-                    l.remove(((JSONObject) o).getInt("id"));
-                }
-            }
         }
 
         logger.info("Size of ids that are tested: "+l.size());
 
-        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "5");
+        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "15");
 
         IntStream.range(0, l.size()).parallel().forEach(i -> {
             int j = (int) l.get(i);

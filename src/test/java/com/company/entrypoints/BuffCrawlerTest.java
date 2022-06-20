@@ -32,4 +32,18 @@ public class BuffCrawlerTest extends TestCase {
     public void testGetNewBuffIds() throws Exception {
         getNewBuffIds();
     }
+
+    public void testTestGetBuffItemNoExteriorNegative() throws Exception {
+        boolean failed = false;
+
+        try {
+            getBuffItemNoExterior(882474);
+        } catch (Exception e) {
+            failed = true;
+        }
+
+        if (!failed) {
+            throw new Exception("Function must fail!");
+        }
+    }
 }
