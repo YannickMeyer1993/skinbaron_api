@@ -89,8 +89,8 @@ public class Bot {
                         buff_price = current_price;
                     }
 
-                    if (price <= buff_price*0.9) {
-                        logger.info("Did not buy item, because buff price is cheaper than Skinbaron price!");
+                    if (price <= buff_price*0.95) {
+                        //logger.info("Did not buy item, because buff price is cheaper than Skinbaron price!");
                         continue;
                     }
 
