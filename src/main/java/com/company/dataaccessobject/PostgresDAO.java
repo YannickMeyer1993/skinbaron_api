@@ -394,12 +394,6 @@ public class PostgresDAO implements ItemDAO {
     }
 
     @Override
-    public Item getItem(String ItemName) {
-        ItemCollection collection = new ItemCollection("", false);
-        return new Item(ItemName, collection);
-    }
-
-    @Override
     public void cleanUp() throws Exception {
         executeDDLfromPath(resourcePath + "cleanUp.sql");
     }

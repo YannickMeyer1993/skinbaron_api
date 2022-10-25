@@ -1,6 +1,5 @@
 package com.company.dataaccessobject;
 
-import com.company.model.Item;
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -22,8 +21,6 @@ public interface ItemDAO {
     void initHightestSteamIteration() throws Exception;
 
     void setHighestSteamIteration(int iteration) throws Exception;
-
-    Item getItem(String ItemName);
 
     void cleanUp() throws Exception;
 
