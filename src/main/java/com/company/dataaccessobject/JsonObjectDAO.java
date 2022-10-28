@@ -1,16 +1,30 @@
 package com.company.dataaccessobject;
 
-import com.company.model.SkinbaronItem;
-import com.company.model.SteamPrice;
+import com.company.model.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.json.JSONArray;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 
 public class JsonObjectDAO implements ItemDAO {
+    private Inventory inventory = new Inventory();
+    private SkinbaronSales skinbaronSales = new SkinbaronSales();
+    private HashMap<String, Item> itemController = new HashMap<>();
+    private final String RESOURCE_PATH = "src/main/resources/JsonObjectDAO";
+
+    public JsonObjectDAO() throws Exception {
+        init();
+    }
     @Override
     public void init() throws Exception {
+
+        //crawl all needed information
+        crawlItemInformations();
+        crawlWearValues();
+
+        //TODO read all json information from disk
 
     }
 
