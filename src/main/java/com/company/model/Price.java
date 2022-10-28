@@ -2,6 +2,9 @@ package com.company.model;
 
 import java.util.Date;
 
+/**
+ * low level class price. Consists of price, name and timestamp
+ */
 public class Price {
     private final Double price;
     private final Date timestamp;

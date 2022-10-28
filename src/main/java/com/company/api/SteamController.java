@@ -18,20 +18,6 @@ public class SteamController {
         this.steamService = steamService;
     }
 
-    @GetMapping(value="api/v1/GetHightestSteamIteration",produces = MediaType.TEXT_PLAIN_VALUE)
-    public String getHighestSteamIteration() throws Exception {
-       return ""+steamService.getHighestSteamIteration();
-    }
-
-    @RequestMapping("api/v1/SetHightestSteamIteration")
-    @PostMapping
-    public void setHightestSteamIteration(@RequestBody com.fasterxml.jackson.databind.JsonNode payload) throws Exception {
-
-        String i = payload.get("iteration").toString();
-
-        steamService.setHighestSteamIteration(i);
-    }
-
     @RequestMapping("api/v1/SetOverview")
     @PostMapping
     public void setOverview(@RequestBody com.fasterxml.jackson.databind.JsonNode payload) throws Exception {

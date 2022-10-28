@@ -167,60 +167,6 @@ public class PostgresDAO implements ItemDAO {
     }
 
     @Override
-    public int getHighestSteamIteration() throws Exception {
-        String query = "select iteration from steam.steam_iteration where \"date\" = CURRENT_DATE;";
-
-        try (Connection conn = getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
-            if (!rs.next()) {
-                initHightestSteamIteration();
-                return getHighestSteamIteration();
-            } else {
-                return rs.getInt("iteration"); //rs.next() was called above
-            }
-        }
-    }
-
-    @Override
-    public void initHightestSteamIteration() throws Exception {
-
-        Connection connection = getConnection();
-
-        if (!checkIfResultsetIsEmpty("select iteration from steam.steam_iteration where \"date\" = CURRENT_DATE;")) {
-            return;
-        }
-        String SQLinsert = "INSERT INTO steam.steam_iteration(iteration) "
-                + "VALUES(0)";
-        try (PreparedStatement pstmt = connection.prepareStatement(SQLinsert, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt.executeUpdate();
-            connection.commit();
-        }
-
-        logger.info("table steam_iteration has a new entry for today.");
-
-    }
-
-    @Override
-    public void setHighestSteamIteration(int iteration) throws Exception {
-
-        //for day change
-        initHightestSteamIteration();
-
-        String SQLinsert = "UPDATE steam.steam_iteration set iteration=? where \"date\"=current_date";
-
-        if (checkIfResultsetIsEmpty("select iteration from steam.steam_iteration where \"date\" = CURRENT_DATE;")) {
-            throw new Exception("steam.steam_iteration must be initialized.");
-        }
-
-        try (Connection connection = getConnection(); PreparedStatement pstmt = connection.prepareStatement(SQLinsert, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt.setInt(1, iteration);
-
-            pstmt.executeUpdate();
-            connection.commit();
-        }
-        logger.info("Highest steam iteration for today is: " + iteration);
-    }
-
-    @Override
     public void addInventoryItems(JsonNode payload) throws Exception {
 
         executeDDL("update steam.inventory set still_there = false where still_there;");

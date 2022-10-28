@@ -15,14 +15,6 @@ public class SteamService {
         this.itemdao = itemdao;
     }
 
-    public int getHighestSteamIteration() throws Exception {
-        return itemdao.getHighestSteamIteration();
-    }
-
-    public void setHighestSteamIteration(String i) throws Exception {
-        itemdao.setHighestSteamIteration(Integer.parseInt(i));
-    }
-
     public void setOverview(double steambalance, double steamopensales, double skinbaronbalance) throws Exception {
         itemdao.insertOverviewRow(steambalance,steamopensales,skinbaronbalance);
     }

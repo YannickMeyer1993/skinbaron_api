@@ -12,7 +12,6 @@ public class Item {
 
     private Price CurrentSteamPrice = null;
     private Price CheapestSkinbaronPrice = null;
-    private List<String> exists_in_inventory = null;
 
     private final List<SkinbaronItem> SkinbaronItemList = new ArrayList<>();
     private final List<SteamPrice> SteamPriceList = new ArrayList<>();
@@ -71,27 +70,6 @@ public class Item {
                 .concat("\nSteam Price: "+CurrentSteamPrice.getValue())
                 .concat("\nSkinbaron Price: "+CheapestSkinbaronPrice.getValue());
         return result;
-    }
-
-    /**
-     * Inventory Type must be one of steam, storage, skinbaron, skinbaron sales, smurf
-     */
-    public void addToInventory(String InventoryType){
-        List<String> AllowedInventoryTypes = new ArrayList<>();
-        AllowedInventoryTypes.add(INV_TYPE_skinbaron);
-        AllowedInventoryTypes.add(INV_TYPE_steam);
-        AllowedInventoryTypes.add(INV_TYPE_storage);
-        AllowedInventoryTypes.add(INV_TYPE_SKINBARON_SALES);
-        AllowedInventoryTypes.add(INV_TYPE_smurf);
-        if (AllowedInventoryTypes.contains(InventoryType)) {
-            throw new IllegalArgumentException("Unknown Inventory Type");
-        }
-        exists_in_inventory.add(InventoryType);
-
-    }
-
-    public void clearInventory() {
-        exists_in_inventory = null;
     }
 
     public List<SkinbaronItem> getSkinbaronItemList() {

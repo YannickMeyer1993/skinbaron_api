@@ -4,17 +4,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDate;
 
+/**
+ * consists of a Skinbaron Item with information about Id, price, name, stickers, wear, inspect link and steam inspect link
+ */
 public class SkinbaronItem {
-    private final String id;
+    private final String ID;
     private Price price;
-    private final String name;
+    private final String NAME;
     private final String Stickers;
     private final double wear;
     private final String inspect;
     private final String sbinspect;
 
     public String getId() {
-        return id;
+        return ID;
     }
 
     public Price getPrice() {
@@ -25,24 +28,24 @@ public class SkinbaronItem {
         this.price = price;
     }
 
-    public SkinbaronItem(@JsonProperty("id") String id,
+    public SkinbaronItem(@JsonProperty("id") String ID,
                          @JsonProperty("price") double price,
-                         @JsonProperty("market_name") String name,
+                         @JsonProperty("market_name") String NAME,
                          @JsonProperty("stickers") String stickers,
                          @JsonProperty("wear") double wear,
                          @JsonProperty("inspect") String inspect,
                          @JsonProperty("sbinspect") String sbinspect) {
-        this.id = id;
+        this.ID = ID;
         this.inspect = inspect;
         this.sbinspect = sbinspect;
-        this.price = new Price(java.sql.Date.valueOf(LocalDate.now()),price,name);
-        this.name = name;
+        this.price = new Price(java.sql.Date.valueOf(LocalDate.now()),price,NAME);
+        this.NAME = NAME;
         Stickers = stickers;
         this.wear = wear;
     }
 
     public String getName() {
-        return name;
+        return NAME;
     }
 
     public String getStickers() {
