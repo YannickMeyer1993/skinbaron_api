@@ -6,16 +6,13 @@ import java.sql.Timestamp;
 
 public class ItemTest extends TestCase {
 
-    public void testToString() {
-        String ItemName = "Kniff";
+    public void testGetAsJson() {
+        Item item = new Item("name",new ItemCollection("Collection",true),"","","");
+        item.addSkinbaronItemToList(new SkinbaronItem("ferfef",2.0,"name","no",0.3,"",""));
+        item.addSkinbaronItemToList(new SkinbaronItem("ferfef",3.0,"name","no",0.5,"",""));
+        item.addSteamPricetoList(new SteamPrice("",null,2.0,3000));
 
-        Item item = new Item(ItemName, new ItemCollection("Cobble",false));
-        item.setSteamPrice(new Price(new Timestamp(System.currentTimeMillis()) ,1d, ItemName));
-        item.setSkinbaronPrice(new Price(new Timestamp(System.currentTimeMillis()),2d, ItemName));
+        item.print();
 
-        assertEquals(item.toString(),"Item Name: Kniff\n" +
-                "Collection Name: Cobble\n" +
-                "Steam Price: 1.0\n" +
-                "Skinbaron Price: 2.0");
     }
 }

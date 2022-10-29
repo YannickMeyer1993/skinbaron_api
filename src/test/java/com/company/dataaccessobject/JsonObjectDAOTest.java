@@ -3,6 +3,8 @@ package com.company.dataaccessobject;
 import com.company.model.SkinbaronItem;
 import junit.framework.TestCase;
 
+import static com.company.common.LoggingHelper.setUpClass;
+
 public class JsonObjectDAOTest extends TestCase {
     JsonObjectDAO dao;
 
@@ -31,7 +33,9 @@ public class JsonObjectDAOTest extends TestCase {
     public void testCrawlWearValues() {
     }
 
-    public void testCrawlItemInformations() {
+    public void testinsertItemInformations() throws Exception {
+        dao.insertItemInformations();
+        dao.print();
     }
 
     public void testGetLastSkinbaronId() {
@@ -78,4 +82,10 @@ public class JsonObjectDAOTest extends TestCase {
 
     public void testInsertPriceList() {
     }
+
+    public void testCrawlItemsFromCsgoExchange() throws Exception{
+        dao.crawlItemsFromCsgoExchange();
+        //TODO infinite loop
+    }
+
 }

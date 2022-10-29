@@ -3,10 +3,19 @@ package com.company.dataaccessobject;
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.DomElement;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.json.JSONArray;
 
+import java.io.IOException;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static com.company.common.LoggingHelper.setUpClass;
 
 public interface ItemDAO {
 
@@ -62,7 +71,7 @@ public interface ItemDAO {
      * gets additional information about every Steam Item like Collection and Quality and adds it to the data structure.
      * @throws Exception
      */
-    void crawlItemInformations() throws Exception;
+    void insertItemInformations() throws Exception;
 
     /**
      * get last Skinbaron Id that was inserted to the data structure.
@@ -169,4 +178,124 @@ public interface ItemDAO {
      * @throws Exception
      */
     void insertPriceList(JsonNode payload) throws Exception;
+
+    /**
+     * @return Map of Item Name as Key and String[name,weapon,collection,quality,name_without_exterior]
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    default Map<String, String[]> crawlItemsFromCsgoExchange() throws IOException, InterruptedException {
+        setUpClass();
+
+        Map<String, String[]> map = new HashMap<>();
+
+        String url = "https://csgo.exchange/prices/";
+
+        WebClient webClient = new WebClient(BrowserVersion.FIREFOX);
+        webClient.getOptions().setJavaScriptEnabled(true); // enable javascript
+        webClient.getOptions().setCssEnabled(true);
+        webClient.getOptions().setThrowExceptionOnScriptError(false); //even if there is error in js continue
+        webClient.waitForBackgroundJavaScriptStartingBefore(1000000);
+        webClient.waitForBackgroundJavaScript(10000000); // important! wait when javascript finishes rendering
+        HtmlPage page = webClient.getPage(url);
+        Thread.sleep(1000);
+
+        List<DomElement> Items = page.getByXPath("//*[contains(@class, 'cItem')]");
+
+        System.out.println("Item Information on csgo.exchhange will be scawled!");
+
+        for (DomElement item : Items) {
+            String item_xml = item.asXml();
+
+            String name = item.getFirstChild().asNormalizedText();
+
+            if ("".equals(name) || name.contains("Souvenir Souvenir") || name.contains("Sealed Graffiti")) {
+                continue;
+            }
+
+
+            String weapon = item.getAttribute("data-weapon");
+            String collection = item.getAttribute("data-collection");
+            String quality = item.getAttribute("data-quality");
+
+            Double vn_price = !"0.00".equals(item.getAttribute("data-vn").trim()) ? Double.parseDouble(item.getAttribute("data-vn")) : null;
+            Double bs_price = !"0.00".equals(item.getAttribute("data-bs").trim()) ? Double.parseDouble(item.getAttribute("data-bs")) : null;
+            Double ww_price = !"0.00".equals(item.getAttribute("data-ww").trim()) ? Double.parseDouble(item.getAttribute("data-ww")) : null;
+            Double ft_price = !"0.00".equals(item.getAttribute("data-ft").trim()) ? Double.parseDouble(item.getAttribute("data-ft")) : null;
+            Double mw_price = !"0.00".equals(item.getAttribute("data-mw").trim()) ? Double.parseDouble(item.getAttribute("data-mw")) : null;
+            Double fn_price = !"0.00".equals(item.getAttribute("data-fn").trim()) ? Double.parseDouble(item.getAttribute("data-fn")) : null;
+
+            if (vn_price == null && fn_price == null && mw_price == null && ft_price == null && ww_price == null && bs_price == null) {
+                continue;
+            }
+
+            if (name.contains("StatTrak")) {
+                name = name.replace("StatTrak", "StatTrak\u2122");
+            }
+
+            if (name.contains("/")) {
+                name = name.replace("/", "-");
+            }
+
+            //Knife
+            if ("Covert".equals(quality) && (weapon.contains("Knife") || weapon.contains("Bayonet") || weapon.contains("Shadow Daggers") || weapon.contains("Karambit") || "".equals(weapon))) {
+                name = "\u2605 " + name;
+            }
+
+            //Gloves
+            if (name.contains("Gloves") || name.contains("Hand Wraps")) {
+                name = "\u2605 " + name;
+            }
+
+            name = name.replaceAll(" {2}", " ");
+
+
+            String[] infos = new String[4];
+            if (vn_price != null) {
+                infos[0] = weapon;
+                infos[1] = collection;
+                infos[2] = quality;
+                infos[3] = name.replace("StatTrak\u2122 ", "");
+                map.put(name, infos);
+            }
+            if (bs_price != null) {
+                infos[0] = weapon;
+                infos[1] = collection;
+                infos[2] = quality;
+                infos[3] = name.replace("StatTrak\u2122 ", "");
+                map.put(name + " (Battle-Scarred)", infos);
+            }
+            if (ww_price != null) {
+                infos[0] = weapon;
+                infos[1] = collection;
+                infos[2] = quality;
+                infos[3] = name.replace("StatTrak\u2122 ", "");
+                map.put(name + " (Well-Worn)", infos);
+            }
+            if (ft_price != null) {
+                infos[0] = weapon;
+                infos[1] = collection;
+                infos[2] = quality;
+                infos[3] = name.replace("StatTrak\u2122 ", "");
+                map.put(name + " (Field-Tested)", infos);
+            }
+            if (mw_price != null) {
+                infos[0] = weapon;
+                infos[1] = collection;
+                infos[2] = quality;
+                infos[3] = name.replace("StatTrak\u2122 ", "");
+                map.put(name + " (Minimal Wear)", infos);
+            }
+            if (fn_price != null) {
+                infos[0] = weapon;
+                infos[1] = collection;
+                infos[2] = quality;
+                infos[3] = name.replace("StatTrak\u2122 ", "");
+                map.put(name + " (Factory New)", infos);
+            }
+        }
+
+        return map;
+
+    }
 }

@@ -1,5 +1,8 @@
 package com.company.model;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,17 +11,41 @@ import static com.company.common.Constants.*;
 public class Item {
     private final String name;
 
-    private final ItemCollection collection;
+    private ItemCollection collection;
 
-    private Price CurrentSteamPrice = null;
-    private Price CheapestSkinbaronPrice = null;
+    private Price currentSteamPrice = null;
+    private Price cheapestSkinbaronPrice = null;
 
-    private final List<SkinbaronItem> SkinbaronItemList = new ArrayList<>();
-    private final List<SteamPrice> SteamPriceList = new ArrayList<>();
+    //Map of Item Name as Key and String[name,weapon,collection,quality,name_without_exterior]
+    private String weaponType;
+    private String quality;
+    private String nameWithoutExterior;
 
-    public Item(String ItemName, ItemCollection collection) {
-        this.name = ItemName;
+    private final List<SkinbaronItem> skinbaronItemList = new ArrayList<>();
+    private final List<SteamPrice> steamPriceList = new ArrayList<>();
+
+    public Item(String itemName, ItemCollection collection,String weaponType,String quality,String nameWithoutExterior) {
+        this.name = itemName;
         this.collection = collection;
+        this.weaponType = weaponType;
+        this.quality = quality;
+        this.nameWithoutExterior = nameWithoutExterior;
+    }
+
+    public void print() {
+        System.out.println(getAsJson().toString());
+    }
+
+    public JSONObject getAsJson() {
+        JSONObject item = new JSONObject();
+        item.put("name",name);
+        item.put("collection",collection.getName());
+        item.put("currentSteamPrice",currentSteamPrice.getValue());
+        item.put("cheapestSkinbaronPrice",cheapestSkinbaronPrice.getValue());
+        item.put("skinbaronItemList",new JSONArray(skinbaronItemList));
+        item.put("steamPriceList",new JSONArray(steamPriceList));
+
+        return item;
     }
 
     public String getName() {
@@ -26,34 +53,34 @@ public class Item {
     }
 
     public Price getSteamPrice() {
-        return CurrentSteamPrice;
+        return currentSteamPrice;
     }
 
     /**
     sets the current steam price
     triggered if there is a new steam price
      */
-    public void setSteamPrice(Price steamPrice) {
-        CurrentSteamPrice = steamPrice;
+    private void setSteamPrice(Price steamPrice) {
+        currentSteamPrice = steamPrice;
     }
 
     public Price getSkinbaronPrice() {
-        return CheapestSkinbaronPrice;
+        return cheapestSkinbaronPrice;
     }
 
     /**
     sets the lowest current Skinbaron price
     triggered after change in SkinbaronItem list
      */
-    public void setSkinbaronPrice(Price price) {
-        if (CheapestSkinbaronPrice==null) {
-            CheapestSkinbaronPrice = price;
+    private void setSkinbaronPrice(Price price) {
+        if (cheapestSkinbaronPrice==null) {
+            cheapestSkinbaronPrice = price;
             return;
         }
 
-        for (SkinbaronItem item: SkinbaronItemList) {
-            if (item.getPrice().getValue() < CheapestSkinbaronPrice.getValue()) {
-                CheapestSkinbaronPrice = item.getPrice();
+        for (SkinbaronItem item: skinbaronItemList) {
+            if (item.getPrice().getValue() < cheapestSkinbaronPrice.getValue()) {
+                cheapestSkinbaronPrice = item.getPrice();
             }
         }
     }
@@ -62,37 +89,30 @@ public class Item {
         return collection;
     }
 
-    public String toString() {
-
-        String result = "";
-        result = result.concat("Item Name: "+name)
-                .concat("\nCollection Name: "+collection.getName())
-                .concat("\nSteam Price: "+CurrentSteamPrice.getValue())
-                .concat("\nSkinbaron Price: "+CheapestSkinbaronPrice.getValue());
-        return result;
-    }
-
     public List<SkinbaronItem> getSkinbaronItemList() {
-        return SkinbaronItemList;
+        return skinbaronItemList;
     }
 
     public List<SteamPrice> getSteamPriceList() {
-        return SteamPriceList;
+        return steamPriceList;
     }
 
     public void addSkinbaronItemToList(SkinbaronItem item) {
-        SkinbaronItemList.add(item);
+        skinbaronItemList.add(item);
+
+        setSkinbaronPrice(item.getPrice());
     }
 
     public void addSteamPricetoList(SteamPrice price) {
-        SteamPriceList.add(price);
+        steamPriceList.add(price);
+        setSteamPrice(price);
     }
 
     public void deleteSkinbaronItemFromList(SkinbaronItem item) {
-        SkinbaronItemList.remove(item);
+        skinbaronItemList.remove(item);
     }
 
     public void deleteSteamPriceFromList(SteamPrice price) {
-        SteamPriceList.remove(price);
+        steamPriceList.remove(price);
     }
 }

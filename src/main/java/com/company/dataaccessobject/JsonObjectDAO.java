@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class JsonObjectDAO implements ItemDAO {
     private Inventory inventory = new Inventory();
@@ -17,16 +18,29 @@ public class JsonObjectDAO implements ItemDAO {
     public JsonObjectDAO() throws Exception {
         init();
     }
+
+    public void print() throws Exception {
+        //print inventory as JSON
+
+        //print Skinbaron Sales as JSON
+
+        //print all items in itemController as JSON
+        for (String name: itemController.keySet()) {
+            itemController.get(name).print();
+        }
+    }
+
     @Override
     public void init() throws Exception {
 
         //crawl all needed information
-        crawlItemInformations();
+        insertItemInformations();
         crawlWearValues();
 
         //TODO read all json information from disk
 
     }
+
 
     @Override
     public String addSkinbaronItems(List<SkinbaronItem> items) throws Exception {
@@ -59,8 +73,20 @@ public class JsonObjectDAO implements ItemDAO {
     }
 
     @Override
-    public void crawlItemInformations() throws Exception {
+    public void insertItemInformations() throws Exception {
+        Map<String, String[]> map = crawlItemsFromCsgoExchange();
 
+        int i = 0;
+        for (String name: map.keySet()) {
+            if (!itemController.containsKey(name)) {
+                String[] receivedItem = map.get(name);
+                System.out.println(i);
+                i++;
+                //Item item = new Item(name,new ItemCollection(receivedItem[2],false),receivedItem[1],receivedItem[3],receivedItem[4]);
+                //itemController.put(name,item);
+                break;
+            }
+        }
     }
 
     @Override
