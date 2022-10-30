@@ -1,4 +1,4 @@
 target/
 .scannerwork
 /.idea/
-resources/JsonObjectDAO/
+/src/main/resources/JsonObjectDAO/
