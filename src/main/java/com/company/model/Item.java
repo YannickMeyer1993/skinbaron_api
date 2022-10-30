@@ -40,8 +40,12 @@ public class Item {
         JSONObject item = new JSONObject();
         item.put("name",name);
         item.put("collection",collection.getName());
-        item.put("currentSteamPrice",currentSteamPrice.getValue());
-        item.put("cheapestSkinbaronPrice",cheapestSkinbaronPrice.getValue());
+        if (currentSteamPrice!=null) {
+            item.put("currentSteamPrice", currentSteamPrice.getValue());
+        }
+        if (cheapestSkinbaronPrice!=null) {
+            item.put("cheapestSkinbaronPrice", cheapestSkinbaronPrice.getValue());
+        }
         item.put("skinbaronItemList",new JSONArray(skinbaronItemList));
         item.put("steamPriceList",new JSONArray(steamPriceList));
 

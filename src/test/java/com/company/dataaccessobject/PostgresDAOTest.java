@@ -46,12 +46,6 @@ public class PostgresDAOTest extends TestCase {
         executeDDL("DELETE from steam.steam_prices where name = 'Item Name'");
     }
 
-    public void testinsertItemInformations() throws Exception {
-        PostgresDAO dao = new PostgresDAO();
-        dao.insertItemInformations();
-        assertFalse(checkIfResultsetIsEmpty("select * from steam.item_informations"));
-    }
-
     public void testcleanUp() throws Exception {
         PostgresDAO dao = new PostgresDAO();
         dao.cleanUp();

@@ -35,21 +35,12 @@ public class PostgresDAO implements ItemDAO {
     final String resourcePath = "src/main/resources/PostgresDAO/";
 
     public PostgresDAO() throws Exception {
-        init();
-    }
-
-    @Override
-    public void init() throws Exception {
-
         executeDDLsfromDirectory(resourcePath + "init/");
 
         if (checkIfResultsetIsEmpty("select * from steam.item_informations")) {
             insertItemInformations();
             //crawlWearValues();
         }
-
-        //all data is already inside the tables
-
     }
 
     @Override
@@ -345,8 +336,7 @@ public class PostgresDAO implements ItemDAO {
         executeDDLfromPath(resourcePath + "cleanUp.sql");
     }
 
-    @Override
-    public void insertItemInformations() throws Exception {
+    private void insertItemInformations() throws Exception {
 
         Map<String, String[]> map = crawlItemsFromCsgoExchange();
 
@@ -446,21 +436,12 @@ public class PostgresDAO implements ItemDAO {
         return result;
     }
 
-    @Override
-    public void crawlWearValues() throws Exception {
-
-        logger.info("Crawler WEAR values. This takes long!");
-
-        Map<String, String[]> mapWears = new HashMap<>();
-
+    private ArrayList<Integer> getItemsWithMissingWears() throws Exception {
         int max_iteration = 20000;
-
-        String SQLinsert = "INSERT INTO steam.item_wears(name,id,min_wear,max_wear) "
-                + "VALUES(?,?,?,?)";
+        ArrayList<Integer> iterators;
 
         try (Connection conn = getConnection()) {
-
-            Collection<Integer> iterators = new HashSet<>();
+            iterators = new ArrayList<>();
 
             for (int i = 250; i <= max_iteration; i++) {
                 iterators.add(i);
@@ -475,86 +456,35 @@ public class PostgresDAO implements ItemDAO {
                     System.out.println(rs.getInt("id"));
                 }
             }
-
-            java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF);
-
-            com.gargoylesoftware.htmlunit.WebClient webClient = new com.gargoylesoftware.htmlunit.WebClient(com.gargoylesoftware.htmlunit.BrowserVersion.FIREFOX);
-            webClient.getOptions().setJavaScriptEnabled(true); // enable javascript
-            webClient.getOptions().setCssEnabled(true);
-            webClient.getOptions().setThrowExceptionOnScriptError(false); //even if there is error in js continue
-            webClient.waitForBackgroundJavaScriptStartingBefore(1000000);
-            webClient.waitForBackgroundJavaScript(10000000); // important! wait when javascript finishes rendering
-
-            int count = 0;
-            for (Object i : iterators) {
-
-                count++;
-                try {
-                    String url = "https://csgostash.com/skin/" + i;
-                    com.gargoylesoftware.htmlunit.html.HtmlPage page = webClient.getPage(url);
-
-                    Thread.sleep(1000);
-
-                    String name = page.getTitleText().replace(" - CS:GO Stash", "");
-                    List<com.gargoylesoftware.htmlunit.html.DomElement> Items_min = page.getByXPath("//*[contains(@class, 'marker-wrapper wear-min-value')]");
-                    List<com.gargoylesoftware.htmlunit.html.DomElement> Items_max = page.getByXPath("//*[contains(@class, 'marker-wrapper wear-max-value')]");
-                    List<com.gargoylesoftware.htmlunit.html.DomElement> Items_name = page.getByXPath("//*[contains(@class, 'img-responsive center-block main-skin-img margin-top-sm margin-bot-sm')]");
-
-                    try {
-                        String xml_min = Items_min.get(0).asXml();
-                        String xml_max = Items_max.get(0).asXml();
-
-                        Document document_min = new SAXReader().read(new StringReader(xml_min));
-                        String min = document_min.valueOf("/div/@data-wearmin");
-
-                        Document document_max = new SAXReader().read(new StringReader(xml_max));
-                        String max = document_max.valueOf("/div/@data-wearmax");
-
-                        //System.out.println(name + " " + min + " " + max);
-
-                        String[] infos = new String[3];
-                        //put in map
-                        infos[0] = "" + i;
-                        infos[1] = min;
-                        infos[2] = max;
-                        mapWears.put(name, infos);
-                    } catch (IndexOutOfBoundsException e) {
-                        String[] infos = new String[3];
-                        //put in map
-                        infos[0] = "" + i;
-                        infos[1] = "0";
-                        infos[2] = "1";
-                        mapWears.put(name, infos);
-                    }
-                } catch (FailingHttpStatusCodeException e) {
-                    e.getStatusCode();
-                }
-
-                try (PreparedStatement pstmt = conn.prepareStatement(SQLinsert, Statement.RETURN_GENERATED_KEYS)) {
-                    System.out.println(i);
-                    if (count % 100 == 0 || (i).equals(Integer.MAX_VALUE)) {
-                        count = 0;
-                        for (String key : mapWears.keySet()) {
-                            pstmt.setString(1, key); //name
-                            pstmt.setInt(2, Integer.parseInt(mapWears.get(key)[0])); //i
-                            pstmt.setDouble(3, Double.parseDouble(mapWears.get(key)[1])); //min
-                            pstmt.setDouble(4, Double.parseDouble(mapWears.get(key)[2])); //max
-                            pstmt.addBatch();
-                        }
-                        mapWears.clear();
-
-                        int[] updateCounts = pstmt.executeBatch();
-                        int amountInserts = IntStream.of(updateCounts).sum();
-                        if (amountInserts != 0) {
-                            logger.info(amountInserts + " items were inserted!");
-                        }
-                        conn.commit();
-                    }
-
-                }
-            }
         }
+        return iterators;
+    }
 
+    private void insertWearValues(Map<String, String[]> mapWears) throws Exception {
+        String SQLinsert = "INSERT INTO steam.item_wears(name,id,min_wear,max_wear) "
+                + "VALUES(?,?,?,?)";
+
+        try (Connection conn = getConnection();PreparedStatement pstmt = conn.prepareStatement(SQLinsert, Statement.RETURN_GENERATED_KEYS)) {
+
+            for (String key : mapWears.keySet()) {
+                pstmt.setString(1, key); //name
+                pstmt.setInt(2, Integer.parseInt(mapWears.get(key)[0])); //i
+                pstmt.setDouble(3, Double.parseDouble(mapWears.get(key)[1])); //min
+                pstmt.setDouble(4, Double.parseDouble(mapWears.get(key)[2])); //max
+                pstmt.addBatch();
+            }
+
+            int[] updateCounts = pstmt.executeBatch();
+            int amountInserts = IntStream.of(updateCounts).sum();
+            if (amountInserts != 0) {
+                logger.info(amountInserts + " items were inserted!");
+            }
+            conn.commit();
+        }
+    }
+
+    private void crawlWearValues() throws Exception {
+        insertWearValues(crawlWearValuesFromCsgoStash(getItemsWithMissingWears()));
     }
 
     @Override

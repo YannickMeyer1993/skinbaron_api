@@ -4,26 +4,29 @@ import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import org.dom4j.Document;
+import org.dom4j.io.SAXReader;
 import org.json.JSONArray;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import static com.company.common.LoggingHelper.setUpClass;
 
+/**
+ * Constructor initializes all item master data
+ */
 public interface ItemDAO {
-
-    /**
-     * needs to be called in the beginning to initialize the data structure.
-     * @throws Exception
-     */
-    void init() throws Exception;
 
     /**
      * @param items List of Skinbaron Items that will be added to the underlying data structure
@@ -60,18 +63,6 @@ public interface ItemDAO {
      * @throws Exception
      */
     void cleanUp() throws Exception;
-
-    /**
-     * gets lower and upper bound of wear values of every Steam Item and adds them to the data structure.
-     * @throws Exception
-     */
-    void crawlWearValues() throws Exception;
-
-    /**
-     * gets additional information about every Steam Item like Collection and Quality and adds it to the data structure.
-     * @throws Exception
-     */
-    void insertItemInformations() throws Exception;
 
     /**
      * get last Skinbaron Id that was inserted to the data structure.
@@ -180,7 +171,7 @@ public interface ItemDAO {
     void insertPriceList(JsonNode payload) throws Exception;
 
     /**
-     * @return Map of Item Name as Key and String[name,weapon,collection,quality,name_without_exterior]
+     * @return Map of Item Name as Key and String[weapon,collection,quality,name_without_exterior]
      * @throws IOException
      * @throws InterruptedException
      */
@@ -298,4 +289,67 @@ public interface ItemDAO {
         return map;
 
     }
+
+    default Map<String, String[]> crawlWearValuesFromCsgoStash(ArrayList<Integer> missingIds) throws Exception {
+
+        Map<String, String[]> mapWears = new HashMap<>();
+
+        java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF);
+
+        com.gargoylesoftware.htmlunit.WebClient webClient = new com.gargoylesoftware.htmlunit.WebClient(com.gargoylesoftware.htmlunit.BrowserVersion.FIREFOX);
+        webClient.getOptions().setJavaScriptEnabled(true); // enable javascript
+        webClient.getOptions().setCssEnabled(true);
+        webClient.getOptions().setThrowExceptionOnScriptError(false); //even if there is error in js continue
+        webClient.waitForBackgroundJavaScriptStartingBefore(1000000);
+        webClient.waitForBackgroundJavaScript(10000000); // important! wait when javascript finishes rendering
+
+        int count = 0;
+        for (Integer i : missingIds) {
+
+            count++;
+            try {
+                String url = "https://csgostash.com/skin/" + i;
+                com.gargoylesoftware.htmlunit.html.HtmlPage page = webClient.getPage(url);
+
+                Thread.sleep(1000);
+
+                String name = page.getTitleText().replace(" - CS:GO Stash", "");
+                List<com.gargoylesoftware.htmlunit.html.DomElement> Items_min = page.getByXPath("//*[contains(@class, 'marker-wrapper wear-min-value')]");
+                List<com.gargoylesoftware.htmlunit.html.DomElement> Items_max = page.getByXPath("//*[contains(@class, 'marker-wrapper wear-max-value')]");
+                List<com.gargoylesoftware.htmlunit.html.DomElement> Items_name = page.getByXPath("//*[contains(@class, 'img-responsive center-block main-skin-img margin-top-sm margin-bot-sm')]");
+
+                try {
+                    String xml_min = Items_min.get(0).asXml();
+                    String xml_max = Items_max.get(0).asXml();
+
+                    Document document_min = new SAXReader().read(new StringReader(xml_min));
+                    String min = document_min.valueOf("/div/@data-wearmin");
+
+                    Document document_max = new SAXReader().read(new StringReader(xml_max));
+                    String max = document_max.valueOf("/div/@data-wearmax");
+
+                    //System.out.println(name + " " + min + " " + max);
+
+                    String[] infos = new String[3];
+                    //put in map
+                    infos[0] = "" + i;
+                    infos[1] = min;
+                    infos[2] = max;
+                    mapWears.put(name, infos);
+                } catch (IndexOutOfBoundsException e) {
+                    String[] infos = new String[3];
+                    //put in map
+                    infos[0] = "" + i;
+                    infos[1] = "0";
+                    infos[2] = "1";
+                    mapWears.put(name, infos);
+                }
+            } catch (FailingHttpStatusCodeException e) {
+                e.getStatusCode();
+            }
+        }
+
+        return mapWears;
+    }
+
 }

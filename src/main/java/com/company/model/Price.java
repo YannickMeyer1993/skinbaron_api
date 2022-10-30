@@ -6,7 +6,7 @@ import java.util.Date;
  * low level class price. Consists of price and timestamp
  */
 public class Price {
-    private final Double price;
+    private Double price=0.0;
     private final Date timestamp;
     private String ItemName;
 
@@ -23,7 +23,7 @@ public class Price {
     }
 
     public Double getValue() {
-        return price;
+        return price!=null?price:0;
     }
 
     public Date getTimestamp() {

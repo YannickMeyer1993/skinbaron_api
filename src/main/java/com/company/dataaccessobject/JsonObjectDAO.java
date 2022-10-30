@@ -4,6 +4,9 @@ import com.company.model.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.json.JSONArray;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
@@ -16,22 +19,6 @@ public class JsonObjectDAO implements ItemDAO {
     private final String RESOURCE_PATH = "src/main/resources/JsonObjectDAO";
 
     public JsonObjectDAO() throws Exception {
-        init();
-    }
-
-    public void print() throws Exception {
-        //print inventory as JSON
-
-        //print Skinbaron Sales as JSON
-
-        //print all items in itemController as JSON
-        for (String name: itemController.keySet()) {
-            itemController.get(name).print();
-        }
-    }
-
-    @Override
-    public void init() throws Exception {
 
         //crawl all needed information
         insertItemInformations();
@@ -40,7 +27,6 @@ public class JsonObjectDAO implements ItemDAO {
         //TODO read all json information from disk
 
     }
-
 
     @Override
     public String addSkinbaronItems(List<SkinbaronItem> items) throws Exception {
@@ -67,24 +53,34 @@ public class JsonObjectDAO implements ItemDAO {
 
     }
 
-    @Override
-    public void crawlWearValues() throws Exception {
+    private void crawlWearValues() throws Exception {
 
     }
 
-    @Override
-    public void insertItemInformations() throws Exception {
+    private void insertItemInformations() throws Exception {
         Map<String, String[]> map = crawlItemsFromCsgoExchange();
 
-        int i = 0;
         for (String name: map.keySet()) {
             if (!itemController.containsKey(name)) {
                 String[] receivedItem = map.get(name);
-                System.out.println(i);
-                i++;
-                //Item item = new Item(name,new ItemCollection(receivedItem[2],false),receivedItem[1],receivedItem[3],receivedItem[4]);
-                //itemController.put(name,item);
-                break;
+
+                Item item = new Item(name,new ItemCollection(receivedItem[1],false),receivedItem[0],receivedItem[2],receivedItem[3]);
+                itemController.put(name,item);
+            }
+        }
+
+        for (String item: itemController.keySet()) {
+            String nameJsonFile = RESOURCE_PATH+"/"+java.net.URLEncoder.encode(item, "UTF-8").replace("*","")+".json";
+            File f = new File(nameJsonFile);
+            if(f.exists() && !f.isDirectory()) {
+                continue;
+            }
+
+            try (PrintWriter out = new PrintWriter(new FileWriter(nameJsonFile))) {
+                out.write(itemController.get(item).getAsJson().toString());
+                System.out.println("JSON File for "+item+" has been created.");
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
