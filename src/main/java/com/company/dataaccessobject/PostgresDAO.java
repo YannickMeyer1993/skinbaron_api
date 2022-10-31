@@ -2,28 +2,20 @@ package com.company.dataaccessobject;
 
 import com.company.common.Constants;
 import com.company.common.PostgresHelper;
-import com.company.model.Item;
-import com.company.model.ItemCollection;
 import com.company.model.SkinbaronItem;
 import com.company.model.SteamPrice;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
-import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import org.dom4j.Document;
-import org.dom4j.io.SAXReader;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.sql.*;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.stream.IntStream;
 
 import static com.company.common.PostgresHelper.*;
@@ -39,8 +31,8 @@ public class PostgresDAO implements ItemDAO {
 
         if (checkIfResultsetIsEmpty("select * from steam.item_informations")) {
             insertItemInformations();
-            //crawlWearValues();
         }
+        //crawlWearValues();
     }
 
     @Override
@@ -110,7 +102,7 @@ public class PostgresDAO implements ItemDAO {
     }
 
     public void addSteamPrices(List<SteamPrice> prices) throws Exception {
-        String Insert = "INSERT INTO steam.steam_prices(name,quantity,price_euro) VALUES(?,?,?)";
+        String Insert = "INSERT INTO steam.steam_prices(name,quantity,price_euro,start_index) VALUES(?,?,?,?)";
 
         try (Connection connection = getConnection(); PreparedStatement pstmt = connection.prepareStatement(Insert, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -118,6 +110,7 @@ public class PostgresDAO implements ItemDAO {
                 pstmt.setString(1, price.getItemName());
                 pstmt.setInt(2, price.getQuantity());
                 pstmt.setDouble(3, price.getValue());
+                pstmt.setInt(4,price.getStartIndex());
                 pstmt.addBatch();
             }
 
@@ -446,14 +439,12 @@ public class PostgresDAO implements ItemDAO {
             for (int i = 250; i <= max_iteration; i++) {
                 iterators.add(i);
             }
-            iterators.add(Integer.MAX_VALUE);
+            //iterators.add(Integer.MAX_VALUE);
 
-            //select all ids and excute the complement
+            //select all ids and execute the complement
             try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select id from steam.item_wears")) {
-
                 while (rs.next()) {
-                    iterators.remove(rs.getInt("id"));
-                    System.out.println(rs.getInt("id"));
+                    iterators.remove(iterators.indexOf(rs.getInt("id")));
                 }
             }
         }
@@ -484,7 +475,9 @@ public class PostgresDAO implements ItemDAO {
     }
 
     private void crawlWearValues() throws Exception {
-        insertWearValues(crawlWearValuesFromCsgoStash(getItemsWithMissingWears()));
+        while (getItemsWithMissingWears().size() > 0) {
+            insertWearValues(crawlWearValuesFromCsgoStash(getItemsWithMissingWears(), 10));
+        }
     }
 
     @Override

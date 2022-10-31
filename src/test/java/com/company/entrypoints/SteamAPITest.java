@@ -17,9 +17,9 @@ public class SteamAPITest extends TestCase {
 
     public void testRequestNewSteamprice() throws Exception {
         UUID uuid = UUID.randomUUID();
-        requestInsertNewSteamprice(uuid.toString(), 0d, 1000);
+        requestInsertNewSteamprice(uuid.toString(), 0d, 1000,-100);
         assertFalse(checkIfResultsetIsEmpty("select * from steam.steam_prices where name='" + uuid + "'"));
-        executeDDL("delete from steam.steam_prices where name='" + uuid + "'");
+        executeDDL("delete from steam.steam_prices where name='" + uuid + "' and start_index = -100");
     }
 
     public void testGetSteamPriceForGivenName() throws Exception {

@@ -290,11 +290,12 @@ public interface ItemDAO {
 
     }
 
-    default Map<String, String[]> crawlWearValuesFromCsgoStash(ArrayList<Integer> missingIds) throws Exception {
+    default Map<String, String[]> crawlWearValuesFromCsgoStash(ArrayList<Integer> missingIds, int commitSize) throws Exception {
 
         Map<String, String[]> mapWears = new HashMap<>();
 
         java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF);
+        java.util.logging.Logger.getLogger("org.apache.http.wire").setLevel(Level.OFF);
 
         com.gargoylesoftware.htmlunit.WebClient webClient = new com.gargoylesoftware.htmlunit.WebClient(com.gargoylesoftware.htmlunit.BrowserVersion.FIREFOX);
         webClient.getOptions().setJavaScriptEnabled(true); // enable javascript
@@ -307,6 +308,9 @@ public interface ItemDAO {
         for (Integer i : missingIds) {
 
             count++;
+            if (count > commitSize) {
+                break;
+            }
             try {
                 String url = "https://csgostash.com/skin/" + i;
                 com.gargoylesoftware.htmlunit.html.HtmlPage page = webClient.getPage(url);
@@ -327,8 +331,6 @@ public interface ItemDAO {
 
                     Document document_max = new SAXReader().read(new StringReader(xml_max));
                     String max = document_max.valueOf("/div/@data-wearmax");
-
-                    //System.out.println(name + " " + min + " " + max);
 
                     String[] infos = new String[3];
                     //put in map

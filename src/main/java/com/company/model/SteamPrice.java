@@ -10,13 +10,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class SteamPrice extends Price{
 
     private Integer quantity;
+    private Integer startIndex;
 
     public SteamPrice(@JsonProperty("itemname") String ItemName,
                       Date timestamp,
                       @JsonProperty("price") Double price,
-                      @JsonProperty("quantity") Integer quantity) {
+                      @JsonProperty("quantity") Integer quantity,
+                      @JsonProperty("steamstartindex") Integer startIndex) {
         super((timestamp!=null?timestamp: java.sql.Date.valueOf(LocalDate.now())), price, ItemName);
         this.quantity = quantity;
+        this.startIndex=startIndex;
     }
 
     /**
@@ -33,6 +36,10 @@ public class SteamPrice extends Price{
      */
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
+    }
+
+    public Integer getStartIndex() {
+        return this.startIndex;
     }
 
 }

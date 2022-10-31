@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.logging.Level;
 
 import static com.company.common.LoggingHelper.setUpClass;
 import static com.company.common.PostgresHelper.*;
@@ -18,6 +19,7 @@ import static com.company.entrypoints.SteamAPI.getSteamPriceForGivenName;
 public class PostgresDAOTest extends TestCase {
 
     public void testInit() throws Exception {
+        setUpClass();
         PostgresDAO dao = new PostgresDAO();
         assertFalse(checkIfResultsetIsEmpty("select * from information_schema.schemata s where schema_name = 'steam';"));
         assertFalse(checkIfResultsetIsEmpty("select * from information_schema.\"tables\" t \n" +
@@ -40,9 +42,9 @@ public class PostgresDAOTest extends TestCase {
     public void testAddSteamPrice() throws Exception {
         PostgresDAO dao = new PostgresDAO();
         String ItemName = "Item Name";
-        SteamPrice price = new SteamPrice(ItemName,null,10d,10);
+        SteamPrice price = new SteamPrice(ItemName,null,10d,10,0);
         dao.addSteamPrice(price);
-        assertFalse(checkIfResultsetIsEmpty("select * from steam.steam_prices where name = 'Item Name'"));
+        assertFalse(checkIfResultsetIsEmpty("select * from steam.steam_prices where name = 'Item Name' and "));
         executeDDL("DELETE from steam.steam_prices where name = 'Item Name'");
     }
 

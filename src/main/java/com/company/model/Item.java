@@ -11,8 +11,6 @@ import static com.company.common.Constants.*;
 public class Item {
     private final String name;
 
-    private ItemCollection collection;
-
     private Price currentSteamPrice = null;
     private Price cheapestSkinbaronPrice = null;
 
@@ -24,32 +22,11 @@ public class Item {
     private final List<SkinbaronItem> skinbaronItemList = new ArrayList<>();
     private final List<SteamPrice> steamPriceList = new ArrayList<>();
 
-    public Item(String itemName, ItemCollection collection,String weaponType,String quality,String nameWithoutExterior) {
+    public Item(String itemName,String weaponType,String quality,String nameWithoutExterior) {
         this.name = itemName;
-        this.collection = collection;
         this.weaponType = weaponType;
         this.quality = quality;
         this.nameWithoutExterior = nameWithoutExterior;
-    }
-
-    public void print() {
-        System.out.println(getAsJson().toString());
-    }
-
-    public JSONObject getAsJson() {
-        JSONObject item = new JSONObject();
-        item.put("name",name);
-        item.put("collection",collection.getName());
-        if (currentSteamPrice!=null) {
-            item.put("currentSteamPrice", currentSteamPrice.getValue());
-        }
-        if (cheapestSkinbaronPrice!=null) {
-            item.put("cheapestSkinbaronPrice", cheapestSkinbaronPrice.getValue());
-        }
-        item.put("skinbaronItemList",new JSONArray(skinbaronItemList));
-        item.put("steamPriceList",new JSONArray(steamPriceList));
-
-        return item;
     }
 
     public String getName() {
@@ -87,10 +64,6 @@ public class Item {
                 cheapestSkinbaronPrice = item.getPrice();
             }
         }
-    }
-
-    public ItemCollection getCollection() {
-        return collection;
     }
 
     public List<SkinbaronItem> getSkinbaronItemList() {

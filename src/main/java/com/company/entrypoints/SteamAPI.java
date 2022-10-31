@@ -86,6 +86,7 @@ public class SteamAPI {
 
         JSONArray insertArray = new JSONArray();
 
+        int add_to_start = 0;
         for (Object o: ((JSONArray)resultJson.get("results"))) {
             if (o instanceof JSONObject) {
                 String name = ((JSONObject) o).getString("hash_name");
@@ -102,21 +103,23 @@ public class SteamAPI {
                 //o1.put("sell_price",sell_price); //what is this value?
                 o1.put("price",price);
 
-                //TODO o1.put("start_parameter",start);
+                int steamStartIndex = start+add_to_start;
+                o1.put("start_parameter",steamStartIndex);
 
                 insertArray.put(o1);
 
                 //TODO batch insert over insertArray
-                requestInsertNewSteamprice(name,price,quantity);
+                requestInsertNewSteamprice(name,price,quantity,steamStartIndex);
 
             }
+            add_to_start++;
         }
 
         //logger.info(insertArray.toString());
         return true;
     }
 
-    public static void requestInsertNewSteamprice(String name,Double price, int quantity) {
+    public static void requestInsertNewSteamprice(String name, Double price, int quantity, Integer steamStartIndex) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -125,6 +128,7 @@ public class SteamAPI {
         JsonObject.put("itemname", name);
         JsonObject.put("price", price);
         JsonObject.put("quantity",quantity);
+        JsonObject.put("steamstartindex",steamStartIndex);
 
         HttpEntity<String> request = new HttpEntity<>(JsonObject.toString(), headers);
 
@@ -181,11 +185,11 @@ public class SteamAPI {
                 return_price = price_euro;
             }
 
-            requestInsertNewSteamprice(name,price_euro,quantity);
+            requestInsertNewSteamprice(name,price_euro,quantity,null);
         }
 
         if (!item_found){
-            requestInsertNewSteamprice(hash_name,0d,0); //does not exist
+            requestInsertNewSteamprice(hash_name,0d,0,null); //does not exist
             return_price = 0d;
         }
 

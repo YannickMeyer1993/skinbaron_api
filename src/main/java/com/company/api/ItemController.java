@@ -34,6 +34,7 @@ public class ItemController {
     @RequestMapping("AddSteamPrice")
     @PostMapping
     public void addNewSteamPrice(@RequestBody SteamPrice price) throws Exception {
+        System.out.println("start " + price.getStartIndex());
         insertItemsService.addNewSteamPrice(price);
     }
 
