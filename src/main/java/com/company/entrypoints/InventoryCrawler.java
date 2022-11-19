@@ -389,7 +389,7 @@ public class InventoryCrawler {
     public static void getItemPricesInventory() throws Exception {
 
         try(Connection conn = getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select start_index from steam.inventory_current_prices s\n" +
-                " where \"date\" != current_date or 1=1 order by start_index;")) {
+                " where \"date\" != current_date order by start_index;")) {
             List<Integer> indexList = new ArrayList();
             while (rs.next()) {
                 indexList.add(rs.getInt("start_index"));
@@ -408,14 +408,15 @@ public class InventoryCrawler {
 
             System.out.println(betterList.size() + " Searches are needed.");
 
-            Boolean repeat = true;
-
             for (int i: betterList) {
+                Boolean repeat = true;
                 while (repeat) {
                     try {
-                        repeat = requestSearch(i);
+                        repeat = false;
+                        requestSearch(i);
                         Thread.sleep(3000);
                     } catch (Exception e) {
+                        repeat = true;
                         logger.error("Retry for Index: "+i);
                         Thread.sleep(7000);
                     }

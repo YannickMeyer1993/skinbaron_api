@@ -53,6 +53,7 @@ public class SteamAPITest extends TestCase {
     }
 
     public void testRequestSearch() throws Exception {
+        setUpClass();
         requestSearch(2000);
     }
 }

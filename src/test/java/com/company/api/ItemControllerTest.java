@@ -34,29 +34,6 @@ public class ItemControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    public void testAddNewSteamPrice() throws Exception {
-        String url = "http://localhost:8080/api/v1/AddSteamPrice";
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        JSONObject JsonObject = new JSONObject();
-        UUID uuid = UUID.randomUUID();
-
-        JsonObject.put("itemname", uuid.toString());
-        JsonObject.put("price", 3d);
-        JsonObject.put("quantity",2);
-        
-        HttpEntity<String> request = new HttpEntity<>(JsonObject.toString(), headers);
-
-        restTemplate.postForObject(url, request, String.class);
-
-        assertFalse(checkIfResultsetIsEmpty("Select * from steam.steam_prices where name='"+uuid+"'"));
-        executeDDL("DELETE FROM steam.steam_prices where name='"+uuid+"'");
-
-    }
-
-    @Test
     public void testAddNewSkinbaronItem() throws Exception {
         String url = "http://localhost:8080/api/v1/AddSkinbaronItem";
 

@@ -44,7 +44,7 @@ public class PostgresDAOTest extends TestCase {
         String ItemName = "Item Name";
         SteamPrice price = new SteamPrice(ItemName,null,10d,10,0);
         dao.addSteamPrice(price);
-        assertFalse(checkIfResultsetIsEmpty("select * from steam.steam_prices where name = 'Item Name' and "));
+        assertFalse(checkIfResultsetIsEmpty("select * from steam.steam_prices where name = 'Item Name'"));
         executeDDL("DELETE from steam.steam_prices where name = 'Item Name'");
     }
 
