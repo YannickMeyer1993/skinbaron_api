@@ -3,6 +3,7 @@ package com.company.entrypoints;
 import junit.framework.TestCase;
 import org.json.JSONArray;
 
+import static com.company.common.LoggingHelper.setUpClass;
 import static com.company.common.PostgresHelper.checkIfResultsetIsEmpty;
 import static com.company.common.PostgresHelper.executeDDL;
 import static com.company.entrypoints.InventoryCrawler.*;
@@ -41,5 +42,10 @@ public class InventoryCrawlerTest extends TestCase {
         insertInventory();
         assertTrue(checkIfResultsetIsEmpty("select * from steam.inventory where name = 'Gibt es nicht' and inv_type='Test Inv'"));
 
+    }
+
+    public void testGetItemPricesInventory() throws Exception {
+        setUpClass();
+        getItemPricesInventory();
     }
 }

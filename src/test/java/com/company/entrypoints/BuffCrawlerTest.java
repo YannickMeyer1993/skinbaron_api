@@ -1,16 +1,8 @@
 package com.company.entrypoints;
 
 import junit.framework.TestCase;
-import org.dom4j.DocumentException;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
 
 import static com.company.common.LoggingHelper.setUpClass;
-import static com.company.common.PostgresHelper.getConnection;
 import static com.company.entrypoints.BuffCrawler.*;
 
 public class BuffCrawlerTest extends TestCase {

@@ -23,9 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 import static com.company.common.Constants.*;
 import static com.company.common.CurrencyHelper.getConversionRateToEuro;
@@ -33,7 +31,7 @@ import static com.company.common.LoggingHelper.setUpClass;
 import static com.company.common.PasswordHelper.readPasswordFromFile;
 import static com.company.common.PostgresHelper.getConnection;
 import static com.company.entrypoints.SkinbaronCrawler.getBalance;
-import static com.company.entrypoints.SteamAPI.getSteamPriceForGivenName;
+import static com.company.entrypoints.SteamAPI.requestSearch;
 
 
 public class InventoryCrawler {
@@ -263,7 +261,6 @@ public class InventoryCrawler {
         }
     }
 
-    
     public static void getSkinbaronSalesForInventory(JSONArray inventory) throws Exception {
 
         Map<String,Integer> amountMap = new HashMap<>();
@@ -385,13 +382,44 @@ public class InventoryCrawler {
         restTemplate.postForObject(url, request, String.class);
     }
 
+    /**
+     * get start_indexes from current_inventory_prices for inventory items and invoke methode requestSearch(start_index);
+     * @throws Exception
+     */
     public static void getItemPricesInventory() throws Exception {
-        try(Connection conn = getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select distinct name from steam.inventory_current_prices s\n" +
-                " where \"date\" != current_date or price_per_unit=0 order by name;")) {
-            String name;
+
+        try(Connection conn = getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select start_index from steam.inventory_current_prices s\n" +
+                " where \"date\" != current_date or 1=1 order by start_index;")) {
+            List<Integer> indexList = new ArrayList();
             while (rs.next()) {
-                name = rs.getString("name");
-                getSteamPriceForGivenName(name);
+                indexList.add(rs.getInt("start_index"));
+            }
+
+            logger.info("Got " + indexList.size() + " item to search for.");
+            List<Integer> betterList = new ArrayList(indexList);
+
+            //clean up indexList
+            //for each item in the indexList clean up the next 99
+            for (int i: indexList) {
+                for (int j=i+1;j<i+100;j++) {
+                    betterList.remove((Object) j);
+                }
+            }
+
+            System.out.println(betterList.size() + " Searches are needed.");
+
+            Boolean repeat = true;
+
+            for (int i: betterList) {
+                while (repeat) {
+                    try {
+                        repeat = requestSearch(i);
+                        Thread.sleep(3000);
+                    } catch (Exception e) {
+                        logger.error("Retry for Index: "+i);
+                        Thread.sleep(7000);
+                    }
+                }
             }
         }
     }

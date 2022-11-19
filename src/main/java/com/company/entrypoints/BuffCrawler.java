@@ -85,6 +85,7 @@ public class BuffCrawler {
 
     public static double getBuffItemNoExterior(int id) throws Exception {
 
+        //TODO hier gehts kaputt
         logger.info("Buff Id: "+id);
 
         DecimalFormat df = new DecimalFormat("0.00");
@@ -198,6 +199,7 @@ public class BuffCrawler {
             double price_euro;
 
             try {
+                System.out.println(element.asNormalizedText()); //TODO hier gehts kaputt
                 String price_rmb = element.asNormalizedText().replaceAll(" ", "").split("¥")[1];
                 price_euro = Double.parseDouble(df.format(conversionRateRMBinEUR * Double.parseDouble(price_rmb)).replace(",", "."));
             } catch (ArrayIndexOutOfBoundsException e) {

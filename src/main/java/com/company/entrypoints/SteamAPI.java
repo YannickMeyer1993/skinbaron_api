@@ -25,10 +25,15 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.StringReader;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.company.common.CurrencyHelper.getConversionRateToEuro;
 import static com.company.common.LoggingHelper.setUpClass;
+import static com.company.common.PostgresHelper.getConnection;
 
 public class SteamAPI {
     private static final Logger logger = LoggerFactory.getLogger(SteamAPI.class);
@@ -39,7 +44,6 @@ public class SteamAPI {
         setUpClass(); //disable Logging
         Boolean repeat = true;
         int start = 0;
-        //TODO start with last successfull index of current date, else =0
 
         while (repeat) {
             try {
@@ -53,6 +57,11 @@ public class SteamAPI {
         }
     }
 
+    /**
+     * @param start start index in search
+     * @return true, if end is not reached yet. Else false
+     * @throws Exception
+     */
     static Boolean requestSearch(int start) throws Exception {
         HttpPost httpPost = new HttpPost("https://steamcommunity.com/market/search/render/?search_descriptions=0&sort_column=name&sort_dir=desc&appid=730&norender=1&count=500&currency=3&start="+start);
         httpPost.setHeader("Content.Type", "application/json");
@@ -114,8 +123,6 @@ public class SteamAPI {
             }
             add_to_start++;
         }
-
-        //logger.info(insertArray.toString());
         return true;
     }
 
@@ -135,67 +142,35 @@ public class SteamAPI {
         restTemplate.postForObject(UrlPost, request, String.class);
     }
 
+    public static int getStartIndexForGivenName(String hash_name) throws Exception {
+        try(Connection conn = getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select start_index from steam.steam_item_indexes s\n" +
+                " where s.name = '"+hash_name+"';")) {
+
+            rs.next();
+            return rs.getInt("start_index");
+        }
+    }
+
     public static double getSteamPriceForGivenName(String hash_name) throws Exception {
 
-        conversionRateUSDinEUR = getConversionRateToEuro("USD");
-
-        double return_price = 0.0;
-        boolean item_found = false;
-
-        String url = "https://steamcommunity.com/market/search?q="+java.net.URLDecoder.decode(hash_name, "UTF-8")+"&appid=730#p1_default_desc";
-
-        WebClient webClient = new WebClient(BrowserVersion.FIREFOX);
-        webClient.getOptions().setJavaScriptEnabled(true); // enable javascript
-        webClient.getOptions().setCssEnabled(true);
-        webClient.getOptions().setThrowExceptionOnScriptError(false); //even if there is error in js continue
-        webClient.waitForBackgroundJavaScriptStartingBefore(1000000);
-        webClient.waitForBackgroundJavaScript(10000000); // important! wait when javascript finishes rendering
-        HtmlPage page = webClient.getPage(url);
-
-        List<DomElement> Items = page.getByXPath("//*[contains(@class, 'market_listing_row market_recent_listing_row market_listing_searchresult')]");
-
-        for (DomElement element : Items) {
-            String item_xml = element.asXml();
-            Document document = new SAXReader().read(new StringReader(item_xml));
-
-            String name = document.valueOf("/div/@data-hash-name");
-            int quantity = Integer.parseInt(document.valueOf("/div/div/div/span/span/@data-qty"));
-            double price = Double.parseDouble(document.valueOf("/div/div/div/span/span/@data-price"));
-            int currency = Integer.parseInt(document.valueOf("/div/div/div/span/span/@data-currency"));
-
-            if (name == null) {
-                throw new Exception("Fehlerhafte Ergebnisse für Skin: " + hash_name);
+        Boolean repeat = true;
+        while (repeat) {
+            try {
+                repeat = false;
+                requestSearch(getStartIndexForGivenName(hash_name));
+                Thread.sleep(3000);
+            } catch (Exception e) {
+                repeat = true;
+                logger.error("Retry for Item: "+hash_name);
+                Thread.sleep(7000);
             }
-
-            java.text.DecimalFormat df = new java.text.DecimalFormat("0.00");
-            df.setRoundingMode(java.math.RoundingMode.HALF_DOWN);
-
-            double price_euro;
-            if (1 == currency) {
-                price_euro = Double.parseDouble(df.format(conversionRateUSDinEUR * price / 100).replace(",", "."));
-            } else if (3 == currency) {
-                price_euro = Double.parseDouble(df.format(price / 100).replace(",", "."));
-            } else {
-                throw new Exception("Currency nicht USD oder EUR");
-            }
-
-            item_found = item_found || hash_name.equals(name);
-
-            if (hash_name.equals(name)){
-                return_price = price_euro;
-            }
-
-            requestInsertNewSteamprice(name,price_euro,quantity,null);
         }
 
-        if (!item_found){
-            requestInsertNewSteamprice(hash_name,0d,0,null); //does not exist
-            return_price = 0d;
+        try(Connection conn = getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select s.price_euro from steam.steam_current_prices s\n" +
+                " where s.name = '"+hash_name+"';")) {
+
+            rs.next();
+            return rs.getDouble("price_euro");
         }
-
-        logger.info("Item \""+hash_name+"\" costs "+return_price+" Euro.");
-
-        Thread.sleep((long) 20*1000);
-        return return_price;
     }
 }

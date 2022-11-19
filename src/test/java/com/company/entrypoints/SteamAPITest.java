@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Scanner;
 import java.util.UUID;
 
+import static com.company.common.LoggingHelper.setUpClass;
 import static com.company.common.PostgresHelper.checkIfResultsetIsEmpty;
 import static com.company.common.PostgresHelper.executeDDL;
 import static com.company.entrypoints.InventoryCrawler.getItemsFromSteamHTTP;
@@ -46,6 +47,7 @@ public class SteamAPITest extends TestCase {
 
 
     public void testTestGetSteamPriceForGivenName() throws Exception {
+        setUpClass();
         double price = SteamAPI.getSteamPriceForGivenName("Name Tag");
         assertTrue(price> 1.5);
     }
