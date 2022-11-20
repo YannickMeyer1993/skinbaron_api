@@ -28,6 +28,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.IntStream;
@@ -85,7 +86,6 @@ public class BuffCrawler {
 
     public static double getBuffItemNoExterior(int id) throws Exception {
 
-        //TODO hier gehts kaputt
         logger.info("Buff Id: "+id);
 
         DecimalFormat df = new DecimalFormat("0.00");
@@ -121,13 +121,16 @@ public class BuffCrawler {
         double min_price_rmb = Double.MAX_VALUE;
         //should be Items.size() = # on website - 1 for ref price
         for (DomElement elem : Items) {
-
+            String priceString = null;
             try {
-                double price_rmb = Double.parseDouble(elem.asNormalizedText().replace("¥ ", "").trim());
+                priceString = elem.asNormalizedText().replace("¥ ", "").trim();
+                priceString = priceString.substring(0,priceString.indexOf("("));
+                double price_rmb = Double.parseDouble(priceString);
                 if (min_price_rmb > price_rmb) {
                     min_price_rmb = price_rmb;
                 }
             } catch (NumberFormatException e) {
+                logger.info("This is no number: "+priceString);
                 //do nothing
             }
 
@@ -175,10 +178,10 @@ public class BuffCrawler {
             if (name_xml.valueOf("span") != null) {
                 hash_name = name_xml.valueOf("span").trim();
             }
-
         }
+        logger.info("Buff Item Name: "+hash_name);
 
-        List<com.gargoylesoftware.htmlunit.html.DomElement> Items = page.getByXPath("//*[contains(@class, 'relative-goods')]");
+        List<com.gargoylesoftware.htmlunit.html.DomElement> Items = page.getByXPath("//*[contains(@class, 'scope-btns')]");
 
         JSONArray array = new JSONArray();
         double returnValue = 0;
@@ -199,7 +202,6 @@ public class BuffCrawler {
             double price_euro;
 
             try {
-                System.out.println(element.asNormalizedText()); //TODO hier gehts kaputt
                 String price_rmb = element.asNormalizedText().replaceAll(" ", "").split("¥")[1];
                 price_euro = Double.parseDouble(df.format(conversionRateRMBinEUR * Double.parseDouble(price_rmb)).replace(",", "."));
             } catch (ArrayIndexOutOfBoundsException e) {
