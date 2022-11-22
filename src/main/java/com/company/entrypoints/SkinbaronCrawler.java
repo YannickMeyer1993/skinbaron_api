@@ -160,6 +160,11 @@ public class SkinbaronCrawler {
         HttpEntity entity = new ByteArrayEntity(jsonInputString.getBytes(StandardCharsets.UTF_8));
         httpPost.setEntity(entity);
         HttpResponse response = client.execute(httpPost);
+
+        if (response.getStatusLine().getStatusCode()!=200) {
+            throw new Exception(response.getStatusLine().toString());
+        }
+
         String result = EntityUtils.toString(response.getEntity());
 
         try {
