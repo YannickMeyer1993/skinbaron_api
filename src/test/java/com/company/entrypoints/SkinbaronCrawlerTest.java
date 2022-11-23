@@ -3,6 +3,7 @@ package com.company.entrypoints;
 import junit.framework.TestCase;
 import org.json.JSONObject;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 import static com.company.common.LoggingHelper.setUpClass;
@@ -29,6 +30,7 @@ public class SkinbaronCrawlerTest extends TestCase {
         //get an existing id
 
         String[] result = Search( secret, after_saleid,1);
+        System.out.println(Arrays.toString(result));
         assertTrue(Integer.parseInt(result[0])>=0);
         assertFalse(checkIfResultsetIsEmpty("select * from steam.skinbaron_items where id='"+result[1]+"'"));
         executeDDL("delete from steam.skinbaron_items where id='"+result[1]+"'");

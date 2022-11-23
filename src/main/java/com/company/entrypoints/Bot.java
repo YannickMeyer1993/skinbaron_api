@@ -123,7 +123,7 @@ public class Bot {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
 
-        headers.add("Content.Type", "application/json");
+        headers.add("Content-Type", "application/json");
         headers.add("x-requested-with", "XMLHttpRequest");
         headers.add("Accept", "application/json");
         headers.setContentType(MediaType.APPLICATION_JSON);

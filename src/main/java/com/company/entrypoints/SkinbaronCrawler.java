@@ -47,7 +47,7 @@ public class SkinbaronCrawler {
 
         //noinspection InfiniteLoopStatement
         while (true) { //infinite times
-            while (true) { //as long as there are inserts
+            while (1==1 || 1==0) { //as long as there are inserts
                 try {
                     String[] output = Search(secret, id,50);
                     if (Integer.parseInt(output[0]) == 0) {
@@ -77,7 +77,7 @@ public class SkinbaronCrawler {
         String jsonInputString = "{\"appId\": 730,\"apikey\": \"" + secret + "\"}";
 
         HttpPost httpPost = new HttpPost("https://api.skinbaron.de/GetPriceList");
-        httpPost.setHeader("Content.Type", "application/json");
+        httpPost.setHeader("Content-Type", "application/json");
         httpPost.setHeader("x-requested-with", "XMLHttpRequest");
         httpPost.setHeader("Accept", "application/json");
 
@@ -148,7 +148,7 @@ public class SkinbaronCrawler {
         String jsonInputString = "{\"apikey\": \"" + secret + "\",\"appid\": 730,\"min\":0.05,\"items_per_page\": "+items_per_page + (!"".equals(after_saleid) ? ",\"after_saleid\":\"" + after_saleid + "\"" : "") + "}";
 
         HttpPost httpPost = new HttpPost("https://api.skinbaron.de/Search");
-        httpPost.setHeader("Content.Type", "application/json");
+        httpPost.setHeader("Content-Type", "application/json");
         httpPost.setHeader("x-requested-with", "XMLHttpRequest");
         httpPost.setHeader("Accept", "application/json");
 
@@ -260,7 +260,7 @@ public class SkinbaronCrawler {
 
         System.out.println(jsonInputString);
         HttpPost httpPost = new HttpPost("https://api.skinbaron.de/Search");
-        httpPost.setHeader("Content.Type", "application/json");
+        httpPost.setHeader("Content-Type", "application/json");
         httpPost.setHeader("x-requested-with", "XMLHttpRequest");
         httpPost.setHeader("Accept", "application/json");
 
@@ -297,7 +297,7 @@ public class SkinbaronCrawler {
             String jsonInputString = "{\"apikey\": \"" + secret + "\",\"type\":4,\"appid\": 730,\"items_per_page\": 50" + (queryId == null ? "" : ",\"after_saleid\":\"" + queryId + "\"") + ",sort_order:2}";
 
             HttpPost httpPost = new HttpPost("https://api.skinbaron.de/GetSales");
-            httpPost.setHeader("Content.Type", "application/json");
+            httpPost.setHeader("Content-Type", "application/json");
             httpPost.setHeader("x-requested-with", "XMLHttpRequest");
             httpPost.setHeader("Accept", "application/json");
 
@@ -383,7 +383,7 @@ public class SkinbaronCrawler {
         String jsonInputString = "{\"apikey\": \"" + secret + "\"}";
 
         HttpPost httpPost = new HttpPost("https://api.skinbaron.de/GetBalance");
-        httpPost.setHeader("Content.Type", "application/json");
+        httpPost.setHeader("Content-Type", "application/json");
         httpPost.setHeader("x-requested-with", "XMLHttpRequest");
         httpPost.setHeader("Accept", "application/json");
 

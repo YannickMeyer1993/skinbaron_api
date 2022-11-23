@@ -222,7 +222,7 @@ public class InventoryCrawler {
         String jsonInputString = "{\"apikey\": \"" + secret + "\",\"type\": 2,\"appid\": 730,\"items_per_page\": 50}";
 
         HttpPost httpPost = new HttpPost("https://api.skinbaron.de/GetInventory");
-        httpPost.setHeader("Content.Type", "application/json");
+        httpPost.setHeader("Content-Type", "application/json");
         httpPost.setHeader("x-requested-with", "XMLHttpRequest");
         httpPost.setHeader("Accept", "application/json");
 
@@ -310,7 +310,7 @@ public class InventoryCrawler {
         String id = null;
 
         HttpPost httpPost = new HttpPost("https://api.skinbaron.de/GetSales");
-        httpPost.setHeader("Content.Type", "application/json");
+        httpPost.setHeader("Content-Type", "application/json");
         httpPost.setHeader("x-requested-with", "XMLHttpRequest");
         httpPost.setHeader("Accept", "application/json");
 

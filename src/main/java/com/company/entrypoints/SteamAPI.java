@@ -64,7 +64,7 @@ public class SteamAPI {
      */
     static Boolean requestSearch(int start) throws Exception {
         HttpPost httpPost = new HttpPost("https://steamcommunity.com/market/search/render/?search_descriptions=0&sort_column=name&sort_dir=desc&appid=730&norender=1&count=500&currency=3&start="+start);
-        httpPost.setHeader("Content.Type", "application/json");
+        httpPost.setHeader("Content-Type", "application/json");
         httpPost.setHeader("x-requested-with", "XMLHttpRequest");
         httpPost.setHeader("Accept", "application/json");
 
