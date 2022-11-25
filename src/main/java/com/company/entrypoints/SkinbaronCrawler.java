@@ -46,7 +46,7 @@ public class SkinbaronCrawler {
         String id = getLastSkinbaronId();
 
         //noinspection InfiniteLoopStatement
-        while (true) { //infinite times
+        while (true) {//infinite times
             while (1==1 || 1==0) { //as long as there are inserts
                 try {
                     String[] output = Search(secret, id,50);
@@ -144,7 +144,6 @@ public class SkinbaronCrawler {
         int amountInserts = 0;
 
         logger.info("Skinbaron API Search has been called.");
-        //Thread.sleep(1000);
         String jsonInputString = "{\"apikey\": \"" + secret + "\",\"appid\": 730,\"min\":0.05,\"items_per_page\": "+items_per_page + (!"".equals(after_saleid) ? ",\"after_saleid\":\"" + after_saleid + "\"" : "") + "}";
 
         HttpPost httpPost = new HttpPost("https://api.skinbaron.de/Search");
@@ -255,7 +254,7 @@ public class SkinbaronCrawler {
         String secret = readPasswordFromFile("C:/passwords/api_secret.txt");
 
         logger.info("Skinbaron API Search has been called.");
-        Thread.sleep(1000);
+
         String jsonInputString = "{\"apikey\": \"" + secret + "\",\"appid\": 730,\"search_item\"=\"" + name + "\",\"max\"=" + price + ",\"items_per_page\": 50}";
 
         System.out.println(jsonInputString);

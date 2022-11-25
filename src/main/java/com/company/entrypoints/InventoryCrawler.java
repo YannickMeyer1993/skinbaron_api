@@ -414,7 +414,7 @@ public class InventoryCrawler {
                     try {
                         repeat = false;
                         requestSearch(i);
-                        Thread.sleep(3000);
+                        //Thread.sleep(3000);
                     } catch (Exception e) {
                         repeat = true;
                         logger.error("Retry for Index: "+i);
