@@ -179,6 +179,7 @@ public class SkinbaronCrawler {
                         //set id
                         id = ((JSONObject) o).getString("id");
 
+                        //TODO Batch
                         alreadyExisting = requestInsertSkinbaronItem((JSONObject) o);
 
                         if (!alreadyExisting) {

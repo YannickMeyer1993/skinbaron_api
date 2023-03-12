@@ -51,6 +51,7 @@ public class SteamAPI {
                 Thread.sleep(3000);
                 start+=100;
             } catch (Exception e) {
+                logger.error(e.getMessage());
                 logger.error("Retry for Index: "+start);
                 Thread.sleep(7000);
             }

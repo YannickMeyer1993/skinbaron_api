@@ -39,7 +39,6 @@ public class Bot {
         double max_price = min(sc.nextDouble(), balance);
 
         while (true) {
-
             logger.info("Bot is started...");
 
             JSONArray array = getItemsToBuy();
@@ -65,6 +64,7 @@ public class Bot {
                     }
 
                     if (price > max_price) {
+                        logger.info("Preis höher als max Preis.");
                         continue;
                     }
 
@@ -89,10 +89,10 @@ public class Bot {
                         buff_price = current_price;
                     }
 
-                    if (price <= buff_price*0.95) {
-                        //logger.info("Did not buy item, because buff price is cheaper than Skinbaron price!");
-                        continue;
-                    }
+                    //if (price <= buff_price*0.95) {
+                    //    logger.info("Did not buy item, because buff price is cheaper than Skinbaron price!");
+                    //    continue;
+                    //}
 
                     for (String id : skinbaron_ids.split(",")) {
                         logger.info(name + " " + id + " " + price);

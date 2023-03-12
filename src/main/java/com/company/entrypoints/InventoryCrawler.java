@@ -61,10 +61,12 @@ public class InventoryCrawler {
 
         //add result to inventory
         getSkinbaronInventory(inventory);
+        Thread.sleep(60000);
         getItemsfromInventory(inventory,"https://steamcommunity.com/inventory/76561198286004569/730/2?count=2000", INV_TYPE_steam);
-        getItemsfromInventory(inventory,"https://steamcommunity.com/inventory/76561198331678576/730/2?count=2000", INV_TYPE_smurf);
+        Thread.sleep(60000);
+        //getItemsfromInventory(inventory,"https://steamcommunity.com/inventory/76561198331678576/730/2?count=2000", INV_TYPE_smurf);
+        //Thread.sleep(60000);
         getSkinbaronSalesForInventory(inventory);
-        getStorageItems(inventory);
 
         getSkinbaronSalesForTable();
         insertInventory();
@@ -74,6 +76,7 @@ public class InventoryCrawler {
 
     public static void getItemsfromInventory(JSONArray inventory, String inventoryurl, String type) throws Exception {
 
+        Thread.sleep(5000);
         logger.info("Getting inventory: " + type);
         HttpGet httpGet = new HttpGet(inventoryurl);
 
@@ -83,10 +86,10 @@ public class InventoryCrawler {
                 .build();
 
         HttpResponse response = client.execute(httpGet);
+        Thread.sleep(30000);
+        String result = EntityUtils.toString(response.getEntity());
 
-        String resultJSON = EntityUtils.toString(response.getEntity());
-
-        HashMap<String, Integer> map = getItemsFromSteamHTTP(resultJSON);
+        HashMap<String, Integer> map = getItemsFromSteamHTTP(result);
 
         for (String key : map.keySet()) {
             JSONObject o = new JSONObject();
@@ -96,22 +99,6 @@ public class InventoryCrawler {
 
             inventory.put(o);
         }
-
-    }
-
-    public static void getStorageItems(JSONArray inventory) throws IOException {
-
-        logger.info("Getting storage items");
-
-        HttpGet httpGet = new HttpGet("https://steamcommunity.com/inventory/76561198286004569/730/2?count=2000");
-
-        HttpClient client = HttpClients.custom()
-                .setDefaultRequestConfig(RequestConfig.custom()
-                        .setCookieSpec(CookieSpecs.STANDARD).build())
-                .build();
-
-        HttpResponse response = client.execute(httpGet);
-        String result = EntityUtils.toString(response.getEntity());
 
         JSONObject result_json = (JSONObject) new JSONTokener(result).nextValue();
 
@@ -164,6 +151,7 @@ public class InventoryCrawler {
                 inventory.put(o);
             }
         }
+
     }
 
     public static HashMap<String, Integer> getItemsFromSteamHTTP(String resultJSON) {

@@ -53,6 +53,7 @@ public class BuffCrawler {
 
     public static void main(String[] args) throws Exception {
         setUpClass();
+        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "4");
 
         //TODO Display count of unknown Buff Ids
 
@@ -124,7 +125,7 @@ public class BuffCrawler {
             String priceString = null;
             try {
                 priceString = elem.asNormalizedText().replace("¥ ", "").trim();
-                priceString = priceString.substring(0,priceString.indexOf("("));
+                priceString = priceString.substring(0,priceString.indexOf("(")!=-1?priceString.indexOf("("):priceString.length());
                 double price_rmb = Double.parseDouble(priceString);
                 if (min_price_rmb > price_rmb) {
                     min_price_rmb = price_rmb;
@@ -235,7 +236,7 @@ public class BuffCrawler {
 
         logger.info("Size of ids that are tested: "+l.size());
 
-        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "15");
+        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "4");
 
         IntStream.range(0, l.size()).parallel().forEach(i -> {
             int j = (int) l.get(i);
