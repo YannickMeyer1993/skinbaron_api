@@ -58,10 +58,10 @@ public class Bot {
                     boolean has_exterior = ((JSONObject) o).getBoolean("has_exterior");
                     int buff_id = ((JSONObject) o).getInt("buff_id");
 
-                    if (buff_id ==0) {
-                        logger.error("Buff id is null!");
-                        continue;
-                    }
+                    //if (buff_id ==0) {
+                    //    logger.error("Buff id is null!");
+                    //    continue;
+                    //}
 
                     if (price > max_price) {
                         logger.info("Preis höher als max Preis.");
@@ -76,7 +76,7 @@ public class Bot {
                         }
                     }
 
-                    if (!buff_price_is_new) {
+                    /*if (!buff_price_is_new) {
 
                         double current_price;
                         logger.info("Checking buff price for id: "+buff_id);
@@ -88,6 +88,8 @@ public class Bot {
 
                         buff_price = current_price;
                     }
+
+                     */
 
                     //if (price <= buff_price*0.95) {
                     //    logger.info("Did not buy item, because buff price is cheaper than Skinbaron price!");

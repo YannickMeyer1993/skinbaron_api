@@ -43,7 +43,7 @@ public class SteamAPI {
     public static void main(String[] args) throws Exception {
         setUpClass(); //disable Logging
         Boolean repeat = true;
-        int start = 0;
+        int start = 5000;
 
         while (repeat) {
             try {
