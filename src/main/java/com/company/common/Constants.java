@@ -32,7 +32,6 @@ public class Constants {
         LIST_FOR_NEWEST_SALES.add("Cap");//capsule
         LIST_FOR_NEWEST_SALES.add("tat");//Stattrak
         LIST_FOR_NEWEST_SALES.add("Pin");//Pin
-        LIST_FOR_NEWEST_SALES.add("tat");//Stattrak
         LIST_FOR_NEWEST_SALES.add("usi");//Music Kit
         LIST_FOR_NEWEST_SALES.add("nif");//Knife
         LIST_FOR_NEWEST_SALES.add("olo");//Holo
